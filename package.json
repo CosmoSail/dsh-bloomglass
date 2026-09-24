@@ -1,0 +1,90 @@
+{
+  "name": "dsh-bloomglass",
+  "version": "0.1.0",
+  "description": "Bloom Glass — 把 Bloom 的 10 套 OKLCH 莫兰迪色板与磨砂壁纸玻璃整合为一个 DeepSeek Harness Web 主题插件。官方 Light / Dark / System 仍然掌权。",
+  "author": "dsh-bloomglass contributors",
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "lib/client.js.map",
+    "cordis.patch.yml",
+    "README.md",
+    "docs/showcase/README.md",
+    "docs/showcase/palette-board.png",
+    "docs/showcase/ui-mist-light.png",
+    "docs/showcase/ui-ripple-plain.png",
+    "docs/showcase/ui-ripple-glass.png",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "bundle": "tsdown",
+    "prepare": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "showcase": "node scripts/generate-wallpaper.mjs && node scripts/generate-showcase.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "theme",
+    "wallpaper",
+    "frosted-glass",
+    "glassmorphism",
+    "oklch",
+    "morandi",
+    "bloom"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-theme",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-client-locale": "*",
+    "@deepseek-ai/dsh-client-runtime": "*",
+    "@deepseek-ai/dsh-client-ui-settings": "*",
+    "@deepseek-ai/dsh-client-ui-theme": "*",
+    "react": "^18.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": { "optional": true },
+    "@deepseek-ai/dsh-client-locale": { "optional": true },
+    "@deepseek-ai/dsh-client-runtime": { "optional": true },
+    "@deepseek-ai/dsh-client-ui-settings": { "optional": true },
+    "@deepseek-ai/dsh-client-ui-theme": { "optional": true },
+    "react": { "optional": true }
+  },
+  "devDependencies": {
+    "@types/react": "~18.3.1",
+    "@types/react-dom": "~18.3.1",
+    "fake-indexeddb": "^6.0.0",
+    "jsdom": "^26.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.3.1",
+    "tsdown": "^0.22.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,8 @@
+# This package ships source that other people consume on macOS and Linux.
+# Normalize to LF in the repository and on checkout so a Windows author cannot
+# introduce CRLF into the stylesheet strings or the published bundle.
+* text=auto eol=lf
+
+# The committed build output is generated text; keep it diffable.
+lib/*.js text eol=lf
+lib/*.js.map text eol=lf

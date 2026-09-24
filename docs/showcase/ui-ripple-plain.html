@@ -1,0 +1,1650 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8">
+<title>天青 · dark</title>
+<style>
+body{--dsw-alias-state-business-primary:oklch(51% 0.12 195);--dsw-alias-state-success-primary:oklch(45% 0.14 150);--dsw-alias-state-success-secondary:oklch(45% 0.14 150);--dsw-alias-state-success-tertiary:color-mix(in oklch, oklch(45% 0.14 150), oklch(96% 0.01 195) 88%);--dsw-alias-state-error-primary:oklch(45% 0.16 25);--dsw-alias-state-error-secondary:oklch(45% 0.16 25);--dsw-alias-state-warn-primary:oklch(45% 0.11 75);--dsw-alias-state-warn-secondary:oklch(45% 0.11 75);--dsw-alias-state-warn-tertiary:color-mix(in oklch, oklch(45% 0.11 75), oklch(96% 0.01 195) 88%);--dsw-alias-state-warn-label:oklch(40% 0.09 75);--dsw-alias-interactive-bg-hover-danger:color-mix(in oklch, oklch(45% 0.16 25), transparent 90%);--dsw-alias-state-business-tertiary:color-mix(in oklch, oklch(51% 0.12 195), oklch(96% 0.01 195) 88%);--dsw-alias-border-inverted:color-mix(in oklch, oklch(96% 0.01 195), transparent 85%);--dsw-alias-border-inverted2:color-mix(in oklch, oklch(96% 0.01 195), transparent 70%);--dsw-alias-label-primary-inverted:oklch(96% 0.01 195);--dsw-alias-button-contrast-fill:oklch(25% 0.02 195);--dsw-alias-button-elevated-fill:oklch(96% 0.01 195);--dsw-alias-button-tool-bar-fill-invisible:transparent;--dsw-alias-markdown-code-block-banner:color-mix(in oklch, oklch(25% 0.02 195), transparent 96%);--dsw-alias-tooltip-bg:color-mix(in oklch, oklch(25% 0.02 195), black 8%);--dsw-alias-toast-bg:color-mix(in oklch, oklch(25% 0.02 195), black 8%);--dsw-alias-bg-mask-photo:color-mix(in oklch, oklch(96% 0.01 195), black 30%);--dsw-alias-bg-base:oklch(96% 0.01 195);--dsw-alias-bg-layer-1:oklch(96% 0.01 195);--dsw-alias-bg-layer-2:oklch(94% 0.01 195);--dsw-alias-bg-layer-3:oklch(92% 0.01 195);--dsw-alias-bg-overlay:oklch(94% 0.01 195);--dsw-alias-bg-module-platform:oklch(94% 0.01 195);--dsw-alias-bg-multi-select:oklch(92% 0.01 195);--dsw-alias-bg-skeleton:color-mix(in oklch, oklch(25% 0.02 195), transparent 95%);--dsw-alias-bg-mask-1:color-mix(in oklch, oklch(25% 0.02 195), transparent 97%);--dsw-alias-bg-mask-2:color-mix(in oklch, oklch(25% 0.02 195), transparent 95%);--dsw-alias-bg-mask-3:color-mix(in oklch, oklch(25% 0.02 195), transparent 93%);--dsw-alias-bg-mask-drop:color-mix(in oklch, oklch(25% 0.02 195), transparent 88%);--dsw-alias-label-primary:oklch(25% 0.02 195);--dsw-alias-label-primary-bluish:oklch(25% 0.02 195);--dsw-alias-label-primary-dimmed:color-mix(in oklch, oklch(25% 0.02 195), transparent 25%);--dsw-alias-label-primary-foreground:oklch(96% 0.01 195);--dsw-alias-label-secondary:color-mix(in oklch, oklch(25% 0.02 195), transparent 28%);--dsw-alias-label-tertiary:color-mix(in oklch, oklch(25% 0.02 195), transparent 32%);--dsw-alias-label-caption:color-mix(in oklch, oklch(25% 0.02 195), transparent 35%);--dsw-alias-label-dimmed:color-mix(in oklch, oklch(25% 0.02 195), transparent 37%);--dsw-alias-brand-primary:oklch(51% 0.12 195);--dsw-alias-brand-primary-invert:oklch(96% 0.01 195);--dsw-alias-brand-text:oklch(96% 0.01 195);--dsw-alias-border-l1:color-mix(in oklch, oklch(25% 0.02 195), transparent 90%);--dsw-alias-border-l2:color-mix(in oklch, oklch(25% 0.02 195), transparent 80%);--dsw-alias-border-l3:color-mix(in oklch, oklch(25% 0.02 195), transparent 70%);--dsw-alias-border-l4:color-mix(in oklch, oklch(25% 0.02 195), transparent 60%);--dsw-alias-button-primary-fill:oklch(51% 0.12 195);--dsw-alias-button-primary-hover:color-mix(in oklch, oklch(51% 0.12 195), black 8%);--dsw-alias-button-primary-dimmed:oklch(96% 0.01 195);--dsw-alias-button-tool-bar-fill:oklch(94% 0.01 195);--dsw-alias-button-tool-bar-hover:color-mix(in oklch, oklch(25% 0.02 195), transparent 95%);--dsw-alias-button-floating-fill:oklch(94% 0.01 195);--dsw-alias-button-floating-hover:oklch(92% 0.01 195);--dsw-alias-button-info-fill:color-mix(in oklch, oklch(51% 0.12 195), transparent 90%);--dsw-alias-button-info-hover:color-mix(in oklch, oklch(51% 0.12 195), transparent 84%);--dsw-alias-button-ghost-active-fill:color-mix(in oklch, oklch(51% 0.12 195), transparent 92%);--dsw-alias-button-ghost-active-hover:color-mix(in oklch, oklch(51% 0.12 195), transparent 88%);--dsw-alias-button-ghost-active-border:color-mix(in oklch, oklch(51% 0.12 195), transparent 78%);--dsw-alias-interactive-bg-hover:color-mix(in oklch, oklch(51% 0.12 195), transparent 92%);--dsw-alias-interactive-bg-hover-accent:color-mix(in oklch, oklch(51% 0.12 195), transparent 85%);--dsw-alias-interactive-bg-hover-solid:color-mix(in oklch, oklch(51% 0.12 195), transparent 88%);--dsw-alias-interactive-bg-active:color-mix(in oklch, oklch(51% 0.12 195), transparent 88%);--dsw-alias-markdown-inline-code:var(--bloom-code-bg);--dsw-alias-markdown-code-block:oklch(94% 0.01 195);--dsw-alias-markdown-tag:color-mix(in oklch, oklch(51% 0.12 195), transparent 88%);--dsw-alias-markdown-placeholder:color-mix(in oklch, oklch(25% 0.02 195), transparent 50%);--dsw-alias-markdown-citation:color-mix(in oklch, oklch(25% 0.02 195), transparent 55%);--dsw-alias-scrollbar-bg-l1:color-mix(in oklch, oklch(25% 0.02 195), transparent 90%);--dsw-alias-scrollbar-bg-l2:color-mix(in oklch, oklch(25% 0.02 195), transparent 80%);--dsw-alias-scrollbar-hover-l1:color-mix(in oklch, oklch(25% 0.02 195), transparent 82%);--dsw-alias-scrollbar-hover-l2:color-mix(in oklch, oklch(25% 0.02 195), transparent 72%);--dsw-specific-bubble:color-mix(in oklch, oklch(96% 0.01 195), oklch(25% 0.02 195) 3%);--dsw-specific-bubble-highlight:color-mix(in oklch, oklch(51% 0.12 195), transparent 88%);--dsw-specific-input-major:oklch(96% 0.01 195);--dsw-specific-login-input:oklch(94% 0.01 195);--dsw-specific-menu:oklch(92% 0.01 195);--dsw-specific-selector:oklch(94% 0.01 195);--dsw-specific-sidebar-fill:color-mix(in oklch, oklch(96% 0.01 195), oklch(25% 0.02 195) 5%);--dsw-specific-sidebar-nav-item-active-accent:color-mix(in oklch, oklch(51% 0.12 195), transparent 86%);--dsw-specific-sidebar-nav-item-active:color-mix(in oklch, oklch(51% 0.12 195), transparent 93%);--dsw-specific-sidebar-nav-item-hover:color-mix(in oklch, oklch(25% 0.02 195), transparent 95%);--dsw-specific-tip:color-mix(in oklch, oklch(51% 0.12 195), transparent 90%);}
+body[data-ds-dark-theme]{--dsw-alias-state-business-primary:oklch(75% 0.12 195);--dsw-alias-state-success-primary:oklch(72% 0.12 150);--dsw-alias-state-success-secondary:oklch(72% 0.12 150);--dsw-alias-state-success-tertiary:color-mix(in oklch, oklch(72% 0.12 150), oklch(20% 0.02 195) 78%);--dsw-alias-state-error-primary:oklch(72% 0.16 25);--dsw-alias-state-error-secondary:oklch(72% 0.16 25);--dsw-alias-state-warn-primary:oklch(80% 0.12 75);--dsw-alias-state-warn-secondary:oklch(80% 0.12 75);--dsw-alias-state-warn-tertiary:color-mix(in oklch, oklch(80% 0.12 75), oklch(20% 0.02 195) 78%);--dsw-alias-state-warn-label:oklch(88% 0.1 75);--dsw-alias-interactive-bg-hover-danger:color-mix(in oklch, oklch(72% 0.16 25), transparent 86%);--dsw-alias-state-business-tertiary:color-mix(in oklch, oklch(75% 0.12 195), oklch(20% 0.02 195) 78%);--dsw-alias-border-inverted:color-mix(in oklch, oklch(20% 0.02 195), transparent 85%);--dsw-alias-border-inverted2:color-mix(in oklch, oklch(20% 0.02 195), transparent 70%);--dsw-alias-label-primary-inverted:oklch(20% 0.02 195);--dsw-alias-button-contrast-fill:oklch(96% 0.01 195);--dsw-alias-button-elevated-fill:oklch(20% 0.02 195);--dsw-alias-button-tool-bar-fill-invisible:transparent;--dsw-alias-markdown-code-block-banner:color-mix(in oklch, oklch(96% 0.01 195), transparent 96%);--dsw-alias-tooltip-bg:color-mix(in oklch, oklch(20% 0.02 195), black 22%);--dsw-alias-toast-bg:color-mix(in oklch, oklch(20% 0.02 195), black 22%);--dsw-alias-bg-mask-photo:color-mix(in oklch, oklch(20% 0.02 195), black 45%);--dsw-alias-bg-base:oklch(20% 0.02 195);--dsw-alias-bg-layer-1:oklch(20% 0.02 195);--dsw-alias-bg-layer-2:oklch(28% 0.02 195);--dsw-alias-bg-layer-3:oklch(38% 0.02 195);--dsw-alias-bg-overlay:oklch(28% 0.02 195);--dsw-alias-bg-module-platform:oklch(28% 0.02 195);--dsw-alias-bg-multi-select:oklch(38% 0.02 195);--dsw-alias-bg-skeleton:color-mix(in oklch, oklch(96% 0.01 195), transparent 95%);--dsw-alias-bg-mask-1:color-mix(in oklch, oklch(96% 0.01 195), transparent 97%);--dsw-alias-bg-mask-2:color-mix(in oklch, oklch(96% 0.01 195), transparent 95%);--dsw-alias-bg-mask-3:color-mix(in oklch, oklch(96% 0.01 195), transparent 93%);--dsw-alias-bg-mask-drop:color-mix(in oklch, oklch(96% 0.01 195), transparent 88%);--dsw-alias-label-primary:oklch(96% 0.01 195);--dsw-alias-label-primary-bluish:oklch(96% 0.01 195);--dsw-alias-label-primary-dimmed:color-mix(in oklch, oklch(96% 0.01 195), transparent 30%);--dsw-alias-label-primary-foreground:oklch(20% 0.02 195);--dsw-alias-label-secondary:color-mix(in oklch, oklch(96% 0.01 195), transparent 30%);--dsw-alias-label-tertiary:color-mix(in oklch, oklch(96% 0.01 195), transparent 35%);--dsw-alias-label-caption:color-mix(in oklch, oklch(96% 0.01 195), transparent 40%);--dsw-alias-label-dimmed:color-mix(in oklch, oklch(96% 0.01 195), transparent 43%);--dsw-alias-brand-primary:oklch(75% 0.12 195);--dsw-alias-brand-primary-invert:oklch(20% 0.02 195);--dsw-alias-brand-text:oklch(20% 0.02 195);--dsw-alias-border-l1:rgba(95, 168, 178, 0.10);--dsw-alias-border-l2:rgba(95, 168, 178, 0.18);--dsw-alias-border-l3:rgba(95, 168, 178, 0.28);--dsw-alias-border-l4:rgba(95, 168, 178, 0.40);--dsw-alias-button-primary-fill:oklch(75% 0.12 195);--dsw-alias-button-primary-hover:color-mix(in oklch, oklch(75% 0.12 195), white 8%);--dsw-alias-button-primary-dimmed:oklch(20% 0.02 195);--dsw-alias-button-tool-bar-fill:oklch(28% 0.02 195);--dsw-alias-button-tool-bar-hover:color-mix(in oklch, oklch(96% 0.01 195), transparent 92%);--dsw-alias-button-floating-fill:oklch(28% 0.02 195);--dsw-alias-button-floating-hover:oklch(38% 0.02 195);--dsw-alias-button-info-fill:color-mix(in oklch, oklch(75% 0.12 195), transparent 86%);--dsw-alias-button-info-hover:color-mix(in oklch, oklch(75% 0.12 195), transparent 78%);--dsw-alias-button-ghost-active-fill:color-mix(in oklch, oklch(75% 0.12 195), transparent 88%);--dsw-alias-button-ghost-active-hover:color-mix(in oklch, oklch(75% 0.12 195), transparent 82%);--dsw-alias-button-ghost-active-border:color-mix(in oklch, oklch(75% 0.12 195), transparent 70%);--dsw-alias-interactive-bg-hover:color-mix(in oklch, oklch(75% 0.12 195), transparent 90%);--dsw-alias-interactive-bg-hover-accent:color-mix(in oklch, oklch(75% 0.12 195), transparent 84%);--dsw-alias-interactive-bg-hover-solid:color-mix(in oklch, oklch(75% 0.12 195), transparent 82%);--dsw-alias-interactive-bg-active:color-mix(in oklch, oklch(75% 0.12 195), transparent 86%);--dsw-alias-markdown-inline-code:var(--bloom-code-bg);--dsw-alias-markdown-code-block:color-mix(in oklch, oklch(20% 0.02 195), black 12%);--dsw-alias-markdown-tag:color-mix(in oklch, oklch(75% 0.12 195), transparent 85%);--dsw-alias-markdown-placeholder:color-mix(in oklch, oklch(96% 0.01 195), transparent 40%);--dsw-alias-markdown-citation:color-mix(in oklch, oklch(96% 0.01 195), transparent 35%);--dsw-alias-scrollbar-bg-l1:color-mix(in oklch, oklch(96% 0.01 195), transparent 86%);--dsw-alias-scrollbar-bg-l2:color-mix(in oklch, oklch(96% 0.01 195), transparent 76%);--dsw-alias-scrollbar-hover-l1:color-mix(in oklch, oklch(96% 0.01 195), transparent 75%);--dsw-alias-scrollbar-hover-l2:color-mix(in oklch, oklch(96% 0.01 195), transparent 65%);--dsw-specific-bubble:color-mix(in oklch, oklch(20% 0.02 195), oklch(96% 0.01 195) 4%);--dsw-specific-bubble-highlight:color-mix(in oklch, oklch(75% 0.12 195), transparent 82%);--dsw-specific-input-major:oklch(20% 0.02 195);--dsw-specific-login-input:oklch(28% 0.02 195);--dsw-specific-menu:oklch(38% 0.02 195);--dsw-specific-selector:oklch(28% 0.02 195);--dsw-specific-sidebar-fill:color-mix(in oklch, oklch(20% 0.02 195), black 7%);--dsw-specific-sidebar-nav-item-active-accent:color-mix(in oklch, oklch(75% 0.12 195), transparent 80%);--dsw-specific-sidebar-nav-item-active:color-mix(in oklch, oklch(75% 0.12 195), transparent 88%);--dsw-specific-sidebar-nav-item-hover:color-mix(in oklch, oklch(96% 0.01 195), transparent 95%);--dsw-specific-tip:color-mix(in oklch, oklch(75% 0.12 195), transparent 84%);}
+body[data-bloomglass-variant="ripple"]{--bloom-morandi: 95, 168, 178;--bloom-accent: oklch(51% 0.12 195);--bloom-motion-1: oklch(51% 0.12 195);--bloom-motion-2: oklch(51% 0.13 225);--bloom-motion-3: oklch(51% 0.11 165);--bloom-aurora-stream-1: color-mix(in oklch, oklch(51% 0.12 195), transparent 72%);--bloom-aurora-stream-2: color-mix(in oklch, oklch(51% 0.13 225), transparent 72%);--bloom-aurora-stream-3: color-mix(in oklch, oklch(51% 0.11 165), transparent 72%);--bloom-shadow-sm: 0 2px 8px color-mix(in oklch, oklch(25% 0.02 195), transparent 96%);--bloom-shadow: 0 10px 30px color-mix(in oklch, oklch(25% 0.02 195), transparent 94%);--bloom-shadow-lg: 0 24px 60px color-mix(in oklch, oklch(25% 0.02 195), transparent 90%);--bloom-glass-blur: 24px;--bloom-hairline: rgba(95, 168, 178, 0.3);--bloom-hairline-strong: rgba(95, 168, 178, 0.5);--bloom-glow: rgba(95, 168, 178, 0.2);--bloom-code-bg: rgba(95, 168, 178, 0.13);--bloom-code-fg: oklch(25% 0.02 195);}
+body[data-bloomglass-variant="ripple"][data-ds-dark-theme]{--bloom-morandi: 95, 168, 178;--bloom-accent: oklch(75% 0.12 195);--bloom-motion-1: oklch(75% 0.12 195);--bloom-motion-2: oklch(76% 0.14 225);--bloom-motion-3: oklch(77% 0.12 165);--bloom-aurora-stream-1: color-mix(in oklch, oklch(75% 0.12 195), transparent 55%);--bloom-aurora-stream-2: color-mix(in oklch, oklch(76% 0.14 225), transparent 55%);--bloom-aurora-stream-3: color-mix(in oklch, oklch(77% 0.12 165), transparent 55%);--bloom-shadow-sm: 0 2px 8px rgba(0,0,0,0.4);--bloom-shadow: 0 10px 30px rgba(0,0,0,0.5);--bloom-shadow-lg: 0 24px 60px rgba(0,0,0,0.6);--bloom-glass-blur: 22px;--bloom-hairline: rgba(95, 168, 178, 0.3);--bloom-hairline-strong: rgba(95, 168, 178, 0.55);--bloom-glow: rgba(95, 168, 178, 0.34);--bloom-code-bg: rgba(95, 168, 178, 0.16);--bloom-code-fg: oklch(96% 0.01 195);}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font:14px/1.6 system-ui,"Segoe UI","Microsoft YaHei",sans-serif;
+  color:var(--dsw-alias-label-primary);
+  background:var(--dsw-alias-bg-base);
+  overflow:hidden;
+}
+.shell{display:flex;height:100vh}
+._root_demo{display:flex;width:100%}
+._frame_demo{display:flex;width:100%;gap:0}
+._sidebarCol_demo{width:238px;flex:none;display:flex;flex-direction:column;padding:10px 8px;gap:6px;background:var(--dsw-specific-sidebar-fill)}
+._centerCol_demo{flex:1;display:flex;flex-direction:column;min-width:0}
+._header_demo{display:flex;align-items:center;gap:8px;padding:10px 14px;font-weight:600}
+._headerUtilities_demo{margin-left:auto;display:flex;gap:6px;align-items:center}
+._brand_demo{display:flex;align-items:center;gap:8px;font-weight:700;padding:4px 6px 10px}
+._brandDot_demo{width:16px;height:16px;border-radius:5px;background:var(--bloom-accent)}
+._newSession_demo{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;
+  border:1px solid var(--dsw-alias-border-l2);background:transparent;color:inherit;font:inherit;cursor:pointer}
+._sectionHeader_demo{font-size:11px;letter-spacing:.04em;padding:10px 10px 2px;color:var(--dsw-alias-label-tertiary)}
+._list_demo{display:flex;flex-direction:column;gap:2px;overflow:hidden}
+._sessionRow_demo{padding:7px 10px;border-radius:9px;font-size:13px;color:var(--dsw-alias-label-secondary);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+._sessionRow_demo._selected_demo{color:var(--dsw-alias-label-primary)}
+._scrollBody_demo{flex:1;overflow:hidden;padding:6px 0 0}
+._turn_demo{max-width:760px;margin:0 auto;padding:10px 24px;display:flex;flex-direction:column;gap:12px}
+._bubble_demo{align-self:flex-end;max-width:78%;padding:10px 14px;border-radius:14px;background:var(--dsw-specific-bubble);color:var(--dsw-alias-label-primary)}
+._markdown_demo{padding:2px 0}
+._markdown_demo p{margin:0 0 10px}
+._markdown_demo h3{margin:6px 0 10px;font-size:16px}
+._markdown_demo code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
+._composerSeat_demo{padding:12px 24px 20px}
+._composer_demo{max-width:760px;margin:0 auto;display:flex;gap:8px;align-items:flex-end}
+._card_demo{flex:1;border-radius:16px;padding:12px 14px;color:var(--dsw-alias-label-tertiary);font-size:13.5px}
+._dock_demo{max-width:760px;margin:0 auto 8px;display:flex;gap:6px;font-size:12px;color:var(--dsw-alias-label-tertiary)}
+._toolRow_demo{display:flex;gap:6px;margin-top:6px}
+._pill_demo{padding:2px 9px;border-radius:999px;font-size:11.5px;background:color-mix(in oklch,var(--bloom-accent),transparent 88%);color:var(--bloom-accent)}
+
+
+/* ═══ 1. 氛围层 ═══════════════════════════════════════════════════
+   原版 body 的三层叠加：大尺度径向光晕 + 斜向淡染 + 顶部柔光。
+   全部用气质轨(morandi)的极低透明度，这是莫兰迪「灰调通透」的来源。
+
+   v0.10.x（owner 反馈「没光感」）：把 veil 换成 aurora-stream 并提高透明度。
+   aurora-stream 来自 motion 谱，是每个变体的三色光谱（鼠尾草=草绿系、青金=蓝系），
+   透明度从原来的 40% 提高到 55-65%，让"四角色斑"真正能看出来 —— 这是
+   "光感"的主要来源，不再靠硬边光带。 */
+body {
+  /* 抽成变量：输入区那块不透明底板要原样复刻同一份氛围（见 §1.5），
+     两处必须逐字一致，否则底部会出现一道色阶。 */
+  --bloom-ambience:
+    /* 顶左：主色光晕（accent，给画面主调） */
+    radial-gradient(1400px circle at 6% -4%, color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 80%), transparent 50%),
+    /* 顶右：aurora stream 2 —— 异色相，跟主色形成对比 */
+    radial-gradient(1100px circle at 100% 8%, color-mix(in oklch, var(--bloom-aurora-stream-2), transparent 50%), transparent 60%),
+    /* 底右：aurora stream 3 —— 再一个异色相 */
+    radial-gradient(900px circle at 96% 100%, color-mix(in oklch, var(--bloom-aurora-stream-3), transparent 50%), transparent 62%),
+    /* 底左：aurora stream 1 —— 四角各一团 */
+    radial-gradient(1000px circle at 2% 96%, color-mix(in oklch, var(--bloom-aurora-stream-1), transparent 50%), transparent 60%);
+  background-attachment: fixed;
+  background-image: var(--bloom-ambience);
+}
+
+/* ═══ 1.5 输入区底板：让氛围一路铺到窗口底边 ═══════════════════════
+ *
+ * owner 反馈「底部有种戛然而止的感觉」。实测原因：DSH 给 _composerSeat 铺了
+ *   linear-gradient(transparent 0, oklch(0.28 0.02 25) 36px)
+ * ——36px 内从透明冲到**不透明**，之后 90px 全是死板一块。氛围的左右色差
+ * 在 y=721 还有 13 级，到 y=757 直接归零，窗口最下面 1/5 是块死色。
+ *
+ * 修法不是把它改透明（它要盖住滚到输入框背后的正文），而是**在这块不透明
+ * 底板上原样重画一遍氛围**：同一份 --bloom-ambience + background-attachment:
+ * fixed，光斑相对视口定位，于是和 body 那层严丝合缝地接上。
+ *
+ * 为什么要走 ::before + mask 而不是直接给 seat 叠背景：直接叠的话，渐变
+ * 顶部那段半透明区域会**同时**透出 body 的氛围和自己画的氛围，双份叠加，
+ * 实测顶端亮了 20 级。改成 ::before 承载「不透明底 + 氛围」整体，再用
+ * mask 做同一条 56px 淡入 —— 淡入区里 ::before 本身是半透的，透出来的
+ * 只有 body 那一份，不会重复。实测纵向逐行色差 0-1 级，无缝。
+ *
+ * ⚠️ 只用 position:absolute + z-index:-1，不引入 backdrop-filter / transform /
+ * isolation —— seat 的子树里有 conversation.input.overlay 注入的 fixed 元素，
+ * 判据同 glass.ts 侧栏那段。seat 自身是 position:sticky，已经是定位元素，
+ * 不需要也不要去改它的 position。 */
+/* 宿主那条是 .wSkVaW_root[data-phase="active"] .wSkVaW_composerSeat，特异度
+   (0,3,0)；这里必须写满三段才压得过（(0,3,1)），少一段就还是它赢。 */
+body[data-bloomglass-variant] [class*="_root"] [class*="_composerSeat"] {
+  background-image: none;
+}
+body[data-bloomglass-variant] [class*="_root"] [class*="_composerSeat"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: var(--dsw-alias-bg-layer-1, #101010);
+  background-image: var(--bloom-ambience);
+  background-attachment: fixed;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 56px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 56px);
+}
+
+/* 让 body 的氛围层透出来：DSH 这几个全屏容器自带不透明底色会盖住它。
+   侧栏与卡片保留自己的 surface 色（原版同样保留），只做描边和光。 */
+body[data-bloomglass-variant] [class*="_frame"],
+body[data-bloomglass-variant] [class*="_centerCol"],
+/* :has() 里不能加子组合器（`> `）：实测 DSH 的结构是 _root > _body > _scrollBody，
+   scrollBody 是孙子。写成子选择器这条一直没命中 —— 会话区一直盖着
+   oklch(0.28 0.02 240) 不透明底，body 的流线在中区完全看不见（这就是
+   owner 说「没光感」的真正原因）。 */
+body[data-bloomglass-variant] [class*="_root"]:has([class*="_scrollBody"]),
+body[data-bloomglass-variant] [class*="_scrollBody"] {
+  background-color: transparent;
+  background-image: none;
+}
+
+/* ═══ 2. 冷光线条 ═════════════════════════════════════════════════
+   细、冷、低透明度的莫兰迪描边 + 极弱外辉。深色下最出效果。 */
+
+/* ═══ 侧栏 ════════════════════════════════════════════════════════
+   之前只给了右侧一道竖线，内部还是一整块死板的纯色。补足：顶部氛围淡染、
+   会话项冷光态、分组标题层级。 */
+[class*="_sidebarCol"] {
+  position: relative;
+  box-shadow: 1px 0 0 var(--bloom-hairline), 8px 0 32px -10px var(--bloom-glow);
+  /* 顶部莫兰迪淡染，跟主区氛围同源，消除"两块拼起来"的割裂感 */
+  background-image:
+    linear-gradient(180deg, rgba(var(--bloom-morandi), 0.1), transparent 260px),
+    radial-gradient(600px circle at 0% 0%, rgba(var(--bloom-morandi), 0.08), transparent 60%);
+}
+
+/* 会话条目：圆角 + 过渡。hover / 选中的着色统一在 §6「会话行」那一处，
+   这里不再重复一遍（曾经两处各写一遍 6% 和 7%，靠 !important 决定谁赢，
+   等于用 !important 压自己人）。 */
+[class*="_sidebarCol"] [role="treeitem"],
+[class*="_sidebarCol"] [class*="_sessionRow"] {
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+[class*="_sidebarCol"] [role="treeitem"][aria-selected="true"] [class*="_title"],
+[class*="_sidebarCol"] [class*="_active"] [class*="_title"],
+[class*="_sidebarCol"] [class*="_selected"] [class*="_title"] {
+  font-weight: 500;
+  color: var(--dsw-alias-label-primary);
+}
+/* v0.10.x（owner 反馈「脏」）：左侧 3px 蓝竖条是脏点 —— 莫兰迪克制不应有这种色块。
+   删掉 ::before。选中感靠 bg 的 8% 染色传达。 */
+
+/* 新建会话按钮：极淡底色，无 border，文字与图标都用主文字色（owner 反馈「脏」——
+   之前 accent 色的 svg + accent 染色 bg + hairline border 三层叠，跟莫兰迪"统一克制"冲突）。
+   现在的按钮只靠 5% accent 染色跟会话行区分，没有色块、没有边框、没有彩色文字。 */
+[class*="_sidebarCol"] button[class*="_newSession"],
+[class*="_sidebarCol"] button[class*="_newChat"] {
+  background: color-mix(in oklch, var(--bloom-accent) 5%, transparent);
+  border: 0;
+  border-radius: 10px;
+  transition: background 180ms ease;
+}
+[class*="_sidebarCol"] button[class*="_newSession"]:hover,
+[class*="_sidebarCol"] button[class*="_newChat"]:hover {
+  background: color-mix(in oklch, var(--bloom-accent) 12%, transparent);
+}
+/* 图标和文字都用主色 —— 不让 accent 出现在按钮上，跟莫兰迪统一 */
+[class*="_sidebarCol"] button[class*="_newSession"] svg,
+[class*="_sidebarCol"] button[class*="_newChat"] svg {
+  color: var(--dsw-alias-label-primary);
+}
+
+/* 分组标题（工作区 / 未分组）：拉开与条目的层级。
+   _sectionLabel 是 DSH 实际用的类名片段（qDHVXG_sectionLabel），
+   12px + 字距让它明显是「标签」而不是一行内容。 */
+[class*="_sidebarCol"] [class*="_groupLabel"],
+[class*="_sidebarCol"] [class*="_sectionTitle"],
+[class*="_sidebarCol"] [class*="_sectionLabel"] {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--dsw-alias-label-caption);
+}
+
+/* 分区头右侧的搜索/动作图标：默认 60% 亮度降权，hover 才全亮 ——
+   和「工作区」标题同排且全亮时，四个元素抢注意力，列表反而不突出。 */
+[class*="_sidebarCol"] [class*="_sectionHeader"] [class*="_searchSlot"],
+[class*="_sidebarCol"] [class*="_sectionHeader"] [class*="_headerActions"] {
+  opacity: 0.6;
+  transition: opacity 150ms ease;
+}
+[class*="_sidebarCol"] [class*="_sectionHeader"] [class*="_searchSlot"]:hover,
+[class*="_sidebarCol"] [class*="_sectionHeader"] [class*="_headerActions"]:hover {
+  opacity: 1;
+}
+
+/* 会话行元信息（时间戳/来源等 _slot）：DSH 默认 0.55 透明度，
+   暗色氛围渐变上偏糊，统一提到主题的 secondary 档（明暗自适应）。 */
+[class*="_sidebarCol"] [class*="_sessionRow"] [class*="_slot"] {
+  color: var(--dsw-alias-label-secondary);
+}
+
+/* 会话列表细滚动条：4px、冷光 thumb、hover 才加强。
+   系统默认滚动条在 280px 的窄栏里非常抢；DSH 自己只有全局 alias 变量，
+   没有给侧栏列表单独收窄。 */
+[class*="_sidebarCol"] [class*="_list"]::-webkit-scrollbar { width: 4px; }
+[class*="_sidebarCol"] [class*="_list"]::-webkit-scrollbar-track { background: transparent; }
+[class*="_sidebarCol"] [class*="_list"]::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--bloom-accent) 30%, transparent);
+  border-radius: 999px;
+}
+[class*="_sidebarCol"] [class*="_list"]::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklch, var(--bloom-accent) 55%, transparent);
+}
+
+/* 侧边栏成「面」：右侧一道冷光分界 + 向内的极淡渐变。
+   光靠 sidebar-fill 的底色差不足以让它跟消息区分开 —— 消息区有氛围渐变和气泡，
+   侧边栏只有一列文字，不给边界就显得平。分界线用 hairline（比实色 border 轻），
+   渐变只在顶部 120px 内，避免整列发灰。
+
+   v0.10.x（owner 反馈「没层次感」）：之前光带 1px + 18% alpha 在截图里几乎
+   看不见，侧栏和背景完全融成一片。这里两层：① 内部底色 4% accent 给容器
+   自己的"色"，与 body 区分；② 顶部 120px 氛围染。右侧冷光线交给下面的
+   ::after / ::before 双层（线 + 光晕），因为 box-shadow inset 会被 glass.ts
+   的 _sidebarCol 规则覆盖掉（cascade 顺序），改用伪元素才不会被吃掉。 */
+body[data-bloomglass-variant] [class*="_sidebarCol"] {
+  /* 宿主那条 0.5px 实线优先级更高，不加 !important 关不掉（实测覆盖后仍是 0.5px） */
+  border-right: 0;
+  background-color: color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 96%);
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--bloom-accent) 6%, transparent),
+    transparent 120px
+  );
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-size: 100% 100%;
+}
+/* 侧栏右缘的冷光交给 glass.ts 的 box-shadow（向外投）——
+   这里曾用 ::after 画一条 18px 渐变，但侧栏 overflow:hidden，伪元素只能落在
+   容器内侧，看上去是「向内发光」，owner 反馈很奇怪。box-shadow 的外阴影不受
+   自身 overflow 裁剪，是唯一能真正往外散的做法。 */
+
+/* 底部设置区与会话列表之间补一道分隔，让「设置」不像是最后一条会话 */
+[class*="_sidebarCol"] [class*="_footer"],
+[class*="_sidebarCol"] [class*="_bottom"] {
+  border-top: 1px solid var(--bloom-hairline);
+}
+
+/* 顶栏下沿冷光线 —— 标题区与消息流之间的分界，比实色 border 轻。
+   只给 tabs 这一条真正的分界线：_header 会同时命中 headerActions /
+   headerUtilities 等右上角子容器，给它们加投影会凭空多出几个浮块。 */
+div[class*="_tabs"] {
+  box-shadow: 0 1px 0 var(--bloom-hairline), 0 6px 20px -12px var(--bloom-glow);
+}
+
+/* 排队消息条（输入框上方那条待发送预览）。
+   DSH 原样式是「完全透明容器 + 70% 不透明白字」—— 在它自己的纯色底上尚可读，
+   但本主题给 body 铺了氛围渐变，背景不再均匀，这条就糊进背景里了。
+   这是氛围层带来的副作用，必须由本主题自己补一个实体容器兜住。
+
+   ⚠️ 必须用 :has(> [class*="_preview"]) 收窄，不能裸用 [class*="_dock"]：
+   GoalBar（dsh-client-ui-goal）的外层类名也叫「*_dock」，但它是**全宽布局容器**
+   （原生 width: calc(100% - 各种 inset)），真正该被看见的条是里面那个限宽居中的
+   「*_bar」（max-width: var(--dsh-composer-card-max-width)）。
+   裸选择器会把边框+毛玻璃画到那个全宽容器上——实测 dock 1810px 而 bar 只有 748px，
+   于是「进行中的目标」左右各露出一大截空壳边框，跟下方输入框完全不对齐。
+   QueueDock 一定有「_preview」子元素（就是下一条规则要上色的那个），拿它当判据最稳，
+   比写死 QueueDock 的哈希类名（会随 DSH 构建变）可靠。 */
+div[class*="_dock"]:has(> [class*="_preview"]) {
+  background: color-mix(in oklch, var(--dsw-alias-bg-layer-2, #fff), transparent 22%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--bloom-hairline);
+  border-radius: 12px;
+}
+div[class*="_dock"] [class*="_preview"] {
+  color: var(--dsw-alias-label-secondary);
+}
+
+/* 消息卡 / 工具调用行：只给轻描边，不给阴影 —— 数量多（一次会话 30+ 个），
+   加长距阴影会把整个消息流糊成一片。全部限定 div，否则会命中 SVG 元素。 */
+/* 工具调用行：常态不描边，hover 才亮起。
+   常驻边框有两个毛病：① 同为工具行，可展开的 Bash 有框、Read/Edit 没框，视觉不一致；
+   ② 折叠行实测 748×26，画成圆角框又扁又长，且边框贴着内容区边缘而行内图标有内缩，
+   看起来像个输入框。保留 transparent 占位是为了 hover 时不发生布局跳动。 */
+div[class*="_card"],
+div[class*="_toolRow"],
+div[class*="_panel"] {
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+div[class*="_card"]:hover,
+div[class*="_toolRow"]:hover {
+  border-color: var(--bloom-hairline);
+  background: rgba(var(--bloom-morandi), 0.05);
+}
+/* 展开态：DSH 的终端区（_terminal）自带 1px 边框 + 12px 圆角，
+   外层 card 再描一圈就是两个几乎同尺寸的圆角框相套（实测 439px 套 377px）＝框中框。
+   展开后连 hover 边框也不要。 */
+div[class*="_card"]:has([class*="_terminal"]),
+div[class*="_card"]:has(pre),
+div[class*="_card"]:has([class*="_terminal"]):hover,
+div[class*="_card"]:has(pre):hover {
+  border-color: transparent;
+  background: transparent;
+}
+
+/* 输入卡片：整个界面的视觉主角，给足纸感。
+   必须限定在 composer 内 —— 裸的 [class*="_card"] 会命中 30+ 个消息卡片，
+   把长距阴影糊得到处都是。 */
+div[class*="_composer"] div[class*="_card"] {
+  border: 1px solid var(--bloom-hairline);
+  border-radius: 16px;
+  /* 三层：顶部内高光（模拟光从上方打来）+ 长距柔影 + 外侧冷辉 */
+  box-shadow:
+    inset 0 1px 0 rgba(var(--bloom-morandi), 0.14),
+    var(--bloom-shadow),
+    0 0 24px -14px var(--bloom-glow);
+  transition: border-color 0.22s ease, box-shadow 0.22s ease;
+}
+div[class*="_composer"] div[class*="_card"]:focus-within {
+  border-color: var(--bloom-hairline-strong);
+  box-shadow:
+    inset 0 1px 0 rgba(var(--bloom-morandi), 0.2),
+    var(--bloom-shadow),
+    0 0 0 2px var(--bloom-glow);
+}
+
+/* 消息气泡：柔和圆角 + 近距阴影，脱离"贴在背景上"的平面感。
+   限定 div：DSH 的全局 Tooltip 是 span[class*="_bubble"]（见 glass.ts 同名注释），
+   不能吃到气泡的圆角/阴影/入场动画 —— 尤其动画：带 !important 的 bloom-fade-up
+   会在 420ms 里盖掉 tooltip 的定位 transform（[data-side=right] 的 translateY(-50%)），
+   气泡先偏移再跳回，也是"提示看不清"的一部分。 */
+div[class*="_bubble"] {
+  border-radius: 14px;
+  box-shadow: var(--bloom-shadow-sm);
+}
+
+/* ═══ 3. Markdown 排版质感 ═════════════════════════════════════════
+   照搬原版手法：标题渐变短横、hr 两端消隐、引用块左侧主色条。 */
+[class*="_markdown"] h1,
+[class*="_markdown"] h2,
+[class*="_markdown"] h3 {
+  position: relative;
+}
+[class*="_markdown"] h1::after,
+[class*="_markdown"] h2::after,
+[class*="_markdown"] h3::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.34em;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(var(--bloom-morandi), 0.45), transparent);
+}
+[class*="_markdown"] h1::after { width: 76px; height: 3px; }
+[class*="_markdown"] h2::after { width: 56px; }
+[class*="_markdown"] h3::after { width: 40px; background: linear-gradient(90deg, rgba(var(--bloom-morandi), 0.28), transparent); }
+
+hr {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--bloom-hairline-strong), transparent);
+}
+
+blockquote {
+  border-left: 3px solid rgba(var(--bloom-morandi), 0.55);
+  border-radius: 12px;
+  background: rgba(var(--bloom-morandi), 0.07);
+  box-shadow: var(--bloom-shadow-sm);
+}
+
+/* 代码：内联块用莫兰迪淡底（变量已在 alias 层修正为背景色），
+   块级代码加冷光描边 + 圆角，消除方角感 */
+code {
+  border-radius: 6px;
+}
+
+/* 代码块：描边/阴影只能给「有实色背景的那一层」——DSH 的结构是
+     div.md-code-block（实色底 + 圆角）> div > pre.shiki（背景透明）
+   曾经把 border/box-shadow 加在 pre 上：两层各画一个 12px 圆角框 = 框中框，
+   而且 pre 背景透明，阴影直接投进容器内部形成一圈脏边。
+   md-code-block 是 DSH 的全局类名（非 CSS Modules hash），可以稳定引用。 */
+.md-code-block {
+  border: 1px solid var(--bloom-hairline);
+  box-shadow: var(--bloom-shadow-sm);
+  overflow: hidden;
+}
+.md-code-block pre,
+pre.shiki {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+/* 兜底：不在 md-code-block 里的裸 pre 才自己描边 */
+pre:not(.shiki) {
+  border-radius: 12px;
+}
+pre code {
+  border-radius: 0;
+  background: transparent;
+}
+
+/* 表格：严格限定在 [_tableScroll] 容器内，只动 markdown 渲染的聊天表格，
+   不影响 DSH 会话列表（Y0dWHa_table）这类其他用途的 <table>。
+   DSH 原生规则：th/td 各有一条 border-bottom，th:first-child 与 td:first-child
+   的 padding-left:0（让首列对齐正文），空 cell 仍撑出 100px min-width。
+   三个肉眼短板：① 表头只有加粗无底色，与主体混淆；② 无列分隔，像列表不像表；
+   ③ 空 cell 100px 留白让残缺行（如 P1 状态列空）看着"半残废"。 */
+[class*="_tableScroll"] {
+  border: 1px solid var(--bloom-hairline);
+  border-radius: 10px;
+  background: rgba(var(--bloom-morandi), 0.02);
+}
+/* min-width:100% 而不是 width:100%：
+   DSH 原生表格按内容定宽，而 _tableScroll 容器是块级全宽。上面刚给容器加了边框+圆角，
+   两边宽度不一致立刻就看得见——实测容器 748px、表格只有 469px，右侧露出 279px 空框，
+   表头底色和行分隔线都在半路截断（截图里那种「表格缩在左边」）。
+   用 min-width 而非 width 是因为 _tableScroll 本来就是横向滚动容器：
+   窄表格撑满对齐边框，宽表格仍能超出并滚动；写 width:100% 会把宽表格压缩换行，
+   把这个容器的滚动能力废掉。 */
+[class*="_tableScroll"] table {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 100%;
+}
+body[data-bloomglass-variant] [class*="_tableScroll"] th,
+body[data-bloomglass-variant] [class*="_tableScroll"] td {
+  border-color: var(--bloom-hairline);
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-bottom-width: 1px;
+}
+[class*="_tableScroll"] th:last-child,
+[class*="_tableScroll"] td:last-child { border-right: 0; }
+[class*="_tableScroll"] tr:last-child th,
+[class*="_tableScroll"] tr:last-child td { border-bottom: 0; }
+[class*="_tableScroll"] th:first-child,
+[class*="_tableScroll"] td:first-child { padding-left: 16px; }
+[class*="_tableScroll"] thead th {
+  background: rgba(var(--bloom-morandi), 0.10);
+  font-weight: 600;
+  border-bottom-width: 1px;
+  border-bottom-color: var(--bloom-hairline-strong);
+  color: var(--dsw-alias-label-secondary, currentColor);
+}
+[class*="_tableScroll"] tbody tr:hover { background: rgba(var(--bloom-morandi), 0.06); }
+/* 空 cell 视觉降权：透明度 0.35，省得缺值列（P1 状态空）显得行"断了一截" */
+[class*="_tableScroll"] td:empty { opacity: 0.35; }
+
+/* 推理中的 “Deep diving…”：DSH 原生 shimmer 直接使用 DeepSeek 静态蓝。
+   Bloom 为每个变体提供主色及两种邻近色，做成克制的三色光谱流动：有 Gemini
+   式的生命力，但色相始终属于当前主题。以语义后缀而非 CSS Module hash 匹配。 */
+body[data-bloomglass-variant] [class*="_turnStatus"]:not([class*="_turnStatusClock"]) {
+  background-image: linear-gradient(
+    110deg,
+    var(--bloom-motion-1) 0%,
+    var(--bloom-motion-2) 24%,
+    var(--bloom-motion-3) 43%,
+    var(--bloom-motion-1) 60%,
+    var(--bloom-motion-2) 78%,
+    var(--bloom-motion-3) 100%
+  );
+  background-size: 260% 100% !important;
+  animation: bloom-deep-dive-spectrum 3.6s ease-in-out infinite alternate !important;
+}
+[class*="_turnStatusClock"] {
+  color: color-mix(in oklch, var(--bloom-motion-2) 58%, var(--dsw-alias-label-caption)) !important;
+  -webkit-text-fill-color: color-mix(in oklch, var(--bloom-motion-2) 58%, var(--dsw-alias-label-caption)) !important;
+}
+@keyframes bloom-deep-dive-spectrum {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [class*="_turnStatus"]:not([class*="_turnStatusClock"]) {
+    animation: none !important;
+    background-position: 50% 0 !important;
+  }
+}
+
+/* 选中文本：原版用 accent 混 80%，比 DSH 默认的 85% 更实，能看清 */
+::selection {
+  background: color-mix(in oklch, var(--bloom-accent), transparent 78%);
+}
+
+/* ═══ 4. 裸露的 <think> 标签 ═══════════════════════════════════════
+   由 markThinkTags() 打标（见该函数注释：这是 workaround，根因在 LLM 适配层）。
+   标签行整行隐藏 —— 实测它们各自独占段落，隐藏不丢内容；
+   标签之间的思考内容只降权、不隐藏，用冷光竖线标出，信息仍可读。 */
+[data-bloom-think] {
+  display: none !important;
+}
+/* 左侧冷光竖线 + 降低透明度。
+   ⚠️ 竖线错位的坑：思考块是一串平铺的兄弟元素（p / ul / ol / h3 / div），各标签
+   默认 margin-left 不同（实测 p 被置为 0、ul 为 2px），不强制归零就会让竖线
+   错开 2px、连不成一条直线。所以 margin-left 必须 !important 压平。
+   另：用背景色块代替竖线会让每段变成一张「卡片」，且色块边缘直接贴住文字，
+   观感更差 —— 竖线 + 内边距才是对的做法。 */
+[data-bloom-think-body] {
+  opacity: 0.62;
+  border-left: 2px solid var(--bloom-hairline);
+  margin-left: 0 !important;
+  padding-left: 14px;
+  transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+[data-bloom-think-body]:hover {
+  opacity: 0.92;
+  border-left-color: var(--bloom-hairline-strong);
+}
+/* 列表要保留编号/圆点的缩进，否则 padding 被覆盖后编号会贴到竖线上 */
+ul[data-bloom-think-body],
+ol[data-bloom-think-body] {
+  padding-left: 38px;
+}
+
+/* ═══ 6. 微交互动效系统（v0.5.0）══════════════════════════════════
+   原则（导师批注）：
+   ① 只为「状态反馈」动：hover=可点、active=按下、选中=切换；
+   ② 统一时长/缓动走 token（反馈 130ms、常规 200ms、大过渡 280ms；
+      ease-out 入场、通用 ease），全站一致，否则就是「东一块西一块」；
+   ③ 只动 transform/opacity（GPU 合成不动布局），backdrop-filter 很贵不放进 transition；
+   ④ prefers-reduced-motion 一律降级成瞬间（无动画）。
+   别加「为了炫而炫」的常驻动画——那个会回到「脏/四不像」。 */
+body {
+  --bloom-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --bloom-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --bloom-dur-fast: 130ms;
+  --bloom-dur: 200ms;
+  --bloom-dur-slow: 280ms;
+}
+
+/* 侧栏会话行：hover 轻微右移 + 淡染（可点暗示），active 按下回弹 */
+[class*="_sidebarCol"] [role="treeitem"],
+[class*="_sidebarCol"] [class*="_sessionRow"] {
+  transition:
+    background var(--bloom-dur-fast) var(--bloom-ease),
+    transform var(--bloom-dur-fast) var(--bloom-ease);
+}
+[class*="_sidebarCol"] [role="treeitem"]:hover {
+  transform: translateX(2px);
+}
+[class*="_sidebarCol"] [role="treeitem"]:active { transform: translateX(2px) scale(0.996); }
+
+/* ── 侧栏：去分割线，靠间距 + 极淡光感分组（owner 2026-09-10）──
+ *
+ * 反馈原话：「基本取消分割线，用行间距和浅色交替分组」「取消网格，增加当前行
+ * 左侧粉色短竖条」「现在已经不流行通过 border 去做切割了，要不然就是很淡的
+ * 边框线加光感流动或者是阴影，比硬的边框好看得多」。
+ *
+ * 所以这里一条实线都不画。曾经退而求其次画过"极淡的渐隐光带"，
+ * 结果 18 个分组 = 18 条横线，等于换了个材质的网格 —— 也删了，见下。
+ */
+[class*="_sidebarCol"] [class*="_groupSection"] + [class*="_groupSection"] {
+  /* 分组之间只靠留白。10px 时还要配一条组标题下的光带才分得开，
+     16px 之后光带就多余了 —— 见下面那段。 */
+  margin-top: 16px;
+}
+
+/* 组标题下曾有一道渐隐光带（左浓右透）。删掉了：侧栏里有 18 个分组，
+ * 一组一条 = 18 条横线，正是 owner 说的「取消网格」要取消的东西
+ * （2026-09-10 实拍反馈"细节不满意"）。浅色下线的左端是 28% accent，
+ * 在莫兰迪里更是一条明显的彩色规线。
+ *
+ * 分组识别现在靠三件不画线的东西：组标题自带文件夹图标、条目相对缩进、
+ * 组间 16px 留白。实测这三样够了 —— 加线只是把"够了"变成"吵"。 */
+
+/* 会话行：圆角 + hover 淡染，靠留白区分，不描边不画网格 */
+[class*="_sidebarCol"] [class*="_sessionRow"] {
+  position: relative;
+  border-radius: 8px;
+}
+[class*="_sidebarCol"] [class*="_sessionRow"]:hover {
+  background: color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 93%);
+}
+
+/* 当前行：只染色，不画条不画框（owner 反馈「脏」）
+   之前有左侧 3px 蓝竖条 + inset 1px 边框 + 25% accent 实色底，三个都是脏点。
+   现在只留一个 8% 的极淡 accent 染色，跟 hover 区分用细微浓淡差。
+
+   这里不需要 !important（2026-09-10 实测推翻了原注释）：DSH 那条是
+   .YDXeBa_sessionRow.YDXeBa_selected { background: var(--dsw-alias-interactive-bg-hover) }，
+   特异度 (0,2,0) 且不带 !important，而本条 (0,3,0) 本来就赢；更何况
+   --dsw-alias-interactive-bg-hover 早已被 tokens.ts 覆写成本主题的 accent，
+   压根不是"固定蓝色"。 */
+[class*="_sidebarCol"] [class*="_sessionRow"][class*="_selected"],
+[class*="_sidebarCol"] [class*="_sessionRow"][class*="_active"],
+[class*="_sidebarCol"] [class*="_sessionRow"][aria-selected="true"],
+[class*="_sidebarCol"] [role="treeitem"][aria-selected="true"] {
+  background: color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 92%);
+}
+
+/* v0.10.x：左色条 + bloom-bar-in 动画整体删除（owner 反馈「脏」）。
+   没有 ::before 了，bloom-bar-in keyframe 也跟着删。 */
+
+/* 玻璃面板 / 输入卡片 hover：微抬升（只在已有 transition 的元素上加，避免泛化抖动） */
+div[class*="_composer"] div[class*="_card"] {
+  transition:
+    border-color var(--bloom-dur) var(--bloom-ease),
+    box-shadow var(--bloom-dur) var(--bloom-ease);
+}
+div[class*="_composer"] div[class*="_card"]:hover {
+  border-color: var(--bloom-hairline-strong);
+}
+
+/* 主题自己的按钮：按下微缩（明确「点到了」） */
+.dsh-bloom-trigger:active,
+.dsh-bloom-option:active,
+[class*="_sidebarCol"] button:active { transform: scale(0.985); }
+
+/* ═══ 焦点环兜底：统一成主题色 ═══
+   DSH 有些控件（例如设置面板右上角的关闭按钮）没定义自己的 focus 样式，
+   于是露出**浏览器默认**的 focus ring —— Chrome 暗色下是一圈亮蓝
+   rgb(153,200,255)，跟 8 套莫兰迪配色全都打架（用户实拍反馈里那个蓝圈）。
+   注意它不是 DSH 的 token，改 --dsw-* 改不到，只能靠这条兜底。
+
+   用 :focus-visible 而不是 :focus —— 只在键盘导航时出现，鼠标点击不显示，
+   这也是 WCAG 2.4.7「焦点可见」的正确做法：焦点依然清晰，只是跟着主题走。 */
+:focus-visible {
+  outline: 2px solid var(--bloom-accent) !important;
+  outline-offset: 2px;
+}
+
+/* 重新截图/使用观察时可平滑淡入的低频面板入场（默认不绑到常驻元素上） */
+@keyframes bloom-panel-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ═══ 6.5 空状态视觉锚点 (v0.10.x) ═══════════════════════════════════
+ *
+ * owner 反馈「没层次感」：空状态下「探索未至之境」一行字飘在苍白画布上，
+ * 眼睛找不到着陆位置。这里在 scrollBody 没有气泡时（即空状态），在中央
+ * 投一团主题色光晕 + 慢呼吸，给视觉一个焦点。光晕跟 message 流重叠的
+ * 概率低（消息堆在顶部），不会污染正常态。
+ *
+ * selector 限制条件：`:not(:has(div[class*="_bubble"]))` 确保只在没消息时出现；
+ * 有消息时这条规则不匹配，::before 不渲染。`:has()` Chrome 105+/Safari 15.4+。
+ * 限定 div 同样是为了不把 tooltip（span）算进"有消息"。 */
+[class*="_scrollBody"] { position: relative; }
+[class*="_scrollBody"]:not(:has(div[class*="_bubble"]))::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    42% 32% at 50% 48%,
+    color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 86%) 0%,
+    color-mix(in oklch, var(--bloom-aurora-stream-2), transparent 92%) 35%,
+    transparent 68%
+  );
+  animation: bloom-anchor-breathe 4.2s ease-in-out infinite;
+}
+@keyframes bloom-anchor-breathe {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50%      { opacity: 1; transform: scale(1.05); }
+}
+
+/* ═══ 7. 全站统一入场系统 (v0.10.x) ═════════════════════════════════
+ *
+ * owner 反馈：「除了深度求索中的文字有动效外，别的几乎是没有任何吸引到我的动画」
+ * ——所以这一节专门把页面"活起来"：消息气泡/工具行/侧栏/顶栏首次入场都走
+ * 同一条 keyframe，长度/缓动全走 §6 的 token；只动 opacity + transform，
+ * prefers-reduced-motion 下由下方媒体查询清零。
+ *
+ * 为什么用 `animation` 而不是 transition + `:not([hidden])`：
+ *   后者在 React 里反复 toggle hidden 时 transition 不会重新计算；
+ *   且「元素插入」这件事 transition 表达不了。`animation` 在元素 mount 那一刻
+ *   唯一一次触发，正好对应「第一次出现在视野中」的语义；React 重渲染复用
+ *   DOM 节点时也不会重放，不会污染正常状态切换。
+ */
+@keyframes bloom-fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes bloom-fade-down {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* 消息气泡 / 工具调用行 / 滚动体内的卡片 —— 整页停留时间最长的地方。
+   气泡限定 div（span 的 _bubble 是全局 Tooltip，动画会盖掉它的定位 transform，
+   见 §3 气泡圆角处的注释）。
+   `:not(:has(...))` 排除含终端 / 代码块的卡：它们是「展开后才有」的元素，
+   跟着外层一起进，单独动会让代码块在父卡里飘。
+   !important 必要：DSH 在这些元素上有自己的 `animation`（比如呼吸 loader），
+   后注入的会赢；用 !important 让 Bloom 的入场动画压过它。 */
+div[class*="_bubble"],
+div[class*="_toolRow"],
+div[class*="_scrollBody"] > div[class*="_card"]:not(:has([class*="_terminal"])):not(:has(pre)) {
+  animation: bloom-fade-up 420ms var(--bloom-ease-out) backwards !important;
+}
+/* 侧栏会话行：页面打开时整组淡入（一次性，不是循环） */
+[class*="_sidebarCol"] [role="treeitem"] {
+  animation: bloom-fade-up 320ms var(--bloom-ease-out) backwards !important;
+}
+/* 顶栏 —— 从顶部滑下比从下方滑上更贴「页面打开」的语义。
+   :has(> _tabs) 是"真顶栏"的唯一判据，见下方 §去硬边框 里的说明。 */
+[class*="_header"]:has(> [class*="_tabs"]) {
+  animation: bloom-fade-down 420ms var(--bloom-ease-out) backwards !important;
+}
+/* 顶栏三按钮入场（newSession / sessionLog / Bloom trigger）：
+   transform / box-shadow 加到原 transition 里 —— 原来 WIP 只 transition 了
+   background，加 lift 不需要新 transition 字段，hover 时一并平滑 */
+[class*="_newSession"],
+[class*="_sessionLogButton"],
+.dsh-bloom-trigger {
+  animation: bloom-fade-down 320ms var(--bloom-ease-out) backwards !important;
+}
+[class*="_newSession"]:hover,
+[class*="_sessionLogButton"]:hover,
+.dsh-bloom-trigger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px -6px var(--bloom-glow);
+}
+
+/* ═══ 输入卡三态 ═══════════════════════════════════════════════════
+ * owner 要的是"输入框会说话"（2026-09-10）：
+ *   静置   —— 光晕边框慢呼吸（还活着，在等你）
+ *   聚焦   —— 同一条呼吸，节奏收紧一倍（跟手）
+ *   执行中 —— 流光沿边框流转（它在跑）
+ *
+ * 两个 @property 是必需的：普通自定义属性在 keyframes 里只会**离散跳变**，
+ * 声明了 syntax 浏览器才真正插值。--bloom-halo 推 glass.ts 里那圈主题色
+ * 外晕的浓度（阴影本体写在那边，这里只给数值）；--bloom-spin 推 conic
+ * 渐变的起始角。
+ *
+ * 「执行中」的判据是 :has([class*="_pending"])：uV2eYG_pending 是 DSH 自己的
+ * 待处理指示点（8px 圆点 + 1s 脉冲），只在跑的时候渲染进输入卡 —— idle 态
+ * 实测 DOM 里查不到。比按 aria-label="停止" 判稳（那个会随界面语言变）。 */
+@property --bloom-halo { syntax: '<number>'; initial-value: 0.5; inherits: false; }
+@property --bloom-spin { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+
+@keyframes bloom-halo-breathe {
+  0%, 100% { --bloom-halo: 0.3; }
+  50%      { --bloom-halo: 0.85; }
+}
+@keyframes bloom-ring-spin {
+  to { --bloom-spin: 360deg; }
+}
+
+body[data-bloomglass-variant] div[class*="_composer"] div[class*="_card"] {
+  animation: bloom-halo-breathe 5.2s ease-in-out infinite;
+}
+body[data-bloomglass-variant] div[class*="_composer"] div[class*="_card"]:focus-within {
+  animation-duration: 2.6s;
+}
+
+/* 执行中：1.5px 的一圈环，conic 起始角在转，看上去像一束光绕着卡边跑。
+   mask 两层 + exclude 把实心圆角矩形挖成环，padding 就是环的粗细。
+   角度停留在 52%~90% 这一段，所以任一时刻只有约三分之一圈是亮的 ——
+   亮满一整圈就成了跑马灯，不是"流光"。 */
+body[data-bloomglass-variant] div[class*="_composer"] div[class*="_card"]:has([class*="_pending"])::after {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: 18px;
+  padding: 1.5px;
+  pointer-events: none;
+  background: conic-gradient(
+    from var(--bloom-spin),
+    transparent 0 52%,
+    color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 20%) 70%,
+    color-mix(in oklch, var(--bloom-motion-2, #6b8f71), transparent 45%) 80%,
+    transparent 90% 100%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: bloom-ring-spin 2.6s linear infinite;
+}
+/* 跑起来时呼吸让位给流光 —— 两套动效同时在同一块边上跑会互相打架 */
+body[data-bloomglass-variant] div[class*="_composer"] div[class*="_card"]:has([class*="_pending"]) {
+  --bloom-halo: 0.7;
+  animation: none;
+}
+
+/* View Transition：主题切换时整页 cross-fade，让颜色"流过去"而不是瞬切。
+   只有浏览器支持 `document.startViewTransition` 时才触发（switcher.ts 里
+   调），这里只控动画时长 / 缓动；不支持和 reduced-motion 一起由下方兜底
+   清零。 */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ④ 无障碍：动效全部降级为瞬间 */
+@media (prefers-reduced-motion: reduce) {
+  [class*="_sidebarCol"] [role="treeitem"],
+  [class*="_sidebarCol"] [class*="_active"]::before,
+  .dsh-bloom-switcher, .dsh-bloom-trigger, .dsh-bloom-option, .dsh-bloom-menu,
+  [class*="_composer"] div[class*="_card"],
+  [class*="_composer"] div[class*="_card"]::after,
+  [class*="_composer"] div[class*="_card"]:has([class*="_pending"])::after,
+  div[class*="_bubble"],
+  div[class*="_toolRow"],
+  div[class*="_scrollBody"] > div[class*="_card"],
+  [class*="_newSession"], [class*="_sessionLogButton"],
+  [class*="_scrollBody"]:not(:has(div[class*="_bubble"]))::before,
+  ::view-transition-old(root), ::view-transition-new(root) {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ══ 去硬边框：全站统一换成光带 / 浅底 / 阴影（owner 2026-09-10）══
+ *
+ * 原话：「现在已经不流行通过 border 去做切割了，要不然就是很淡的边框线加光感
+ * 流动或者是阴影，比硬的边框好看得多」；以及「不能光靠我一个一个说」。
+ *
+ * 所以全页扫了一遍 border-width > 0 的元素（39 处 / 9 类），按类别统一处理。
+ * 消息气泡与输入卡不在此列 —— 它们的边由 glass.ts 的玻璃体系管，动了会破相。
+ */
+
+/* 顶部标题栏下沿：跟侧栏右缘同一套做法 —— box-shadow 往外投的辉光，
+ * 不是伪元素画的带。
+ *
+ * 为什么不用 ::after：伪元素被自身盒子裁在里面，渐变最浓的一端就是一条
+ * 硬边（实拍 y=58 处 207→189 一跳）。box-shadow 的外阴影画在 border-box
+ * 之外、由 blur 自然收尾，两头都没有边。offset 与 spread 同量（24/-24）
+ * 保证光只往下走，不糊到左右和顶上。
+ *
+ * ⚠️ 选择器必须是 :has(> [class*="_tabs"])，不能只写 [class*="_header"]。
+ * 后者在实际 DOM 里匹配 5 个元素，其中 4 个是**小按钮组**
+ * （wSkVaW_headerActions 68px、wSkVaW_headerUtilities 208px、
+ *   bhn1Oq_headerActions 60px、_2ctAZa_header 24px），二三十像素高的盒子
+ * 挂上 18px 光带就是一小段悬空横带 —— owner 反馈"像被玻璃劈开"
+ * （2026-09-10 实拍：药丸组下沿 y=43 一条硬边，色差 191→209）。
+ * 而真顶栏 wSkVaW_header 反而没吃到：它自带 ::after 是 0.5px 线，
+ * 跟我们 (0,1,0) 平手、后注入者赢。:has() 把特异度提到 (0,2,0)，
+ * 既只命中真顶栏，又压得过宿主那条硬线。 */
+body[data-bloomglass-variant] [class*="_header"]:has(> [class*="_tabs"]) {
+  position: relative;
+  border-bottom: 0;
+  /* 强度实测定档：45% 时边界跳变 32 级、仍读成一条线；78% 跳变 10 级，
+     只剩"上面比下面亮一点"的错觉，这才是分隔而不是分割。 */
+  box-shadow: 0 28px 48px -28px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 78%);
+}
+body[data-bloomglass-variant] [class*="_header"]:has(> [class*="_tabs"])::after {
+  /* 宿主那条 0.5px 硬线关掉，交给上面的辉光 */
+  display: none;
+}
+
+/* 描边按钮 → 浅底。新会话 / Session 日志 / 本主题切换器三个长得一样，
+   一起处理，免得只改自己的显得突兀 */
+body[data-bloomglass-variant] [class*="_newSession"],
+body[data-bloomglass-variant] [class*="_sessionLogButton"],
+body[data-bloomglass-variant] .dsh-bloom-trigger {
+  border-color: transparent;
+  background: color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 92%);
+  /* transform + box-shadow 也进 transition：§7 hover 抬升要平滑，不能 snap。
+     §7 那边只改属性，不重声明 transition —— 避免重复定义打架 */
+  transition:
+    background var(--bloom-dur-fast, .16s) var(--bloom-ease, ease),
+    transform var(--bloom-dur-fast, .16s) var(--bloom-ease, ease),
+    box-shadow var(--bloom-dur-fast, .16s) var(--bloom-ease, ease);
+}
+body[data-bloomglass-variant] [class*="_newSession"]:hover,
+body[data-bloomglass-variant] [class*="_sessionLogButton"]:hover,
+body[data-bloomglass-variant] .dsh-bloom-trigger:hover {
+  background: color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 86%);
+}
+
+/* 侧栏底部操作区：上边框 → 向上扩散的极淡阴影 */
+body[data-bloomglass-variant] [class*="_footerActions"] {
+  border-top: 0;
+  box-shadow: 0 -6px 10px -8px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 78%);
+}
+
+/* ═══ 禁用主按钮的图标可读性（2026-09-14 用户实拍「浅色下看不清」）══
+ * DSH 禁用主按钮（空输入时的发送键等）的原生做法：fill 压到 10% + 整体再叠
+ * opacity .4，但文字/图标仍用「fill 上的前景」label-primary-foreground ——
+ * 那个 token 亮色语义就是白（static neutral-bluish-00）。白箭头浮在洗白的
+ * 淡染底上，禁用态形同消失（禁用 bloom 样式实测原生同样如此，只是莫兰迪的
+ * 淡底把它衬得更明显）。README 挂着 WCAG 徽章，这里修正：禁用态的底已经是
+ * 近白的淡染，图标用正文字色（label-primary）才读得清，明暗自适应 ——
+ * 暗色下两者同为亮色，行为不变，只有亮色被纠正。 */
+body[data-bloomglass-variant] button[class*="_primary"]:disabled {
+  color: var(--dsw-alias-label-primary);
+}
+
+
+/* ═══ 落霞流线（v0.9.0，仅 aurora 变体）═══════════════════════════
+   用户要的「流线」—— body 背后挂两条斜向渐变丝带，transform 缓慢漂移 +
+   blur 软化，做出光帘的视差感。
+   用 ::before 而非改 body background 的原因：动 body 的 background-image
+   每帧重绘整个 viewport；伪元素独立合成层，transform 走 GPU，便宜得多。
+   z-index:-1 + position:fixed —— body 的背景透传规则下，负 z-index 落在根
+   堆叠上下文的负层，画在 body 背景之上、应用内容之下。
+   颜色走 --bloom-aurora-stream-1/2/3（在 tokens.ts 由 motion 谱混透明得到），
+   v0.12.x 起 aurora 换橙黄系，切到该变体时呈现金→橙→珊瑚的晚霞流光，
+   其它变体保持原样不显示。 */
+body[data-bloomglass-variant="aurora"]::before {
+  content: '';
+  position: fixed;
+  inset: -40%;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(115deg,
+      transparent 38%, var(--bloom-aurora-stream-1) 50%, transparent 62%),
+    linear-gradient(70deg,
+      transparent 32%, var(--bloom-aurora-stream-2) 46%, transparent 60%),
+    radial-gradient(60% 40% at 50% 60%,
+      var(--bloom-aurora-stream-3), transparent 70%);
+  background-size: 220% 220%, 260% 240%, 100% 100%;
+  background-position: 25% 30%, 80% 15%, 50% 50%;
+  background-repeat: no-repeat;
+  /* v0.12.1：这层是「脏」的真正来源（owner 2026-09-15）。原来 opacity .6 +
+     saturate(1.2) + blur 60px 铺满整个视口 —— 三条金橙渐变糊成一片盖在界面上，
+     底色再干净也被这层罩住。saturate 尤其致命：它在已经糊开的大色块上继续加彩度，
+     等于把浑浊放大。
+     氛围层的作用是「若隐若现的呼吸感」，不是给界面上色：不透明度砍到三分之一，
+     去掉饱和增益，blur 加大让边界更软。 */
+  filter: blur(76px);
+  opacity: 0.2;
+  transform: translate3d(0, 0, 0);
+  animation: bloom-aurora-drift 28s ease-in-out infinite alternate;
+  will-change: transform, background-position;
+}
+@keyframes bloom-aurora-drift {
+  from { transform: translate3d(-2.5%, -1.5%, 0); background-position: 25% 30%, 80% 15%, 50% 50%; }
+  to   { transform: translate3d(3%, 2%, 0);      background-position: 65% 55%, 35% 45%, 55% 45%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-bloomglass-variant="aurora"]::before {
+    animation: none !important;
+    transform: none !important;
+    opacity: 0.4 !important;
+  }
+}
+
+/* ═══ 顶栏 tab 条：不做玻璃,只留一条发丝底边 ═══════════════════
+   这里曾和侧栏/排队条共用「面级玻璃」档位(半透底 + backdrop blur +
+   inset 白描边)。但 tab 条只有 27px 高、1400px 宽 —— 那套玻璃在这个尺寸上
+   读不出「一块玻璃」,只会变成一条自带底色和白边框的横带,跟下方内容区
+   撞出一道突兀的色块边界(用户实拍反馈:「对话和轨迹这里」)。
+
+   玻璃需要面积才成立。窄条带该做的是「分界」而不是「面」,所以只留一条
+   morandi 发丝底边,底色完全交给 body 的氛围渐变。 */
+body[data-bloomglass-variant] div[class*="_tabs"] {
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: inset 0 -1px 0 var(--bloom-hairline, rgba(146,168,179,0.3));
+}
+
+/* ═══ 面级面板（排队条 / 预览 dock）═══════════════════════════════
+   面积大，档位「略实」；顶部亮高光 + 深色外辉让它像一块立起来的玻璃。 */
+body[data-bloomglass-variant] div[class*="_dock"]:has(> [class*="_preview"]) {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-1, #fff), transparent 82%);
+  backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.3);
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.3);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 0 0 1px rgba(255,255,255,0.10),
+    0 14px 44px -16px rgba(0,0,0,0.22);
+}
+body[data-ds-dark-theme] div[class*="_dock"]:has(> [class*="_preview"]) {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-1, #101010), transparent 64%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    inset 0 0 0 1px rgba(255,255,255,0.05),
+    0 16px 48px -18px rgba(0,0,0,0.5);
+}
+
+/* ═══ 侧栏玻璃：backdrop-filter 必须走 ::before，绝不能加在 _sidebarCol 自身 ═══
+   ⚠️ 这是本项目踩过的最贵的坑，改这块前先读完。
+
+   backdrop-filter（和 transform / filter / perspective / contain / will-change 一样）
+   会让元素成为**其 position:fixed 后代的 containing block**。而 DSH 的**设置面板
+   挂在侧栏子树里**（_sidebarCol > … > _footArea > _settingsArea > _overlay），
+   它的 overlay 是 fixed + inset:0，本来相对视口铺满、panel 800px 居中。
+
+   一旦 _sidebarCol 自己带 backdrop-filter，那个 fixed 就改为相对 280px 宽的侧栏定位：
+   遮罩缩到侧栏那一条，panel 被挤成 279px，detail 区 flex 收缩到 18px ——
+   于是中文变成逐字竖排。这个「DSH 的 layout bug」从来不是 DSH 的，是我们自己造的，
+   而且为它写了 60 行 modal 改造 CSS、来回改了三轮（详见 DEV_NOTES 2026-08-24）。
+
+   伪元素的 backdrop-filter 只作用于伪元素自己，不改变父元素的 containing block
+   资格，所以玻璃观感一致、fixed 后代不受影响。
+
+   ⚠️ 第二个坑（修第一个坑时当场踩的）：**不要给侧栏加 isolation: isolate。**
+   它确实不创建 containing block，但会创建 **stacking context** —— overlay 的
+   z-index:1000 会被困在侧栏内部，而侧栏自身是 z-index:auto，于是设置面板被
+   主聊天区的 composer 画在了上面。两个属性伤的是两件不同的事：
+     backdrop-filter → containing block（伤 fixed 的**定位基准**）
+     isolation        → stacking context（伤 fixed 的**层叠顺序**）
+   所以这里只用 position:relative + z-index:-1：伪元素落在 root 层叠上下文里、
+   body 氛围渐变之上、所有正常流内容之下，玻璃该模糊的背景一点没变。
+
+   判据（以后加玻璃时对每个目标问一遍）：
+   「这个元素的子树里有 position:fixed 的东西吗？」有 → 玻璃必须走 ::before，
+   且不得引入 isolation / transform / filter / contain / will-change。
+   输入卡的 conversation.input.overlay 槽也会注入 fixed 元素（如 dsh-convmap），
+   必须遵守同一判据，不能把滤镜放回卡片本体（issue #15）。 */
+body[data-bloomglass-variant] [class*="_sidebarCol"] {
+  position: relative;
+  /* v0.10.x：之前 transparent !important 让侧栏和 body 完全同色，没有容器感。
+     改成带 accent tint 的底色 —— 6% accent 混进 bg-layer-1，肉眼能看出
+     "这块区域有自己的颜色"，但又不至于抢内容。 */
+  background-color: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #fff) 94%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 0 0 1px rgba(255,255,255,0.10),
+    /* 右缘冷光必须走 box-shadow：侧栏 overflow:hidden，伪元素画的光带只能落在
+       容器内侧，看上去是「向内发光」（owner 2026-09-10 反馈）；外阴影不受自身
+       overflow 裁剪，是唯一真正往外散的做法。offset 与 spread 同量（24/-24），
+       让光只出现在右侧，不糊到上下边。 */
+    24px 0 40px -24px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 45%),
+    0 14px 44px -16px rgba(0,0,0,0.22);
+}
+body[data-bloomglass-variant] [class*="_sidebarCol"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* 玻璃层也带一点 accent tint —— 和上面的底色呼应 */
+  background-color: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #fff) 88%);
+  backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.3);
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.3);
+}
+body[data-ds-dark-theme] [class*="_sidebarCol"] {
+  background-color: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #101010) 92%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    inset 0 0 0 1px rgba(255,255,255,0.05),
+    24px 0 40px -24px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 35%),
+    0 16px 48px -18px rgba(0,0,0,0.5);
+}
+body[data-ds-dark-theme] [class*="_sidebarCol"]::before {
+  background-color: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #101010) 82%);
+}
+
+/* v0.6.2: 「对话 / 轨迹」tab 字号上限保护 —— 用户在窄屏 / 浏览器 zoom>100% 下
+   反馈 tab 视觉上被放大、撑得过宽。DSH 原生 tab 是 wSkVaW_tab（默认 13px），
+   这里兜底 clamp 到 14px，避免任何状态下字号异常撑开。 */
+div[class*="_tabs"] button[class*="_tab"],
+div[class*="_tabs"] [class*="_tab"] {
+  font-size: clamp(13px, 0.9vw, 14px) !important;
+  font-weight: 500 !important;
+  letter-spacing: normal !important;
+  white-space: nowrap !important;
+}
+
+/* ═══ 输入卡片（主角）—— 最清晰的一块玻璃，focus 时玻璃边缘点亮 ═══
+   v0.9.0: 用户反馈边框「粗粗的」——
+     原因不是 1px hairline 本身粗，而是 COMPONENT_CSS 给的 border: 1px solid var(--bloom-hairline)
+     又叠了 GLASS_CSS 的 inset 0 0 0 1px rgba(255,255,255,...) 内白圈，
+     1px 外框 + 1px 内圈 = 视觉上等于 2px 的厚边框；focus-within 再加 3px 的
+     --bloom-glow 光环就更肥。
+   修复：去掉 inset 0 0 0 1px 那圈内白线，只保留顶部 1px 高光（玻璃边沿）
+     和外阴影；focus 环 3px -> 2px，颜色用 accent x 25% 收敛到主题色相，
+     远看像一根细线而不是一圈光晕。border 本身仍走 COMPONENT_CSS 的 hairline。 */
+body[data-bloomglass-variant] div[class*="_composer"] div[class*="_card"] {
+  position: relative;
+  background-color: transparent;
+  /* v0.10.x（owner 反馈「没层次感」）：阴影只完成"功能"没完成"戏剧"。
+     单层远影 + 顶部内高光只是让卡片不和背景撞色，不让卡片"提起来"。
+     三层叠：① 顶部内高光（光从上方来）；② 紧贴的硬短影（贴着卡边的
+     0.5px 影，像把卡片按下去一点弹回来的感觉）；③ 远散的长距柔影
+     （把卡片安放在画布上）；④ 主题色 tint 外晕（"这张卡属于这里"——
+     莫兰迪主题自己的颜色，不是死的灰黑阴影）。 */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.28),
+    0 1px 2px -1px rgba(0, 0, 0, 0.18),
+    0 18px 52px -20px rgba(0,0,0,0.26),
+    /* 外晕浓度由 --bloom-halo 驱动（component.ts §7 的呼吸动画在推它）：
+       halo=0.73 时等于原来的 78%，0.3 时淡到 91%，0.85 时浓到 74.5%。 */
+    0 0 48px -16px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent calc(100% - var(--bloom-halo, 0.73) * 30%));
+}
+body[data-bloomglass-variant] div[class*="_composer"] div[class*="_card"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-1, #fff), transparent 84%);
+  backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.35);
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.35);
+}
+body[data-ds-dark-theme] div[class*="_composer"] div[class*="_card"] {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 1px 2px -1px rgba(0, 0, 0, 0.5),
+    0 20px 56px -22px rgba(0,0,0,0.55),
+    0 0 64px -20px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent calc(100% - var(--bloom-halo, 0.7) * 40%));
+}
+body[data-ds-dark-theme] div[class*="_composer"] div[class*="_card"]::before {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-1, #101010), transparent 66%);
+}
+body[data-bloomglass-variant] div[class*="_composer"] div[class*="_card"]:focus-within {
+  border-color: var(--bloom-hairline-strong);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    0 1px 2px -1px rgba(0, 0, 0, 0.18),
+    0 0 0 2px color-mix(in oklch, var(--bloom-accent) 25%, transparent),
+    0 18px 52px -20px rgba(0,0,0,0.26),
+    0 0 56px -16px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 74%);
+}
+body[data-ds-dark-theme] div[class*="_composer"] div[class*="_card"]:focus-within {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    0 1px 2px -1px rgba(0, 0, 0, 0.5),
+    0 0 0 2px color-mix(in oklch, var(--bloom-accent) 28%, transparent),
+    0 20px 56px -22px rgba(0,0,0,0.55),
+    0 0 72px -20px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 68%);
+}
+
+/* ═══ 消息气泡 —— 柔和玻璃，近距淡影，不压内容 ═══
+   ⚠️ 必须限定 div（2026-09-14 用户实拍「浅色下提示看不清」）：
+   DSH 的全局 Tooltip 与消息气泡共用「_bubble」语义类名（_bubble_1nw3t_1，span）。
+   裸 [class*="_bubble"] 会把 tooltip 的深底 var(--dsw-alias-tooltip-bg) 盖成
+   22% 透明度的近白玻璃，而 tooltip 文字是 static 白（--dsw-static-neutral-bluish-00）
+   —— 白字白底，实测对比度 1.0。消息气泡是 div、tooltip 是 span，限定标签即分开；
+   tooltip 的底色由 tokens.ts 接管的 --dsw-alias-tooltip-bg（深底）自动跟随主题。 */
+body[data-bloomglass-variant] div[class*="_bubble"] {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-1, #fff), transparent 78%);
+  backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.25);
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.25);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.16),
+    inset 0 0 0 1px rgba(255,255,255,0.08),
+    0 6px 24px -10px rgba(0,0,0,0.14);
+}
+body[data-ds-dark-theme] div[class*="_bubble"] {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-1, #101010), transparent 62%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 0 0 1px rgba(255,255,255,0.04),
+    0 8px 28px -12px rgba(0,0,0,0.4);
+}
+
+/* ═══ 下拉/选择器（覆盖型）—— blur 在这里真正可见 ═══ */
+/* v0.6.0 patch: 暗色版从 transparent 52% → 12%（48% → 88% 不透明）。
+   v0.6.0 早期设到 22%（78% 不透明）已被 verify 证伪：青金/冷色调 + 亮色聊天内容
+   透字仍明显（用户截图「字竖排的 layout bug」整段透出）。现在跟 Bloom 自己的
+   下拉（transparent 12%）一致。*/
+body[data-bloomglass-variant] [class*="_menu"],
+body[data-bloomglass-variant] [class*="_selector"] {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-2, #fff), transparent 20%);
+  backdrop-filter: blur(28px) saturate(1.4);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 0 0 1px rgba(255,255,255,0.12),
+    0 20px 56px -18px rgba(0,0,0,0.3);
+}
+body[data-ds-dark-theme] [class*="_menu"],
+body[data-ds-dark-theme] [class*="_selector"] {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-2, #101010), transparent 12%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    inset 0 0 0 1px rgba(255,255,255,0.05),
+    0 24px 64px -20px rgba(0,0,0,0.6);
+}
+
+/* ═══ 设置面板：无需任何覆盖 ═══
+   这里曾经有 60 行把「279px 窄 drawer」改造成居中 modal 的 CSS，前后改了三轮
+   （v0.6.0 修 → v0.6.1 以「不覆盖 DSH 原生 layout」回滚并记为「去官方提 issue」
+   → 又改回来）。三轮都白做，因为**前提是错的**：
+
+   实测（2026-08-24，摘掉 Bloom 样式后量的）DSH 原生设置面板本来就是
+   800×800 的居中 modal，x=464=(1728-800)/2 精确居中，中文描述 383~398px 正常横排。
+   **DSH 没有这个 bug。** 那个「窄 drawer + 中文逐字竖排」是 Bloom 自己造成的回归 ——
+   见上方 _sidebarCol 的 ::before 注释：侧栏的 backdrop-filter 把设置面板 overlay
+   的 fixed containing block 从视口换成了 280px 的侧栏。
+
+   修根因（玻璃移到伪元素）之后，**布局上**这里一行 CSS 都不需要。
+
+   ── 唯一的例外是下面这条，它改的是颜色而不是布局 ── */
+
+/* DSH 拿**前景色 token 当边框色**用的地方（第二例）。设置面板 Agent 预设的
+   选中卡片写的是 border-color: var(--dsw-alias-label-primary) —— 那是正文文字色，
+   Bloom 在暗色下给它 oklch(0.96 …) 近白，于是选中卡围了一圈刺眼白边。
+   选中态本该是主题色。hover 态同样拿 label-dimmed 当边框，一并换成发丝线。 */
+body[data-bloomglass-variant] [class*="_cardActive"] {
+  border-color: var(--bloom-accent);
+}
+body[data-bloomglass-variant] [class*="_card"]:hover:not([class*="_cardActive"]) {
+  border-color: var(--bloom-hairline-strong);
+}
+
+/* 「浅色 / 深色 / 跟随系统」选中态的边框：DSH 用 --dsw-static-neutral-bluish-400
+   （#adb2b8）画它。那是 static 层的中性灰阶 —— 绕过了 alias 层，主题的
+   --dsw-alias-border-* 改不到它，于是在莫兰迪暗底上留下一圈刺眼的灰白边
+   （用户实拍反馈「白色边框很突兀」，而且只有选中那一个特别亮）。
+
+   选中态本该是主题色，这里按 accent 接管。并且**不**整体覆盖
+   --dsw-static-neutral-bluish-400 —— static 是 DSH 的基础色阶，全局改会波及
+   大量无关组件；只在这个具体组件上纠正，影响面可控。 */
+body[data-bloomglass-variant] button[class*="_themeCube"][class*="_selected"] {
+  border-color: var(--bloom-accent);
+}
+
+body[data-bloomglass-variant] .md-code-block,
+body[data-bloomglass-variant] [class*="_tableScroll"] {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-1, #fff), transparent 70%);
+  backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.2);
+}
+body[data-ds-dark-theme] .md-code-block,
+body[data-ds-dark-theme] [class*="_tableScroll"] {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-1, #101010), transparent 56%);
+}
+body[data-bloomglass-variant] .md-code-block pre,
+body[data-bloomglass-variant] .md-code-block code { background: transparent; }
+
+/* ═══ 表格内部分隔线加强（v0.9.0）用户截图反馈列线几乎不可见 ═══
+   原 CSS 用 var(--bloom-hairline)（莫兰迪 30% alpha）做列分隔，
+   在深色氛围渐变上几乎消失，看起来像没线的「列表」。提到
+   hairline-strong（55% alpha）并给 thead 加一档淡底，列与行都立起来。 */
+body[data-bloomglass-variant] [class*="_tableScroll"] th,
+body[data-bloomglass-variant] [class*="_tableScroll"] td {
+  border-color: var(--bloom-hairline-strong);
+}
+[class*="_tableScroll"] thead th {
+  background: rgba(var(--bloom-morandi), 0.10);
+}
+body[data-ds-dark-theme] [class*="_tableScroll"] thead th {
+  background: rgba(var(--bloom-morandi), 0.08);
+}
+[class*="_tableScroll"] tbody tr:nth-child(even) td {
+  background: rgba(var(--bloom-morandi), 0.03);
+}
+body[data-ds-dark-theme] [class*="_tableScroll"] tbody tr:nth-child(even) td {
+  background: rgba(var(--bloom-morandi), 0.04);
+}
+
+[data-bloomglass-frost-wallpaper] {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+[data-bloomglass-frost-dim] {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: rgba(12, 16, 24, var(--fw-dim, 0.28));
+}
+
+body[data-bloomglass-frost] {
+  --fw-blur: 28px;
+  --fw-saturate: 155%;
+  --fw-dim: 0.28;
+  --fw-highlight: rgba(255, 255, 255, 0.55);
+  --fw-edge: rgba(255, 255, 255, 0.28);
+  background-color: transparent;
+}
+
+body[data-bloomglass-frost='dark'] [data-bloomglass-frost-dim] {
+  background: rgba(6, 8, 12, var(--fw-dim, 0.28));
+}
+
+body[data-bloomglass-frost='dark'] {
+  --fw-highlight: rgba(255, 255, 255, 0.14);
+  --fw-edge: rgba(255, 255, 255, 0.12);
+}
+
+/* AppFrame + slot roots: drop opaque fills so the wallpaper shows through. */
+body[data-bloomglass-frost] *:has(> [data-slot='sidebar']):has(> [data-slot='conversation']),
+body[data-bloomglass-frost] [data-slot='sidebar'],
+body[data-bloomglass-frost] [data-slot='sidebar'] > :first-child,
+body[data-bloomglass-frost] [data-slot='conversation'],
+body[data-bloomglass-frost] [data-slot='details'] {
+  background-color: transparent !important;
+}
+
+/*
+ * One frosted plate per column, painted on ::before.
+ * backdrop-filter must stay on the pseudo — never on the column itself —
+ * or position:fixed settings (a sidebar descendant) lock to the rail width.
+ */
+body[data-bloomglass-frost] *:has(> [data-slot='sidebar']),
+body[data-bloomglass-frost] *:has(> [data-slot='conversation']),
+body[data-bloomglass-frost] *:has(> [data-slot='details']) {
+  position: relative;
+}
+body[data-bloomglass-frost] *:has(> [data-slot='sidebar']) {
+  border-right: none !important;
+}
+body[data-bloomglass-frost] *:has(> [data-slot='details']) {
+  border-left: none !important;
+}
+body[data-bloomglass-frost] *:has(> [data-slot='sidebar'])::before,
+body[data-bloomglass-frost] *:has(> [data-slot='conversation'])::before,
+body[data-bloomglass-frost] *:has(> [data-slot='details'])::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--dsw-alias-bg-layer-1);
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate));
+  backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate));
+}
+body[data-bloomglass-frost] *:has(> [data-slot='sidebar'])::before {
+  inset: 0 -2px 0 0;
+  background: var(--dsw-specific-sidebar-fill);
+}
+body[data-bloomglass-frost] *:has(> [data-slot='conversation'])::before {
+  inset: 0 0 0 -2px;
+}
+body[data-bloomglass-frost] *:has(> [data-slot='details'])::before {
+  inset: 0 0 0 -2px;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  body[data-bloomglass-frost] *:has(> [data-slot='sidebar'])::before,
+  body[data-bloomglass-frost] *:has(> [data-slot='conversation'])::before,
+  body[data-bloomglass-frost] *:has(> [data-slot='details'])::before {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+.fw-palette {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+.fw-palette-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--dsw-alias-border-l2, rgba(0, 0, 0, 0.12));
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: border-color 0.16s ease, background-color 0.16s ease;
+}
+.fw-palette-item:hover {
+  background: var(--dsw-alias-interactive-bg-hover, rgba(0, 0, 0, 0.04));
+}
+.fw-palette-item[aria-selected='true'] {
+  border-color: var(--bloom-accent, #6b8f71);
+  background: color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 91%);
+}
+.fw-palette-item:focus-visible {
+  outline: 2px solid var(--bloom-accent, #6b8f71);
+  outline-offset: 2px;
+}
+.fw-palette-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex: none;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
+}
+.fw-palette-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.fw-palette-name {
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--dsw-alias-label-primary);
+}
+.fw-palette-poem {
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--dsw-alias-label-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fw-subhead {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-secondary);
+  margin: 2px 0 -4px;
+}
+/* Settings page */
+.fw-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 0 28px;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--dsw-alias-label-primary);
+}
+.fw-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),
+    var(--dsw-alias-bg-layer-1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.28);
+}
+body[data-ds-dark-theme] .fw-panel {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01)),
+    var(--dsw-alias-bg-layer-1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.fw-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.fw-lead { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.fw-kicker {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dsw-alias-label-tertiary);
+}
+.fw-title { font-size: 18px; line-height: 26px; font-weight: 600; }
+.fw-desc { font-size: 13px; line-height: 20px; color: var(--dsw-alias-label-secondary); }
+.fw-chip {
+  flex: 0 0 auto;
+  margin-top: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 16px;
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-secondary);
+}
+.fw-chip[data-tone='warn'] {
+  background: color-mix(in srgb, var(--dsw-alias-state-warn-primary) 18%, transparent);
+  color: var(--dsw-alias-state-warn-label, var(--dsw-alias-state-warn-primary));
+}
+.fw-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  min-height: 196px;
+  border: 0;
+  border-radius: 16px;
+  padding: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.18), transparent 42%),
+    linear-gradient(135deg, #8aa4c8 0%, #3d4f6b 52%, #1b2330 100%);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.fw-hero[data-over='true'] { outline: 2px solid var(--dsw-alias-brand-primary); outline-offset: 2px; }
+.fw-hero:disabled { cursor: default; }
+.fw-hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.fw-hero-glass {
+  position: absolute;
+  inset: auto 18px 18px auto;
+  width: 42%;
+  min-width: 120px;
+  height: 46%;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.35);
+  background: rgba(255,255,255, var(--fw-ui-glass, 0.46));
+  -webkit-backdrop-filter: blur(var(--fw-ui-blur, 28px)) saturate(var(--fw-ui-sat, 155%));
+  backdrop-filter: blur(var(--fw-ui-blur, 28px)) saturate(var(--fw-ui-sat, 155%));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55);
+  pointer-events: none;
+}
+.fw-hero-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 20px;
+  text-align: left;
+}
+.fw-hero-copy strong { font-size: 14px; line-height: 20px; font-weight: 600; }
+.fw-hero-copy span {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary);
+}
+.fw-hero:not([data-has='true']) .fw-hero-copy strong,
+.fw-hero:not([data-has='true']) .fw-hero-copy span { color: #f4f7fb; }
+.fw-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 22px;
+}
+.fw-switch input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 44px;
+  height: 26px;
+  margin: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #6b7178;
+  position: relative;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+.fw-switch input::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.28);
+  transition: transform 160ms ease;
+}
+.fw-switch input:checked {
+  background: #34c759;
+}
+.fw-switch input:checked::after { transform: translateX(18px); }
+.fw-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+}
+@media (max-width: 640px) { .fw-grid { grid-template-columns: 1fr; } }
+.fw-row { display: flex; flex-direction: column; gap: 8px; }
+.fw-row-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  line-height: 18px;
+}
+.fw-row-head span:last-child { color: var(--dsw-alias-label-secondary); font-variant-numeric: tabular-nums; }
+.fw-row input[type='range'] {
+  width: 100%;
+  height: 4px;
+  accent-color: var(--dsw-alias-brand-primary);
+  cursor: pointer;
+}
+.fw-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+.fw-btn {
+  appearance: none;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+.fw-btn:hover { background: var(--dsw-alias-interactive-bg-hover); }
+.fw-btn[data-kind='primary'] {
+  background: #34c759;
+  color: #fff;
+  border-color: transparent;
+}
+.fw-btn[data-kind='primary']:hover { background: #2fb350; }
+.fw-btn[data-kind='primary']:disabled {
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  border-color: var(--dsw-alias-border-l2);
+  opacity: 0.5;
+}
+.fw-btn[data-kind='danger'] { color: var(--dsw-alias-state-error-primary); }
+.fw-btn:disabled { opacity: 0.5; cursor: default; }
+.fw-error {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dsw-alias-state-error-primary);
+}
+.fw-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style></head>
+<body class="demo-dark" data-dsh-bloomglass data-bloomglass-variant="ripple" data-ds-dark-theme>
+<div class="shell"><div class="_root_demo"><div class="_frame_demo">
+  <aside data-slot="sidebar" class="_sidebarCol_demo">
+    <div class="_brand_demo"><span class="_brandDot_demo"></span>Bloom Glass</div>
+    <button class="_newSession_demo">＋ 新建会话</button>
+    <div class="_sectionHeader_demo">今天</div>
+    <div class="_list_demo"><div class="_sessionRow_demo _selected_demo" role="treeitem">示例会话 A</div><div class="_sessionRow_demo" role="treeitem">示例会话 B</div><div class="_sessionRow_demo" role="treeitem">示例会话 C</div><div class="_sessionRow_demo" role="treeitem">示例会话 D</div></div>
+    <div class="_headerUtilities_demo"><span class="_pill_demo">4</span></div>
+  </aside>
+
+  <main data-slot="conversation" class="_centerCol_demo">
+    <header class="_header_demo">示例会话 A<span class="_headerUtilities_demo"><span class="_pill_demo">示例</span></span></header>
+    <div class="_scrollBody_demo">
+      <div class="_turn_demo">
+        <div class="_bubble_demo">这是一条示例用户消息，用来展示气泡与配色的搭配效果。</div>
+        <div class="_markdown_demo">
+          <p>这是一段示例回复，用来展示正文排版、行内代码 `npm run build` 与强调色的呈现。</p>
+          <p>代码块与表格同样跟随配色，而不是保留 DSH 默认的蓝灰调：</p>
+          <div class="md-code-block"><pre class="shiki"><code><span>export function bloomTokens(p: PaletteEntry, dark: boolean): string {</span>
+<span>  const bg = dark ? p.bgD : p.bgL</span>
+<span>  return `--dsw-alias-bg-base: ${bg};`</span>
+<span>}</span></code></pre></div>
+          <div class="_tableScroll_demo"><table class="_demoTable"><tr><th>变体</th><th>色相</th><th>对比度</th></tr><tr><td>黛蓝</td><td>240</td><td>5.28:1</td></tr><tr><td>朱砂</td><td>25</td><td>4.87:1</td></tr><tr><td>桃夭</td><td>350</td><td>4.55:1</td></tr></table></div>
+          <div class="_toolRow_demo"><span class="_pill_demo">示例工具</span><span class="_pill_demo">示例状态</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="_composerSeat_demo">
+      <div class="_dock_demo"><span class="_pill_demo">示例队列</span></div>
+      <div class="_composer_demo">
+        <div class="_card_demo" contenteditable="true">输入消息，或按 / 查看命令…</div>
+      </div>
+    </div>
+  </main>
+</div></div></div>
+<style>
+._demoTable{width:100%;border-collapse:collapse;font-size:13px}
+._demoTable th,.demoTable td,._demoTable td{padding:6px 10px;text-align:left;border-bottom:1px solid var(--dsw-alias-border-l1)}
+._demoTable th{color:var(--dsw-alias-label-secondary);font-weight:600}
+._tableScroll_demo{margin:4px 0 12px}
+</style>
+
+</body></html>

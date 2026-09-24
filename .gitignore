@@ -1,0 +1,11 @@
+node_modules/
+*.log
+.DS_Store
+
+# Reference checkouts of the two plugins this package merges. They are
+# separate git repositories and are not part of this package's source.
+dsh-bloom-theme/
+dsh-frosted-window/
+
+# Build output is committed on purpose (the published package ships lib/),
+# so it is deliberately NOT ignored.

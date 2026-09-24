@@ -1,0 +1,371 @@
+/**
+ * 氛围层 CSS（v0.4.0）—— 壁纸 + 磨砂玻璃，全部由 body 的 data-* 属性驱动，
+ * 默认不生效（data 属性不写就不渲染），关掉即完全回到 v0.3 的纯 Bloom。
+ *
+ * 壁纸：两个 fixed 层（图 + 压暗纱），z-index:-1 画在 body 背景之上、
+ * 应用内容之下；同时必须把 body 自己的氛围渐变和底色清掉，否则会盖住壁纸。
+ * 玻璃：只接管「面」级容器（侧栏/气泡/输入卡/菜单/顶栏）——这些容器
+ * 已经在 COMPONENT_CSS 里被透明化过背景，这里补半透明底 + backdrop-filter。
+ */
+/**
+ * 玻璃层（v0.5.0，主视觉）—— 不再有壁纸/氛围层。
+ *
+ * 背景即 body 的莫兰迪氛围渐变（见 COMPONENT_CSS 第 1 节，已增强）。
+ * 玻璃由三件事读出来，缺一不可：
+ *   1. 半透底（透明 60~82%）让氛围渐变的色相透过来；
+ *   2. backdrop blur + saturate：面板与背景/内容交界产生霜化；
+ *   3. 玻璃边缘——顶部亮高光(inset) + 半透描边 + 柔和深色外辉。
+ *
+ * 明暗两档透明度：暗色面板更实一点（保亮字可读），亮色更透（玻璃感更足）。
+ * 全部用 color-mix(theme token, transparent) 而不是死白/死黑，色相跟着变体走。
+ */
+export const GLASS_CSS = `
+/* ═══ 落霞流线（v0.9.0，仅 aurora 变体）═══════════════════════════
+   用户要的「流线」—— body 背后挂两条斜向渐变丝带，transform 缓慢漂移 +
+   blur 软化，做出光帘的视差感。
+   用 ::before 而非改 body background 的原因：动 body 的 background-image
+   每帧重绘整个 viewport；伪元素独立合成层，transform 走 GPU，便宜得多。
+   z-index:-1 + position:fixed —— body 的背景透传规则下，负 z-index 落在根
+   堆叠上下文的负层，画在 body 背景之上、应用内容之下。
+   颜色走 --bloom-aurora-stream-1/2/3（在 tokens.ts 由 motion 谱混透明得到），
+   v0.12.x 起 aurora 换橙黄系，切到该变体时呈现金→橙→珊瑚的晚霞流光，
+   其它变体保持原样不显示。 */
+body[data-bloomglass-variant="aurora"]::before {
+  content: '';
+  position: fixed;
+  inset: -40%;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(115deg,
+      transparent 38%, var(--bloom-aurora-stream-1) 50%, transparent 62%),
+    linear-gradient(70deg,
+      transparent 32%, var(--bloom-aurora-stream-2) 46%, transparent 60%),
+    radial-gradient(60% 40% at 50% 60%,
+      var(--bloom-aurora-stream-3), transparent 70%);
+  background-size: 220% 220%, 260% 240%, 100% 100%;
+  background-position: 25% 30%, 80% 15%, 50% 50%;
+  background-repeat: no-repeat;
+  /* v0.12.1：这层是「脏」的真正来源（owner 2026-09-15）。原来 opacity .6 +
+     saturate(1.2) + blur 60px 铺满整个视口 —— 三条金橙渐变糊成一片盖在界面上，
+     底色再干净也被这层罩住。saturate 尤其致命：它在已经糊开的大色块上继续加彩度，
+     等于把浑浊放大。
+     氛围层的作用是「若隐若现的呼吸感」，不是给界面上色：不透明度砍到三分之一，
+     去掉饱和增益，blur 加大让边界更软。 */
+  filter: blur(76px);
+  opacity: 0.2;
+  transform: translate3d(0, 0, 0);
+  animation: bloom-aurora-drift 28s ease-in-out infinite alternate;
+  will-change: transform, background-position;
+}
+@keyframes bloom-aurora-drift {
+  from { transform: translate3d(-2.5%, -1.5%, 0); background-position: 25% 30%, 80% 15%, 50% 50%; }
+  to   { transform: translate3d(3%, 2%, 0);      background-position: 65% 55%, 35% 45%, 55% 45%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-bloomglass-variant="aurora"]::before {
+    animation: none !important;
+    transform: none !important;
+    opacity: 0.4 !important;
+  }
+}
+
+/* ═══ 顶栏 tab 条：不做玻璃,只留一条发丝底边 ═══════════════════
+   这里曾和侧栏/排队条共用「面级玻璃」档位(半透底 + backdrop blur +
+   inset 白描边)。但 tab 条只有 27px 高、1400px 宽 —— 那套玻璃在这个尺寸上
+   读不出「一块玻璃」,只会变成一条自带底色和白边框的横带,跟下方内容区
+   撞出一道突兀的色块边界(用户实拍反馈:「对话和轨迹这里」)。
+
+   玻璃需要面积才成立。窄条带该做的是「分界」而不是「面」,所以只留一条
+   morandi 发丝底边,底色完全交给 body 的氛围渐变。 */
+body[data-bloomglass-variant] div[class*="_tabs"] {
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: inset 0 -1px 0 var(--bloom-hairline, rgba(146,168,179,0.3));
+}
+
+/* ═══ 面级面板（排队条 / 预览 dock）═══════════════════════════════
+   面积大，档位「略实」；顶部亮高光 + 深色外辉让它像一块立起来的玻璃。 */
+body[data-bloomglass-variant] div[class*="_dock"]:has(> [class*="_preview"]) {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-1, #fff), transparent 82%);
+  backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.3);
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.3);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 0 0 1px rgba(255,255,255,0.10),
+    0 14px 44px -16px rgba(0,0,0,0.22);
+}
+body[data-ds-dark-theme] div[class*="_dock"]:has(> [class*="_preview"]) {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-1, #101010), transparent 64%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    inset 0 0 0 1px rgba(255,255,255,0.05),
+    0 16px 48px -18px rgba(0,0,0,0.5);
+}
+
+/* ═══ 侧栏玻璃：backdrop-filter 必须走 ::before，绝不能加在 _sidebarCol 自身 ═══
+   ⚠️ 这是本项目踩过的最贵的坑，改这块前先读完。
+
+   backdrop-filter（和 transform / filter / perspective / contain / will-change 一样）
+   会让元素成为**其 position:fixed 后代的 containing block**。而 DSH 的**设置面板
+   挂在侧栏子树里**（_sidebarCol > … > _footArea > _settingsArea > _overlay），
+   它的 overlay 是 fixed + inset:0，本来相对视口铺满、panel 800px 居中。
+
+   一旦 _sidebarCol 自己带 backdrop-filter，那个 fixed 就改为相对 280px 宽的侧栏定位：
+   遮罩缩到侧栏那一条，panel 被挤成 279px，detail 区 flex 收缩到 18px ——
+   于是中文变成逐字竖排。这个「DSH 的 layout bug」从来不是 DSH 的，是我们自己造的，
+   而且为它写了 60 行 modal 改造 CSS、来回改了三轮（详见 DEV_NOTES 2026-08-24）。
+
+   伪元素的 backdrop-filter 只作用于伪元素自己，不改变父元素的 containing block
+   资格，所以玻璃观感一致、fixed 后代不受影响。
+
+   ⚠️ 第二个坑（修第一个坑时当场踩的）：**不要给侧栏加 isolation: isolate。**
+   它确实不创建 containing block，但会创建 **stacking context** —— overlay 的
+   z-index:1000 会被困在侧栏内部，而侧栏自身是 z-index:auto，于是设置面板被
+   主聊天区的 composer 画在了上面。两个属性伤的是两件不同的事：
+     backdrop-filter → containing block（伤 fixed 的**定位基准**）
+     isolation        → stacking context（伤 fixed 的**层叠顺序**）
+   所以这里只用 position:relative + z-index:-1：伪元素落在 root 层叠上下文里、
+   body 氛围渐变之上、所有正常流内容之下，玻璃该模糊的背景一点没变。
+
+   判据（以后加玻璃时对每个目标问一遍）：
+   「这个元素的子树里有 position:fixed 的东西吗？」有 → 玻璃必须走 ::before，
+   且不得引入 isolation / transform / filter / contain / will-change。
+   输入卡的 conversation.input.overlay 槽也会注入 fixed 元素（如 dsh-convmap），
+   必须遵守同一判据，不能把滤镜放回卡片本体（issue #15）。 */
+body[data-bloomglass-variant] [class*="_sidebarCol"] {
+  position: relative;
+  /* v0.10.x：之前 transparent !important 让侧栏和 body 完全同色，没有容器感。
+     改成带 accent tint 的底色 —— 6% accent 混进 bg-layer-1，肉眼能看出
+     "这块区域有自己的颜色"，但又不至于抢内容。 */
+  background-color: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #fff) 94%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 0 0 1px rgba(255,255,255,0.10),
+    /* 右缘冷光必须走 box-shadow：侧栏 overflow:hidden，伪元素画的光带只能落在
+       容器内侧，看上去是「向内发光」（owner 2026-09-10 反馈）；外阴影不受自身
+       overflow 裁剪，是唯一真正往外散的做法。offset 与 spread 同量（24/-24），
+       让光只出现在右侧，不糊到上下边。 */
+    24px 0 40px -24px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 45%),
+    0 14px 44px -16px rgba(0,0,0,0.22);
+}
+body[data-bloomglass-variant] [class*="_sidebarCol"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* 玻璃层也带一点 accent tint —— 和上面的底色呼应 */
+  background-color: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #fff) 88%);
+  backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.3);
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.3);
+}
+body[data-ds-dark-theme] [class*="_sidebarCol"] {
+  background-color: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #101010) 92%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    inset 0 0 0 1px rgba(255,255,255,0.05),
+    24px 0 40px -24px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 35%),
+    0 16px 48px -18px rgba(0,0,0,0.5);
+}
+body[data-ds-dark-theme] [class*="_sidebarCol"]::before {
+  background-color: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #101010) 82%);
+}
+
+/* v0.6.2: 「对话 / 轨迹」tab 字号上限保护 —— 用户在窄屏 / 浏览器 zoom>100% 下
+   反馈 tab 视觉上被放大、撑得过宽。DSH 原生 tab 是 wSkVaW_tab（默认 13px），
+   这里兜底 clamp 到 14px，避免任何状态下字号异常撑开。 */
+div[class*="_tabs"] button[class*="_tab"],
+div[class*="_tabs"] [class*="_tab"] {
+  font-size: clamp(13px, 0.9vw, 14px) !important;
+  font-weight: 500 !important;
+  letter-spacing: normal !important;
+  white-space: nowrap !important;
+}
+
+/* ═══ 输入卡片（主角）—— 最清晰的一块玻璃，focus 时玻璃边缘点亮 ═══
+   v0.9.0: 用户反馈边框「粗粗的」——
+     原因不是 1px hairline 本身粗，而是 COMPONENT_CSS 给的 border: 1px solid var(--bloom-hairline)
+     又叠了 GLASS_CSS 的 inset 0 0 0 1px rgba(255,255,255,...) 内白圈，
+     1px 外框 + 1px 内圈 = 视觉上等于 2px 的厚边框；focus-within 再加 3px 的
+     --bloom-glow 光环就更肥。
+   修复：去掉 inset 0 0 0 1px 那圈内白线，只保留顶部 1px 高光（玻璃边沿）
+     和外阴影；focus 环 3px -> 2px，颜色用 accent x 25% 收敛到主题色相，
+     远看像一根细线而不是一圈光晕。border 本身仍走 COMPONENT_CSS 的 hairline。 */
+body[data-bloomglass-variant] div[class*="_composer"] div[class*="_card"] {
+  position: relative;
+  background-color: transparent;
+  /* v0.10.x（owner 反馈「没层次感」）：阴影只完成"功能"没完成"戏剧"。
+     单层远影 + 顶部内高光只是让卡片不和背景撞色，不让卡片"提起来"。
+     三层叠：① 顶部内高光（光从上方来）；② 紧贴的硬短影（贴着卡边的
+     0.5px 影，像把卡片按下去一点弹回来的感觉）；③ 远散的长距柔影
+     （把卡片安放在画布上）；④ 主题色 tint 外晕（"这张卡属于这里"——
+     莫兰迪主题自己的颜色，不是死的灰黑阴影）。 */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.28),
+    0 1px 2px -1px rgba(0, 0, 0, 0.18),
+    0 18px 52px -20px rgba(0,0,0,0.26),
+    /* 外晕浓度由 --bloom-halo 驱动（component.ts §7 的呼吸动画在推它）：
+       halo=0.73 时等于原来的 78%，0.3 时淡到 91%，0.85 时浓到 74.5%。 */
+    0 0 48px -16px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent calc(100% - var(--bloom-halo, 0.73) * 30%));
+}
+body[data-bloomglass-variant] div[class*="_composer"] div[class*="_card"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-1, #fff), transparent 84%);
+  backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.35);
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.35);
+}
+body[data-ds-dark-theme] div[class*="_composer"] div[class*="_card"] {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 1px 2px -1px rgba(0, 0, 0, 0.5),
+    0 20px 56px -22px rgba(0,0,0,0.55),
+    0 0 64px -20px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent calc(100% - var(--bloom-halo, 0.7) * 40%));
+}
+body[data-ds-dark-theme] div[class*="_composer"] div[class*="_card"]::before {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-1, #101010), transparent 66%);
+}
+body[data-bloomglass-variant] div[class*="_composer"] div[class*="_card"]:focus-within {
+  border-color: var(--bloom-hairline-strong);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    0 1px 2px -1px rgba(0, 0, 0, 0.18),
+    0 0 0 2px color-mix(in oklch, var(--bloom-accent) 25%, transparent),
+    0 18px 52px -20px rgba(0,0,0,0.26),
+    0 0 56px -16px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 74%);
+}
+body[data-ds-dark-theme] div[class*="_composer"] div[class*="_card"]:focus-within {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    0 1px 2px -1px rgba(0, 0, 0, 0.5),
+    0 0 0 2px color-mix(in oklch, var(--bloom-accent) 28%, transparent),
+    0 20px 56px -22px rgba(0,0,0,0.55),
+    0 0 72px -20px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 68%);
+}
+
+/* ═══ 消息气泡 —— 柔和玻璃，近距淡影，不压内容 ═══
+   ⚠️ 必须限定 div（2026-09-14 用户实拍「浅色下提示看不清」）：
+   DSH 的全局 Tooltip 与消息气泡共用「_bubble」语义类名（_bubble_1nw3t_1，span）。
+   裸 [class*="_bubble"] 会把 tooltip 的深底 var(--dsw-alias-tooltip-bg) 盖成
+   22% 透明度的近白玻璃，而 tooltip 文字是 static 白（--dsw-static-neutral-bluish-00）
+   —— 白字白底，实测对比度 1.0。消息气泡是 div、tooltip 是 span，限定标签即分开；
+   tooltip 的底色由 tokens.ts 接管的 --dsw-alias-tooltip-bg（深底）自动跟随主题。 */
+body[data-bloomglass-variant] div[class*="_bubble"] {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-1, #fff), transparent 78%);
+  backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.25);
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.25);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.16),
+    inset 0 0 0 1px rgba(255,255,255,0.08),
+    0 6px 24px -10px rgba(0,0,0,0.14);
+}
+body[data-ds-dark-theme] div[class*="_bubble"] {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-1, #101010), transparent 62%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 0 0 1px rgba(255,255,255,0.04),
+    0 8px 28px -12px rgba(0,0,0,0.4);
+}
+
+/* ═══ 下拉/选择器（覆盖型）—— blur 在这里真正可见 ═══ */
+/* v0.6.0 patch: 暗色版从 transparent 52% → 12%（48% → 88% 不透明）。
+   v0.6.0 早期设到 22%（78% 不透明）已被 verify 证伪：青金/冷色调 + 亮色聊天内容
+   透字仍明显（用户截图「字竖排的 layout bug」整段透出）。现在跟 Bloom 自己的
+   下拉（transparent 12%）一致。*/
+body[data-bloomglass-variant] [class*="_menu"],
+body[data-bloomglass-variant] [class*="_selector"] {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-2, #fff), transparent 20%);
+  backdrop-filter: blur(28px) saturate(1.4);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 0 0 1px rgba(255,255,255,0.12),
+    0 20px 56px -18px rgba(0,0,0,0.3);
+}
+body[data-ds-dark-theme] [class*="_menu"],
+body[data-ds-dark-theme] [class*="_selector"] {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-2, #101010), transparent 12%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    inset 0 0 0 1px rgba(255,255,255,0.05),
+    0 24px 64px -20px rgba(0,0,0,0.6);
+}
+
+/* ═══ 设置面板：无需任何覆盖 ═══
+   这里曾经有 60 行把「279px 窄 drawer」改造成居中 modal 的 CSS，前后改了三轮
+   （v0.6.0 修 → v0.6.1 以「不覆盖 DSH 原生 layout」回滚并记为「去官方提 issue」
+   → 又改回来）。三轮都白做，因为**前提是错的**：
+
+   实测（2026-08-24，摘掉 Bloom 样式后量的）DSH 原生设置面板本来就是
+   800×800 的居中 modal，x=464=(1728-800)/2 精确居中，中文描述 383~398px 正常横排。
+   **DSH 没有这个 bug。** 那个「窄 drawer + 中文逐字竖排」是 Bloom 自己造成的回归 ——
+   见上方 _sidebarCol 的 ::before 注释：侧栏的 backdrop-filter 把设置面板 overlay
+   的 fixed containing block 从视口换成了 280px 的侧栏。
+
+   修根因（玻璃移到伪元素）之后，**布局上**这里一行 CSS 都不需要。
+
+   ── 唯一的例外是下面这条，它改的是颜色而不是布局 ── */
+
+/* DSH 拿**前景色 token 当边框色**用的地方（第二例）。设置面板 Agent 预设的
+   选中卡片写的是 border-color: var(--dsw-alias-label-primary) —— 那是正文文字色，
+   Bloom 在暗色下给它 oklch(0.96 …) 近白，于是选中卡围了一圈刺眼白边。
+   选中态本该是主题色。hover 态同样拿 label-dimmed 当边框，一并换成发丝线。 */
+body[data-bloomglass-variant] [class*="_cardActive"] {
+  border-color: var(--bloom-accent);
+}
+body[data-bloomglass-variant] [class*="_card"]:hover:not([class*="_cardActive"]) {
+  border-color: var(--bloom-hairline-strong);
+}
+
+/* 「浅色 / 深色 / 跟随系统」选中态的边框：DSH 用 --dsw-static-neutral-bluish-400
+   （#adb2b8）画它。那是 static 层的中性灰阶 —— 绕过了 alias 层，主题的
+   --dsw-alias-border-* 改不到它，于是在莫兰迪暗底上留下一圈刺眼的灰白边
+   （用户实拍反馈「白色边框很突兀」，而且只有选中那一个特别亮）。
+
+   选中态本该是主题色，这里按 accent 接管。并且**不**整体覆盖
+   --dsw-static-neutral-bluish-400 —— static 是 DSH 的基础色阶，全局改会波及
+   大量无关组件；只在这个具体组件上纠正，影响面可控。 */
+body[data-bloomglass-variant] button[class*="_themeCube"][class*="_selected"] {
+  border-color: var(--bloom-accent);
+}
+
+body[data-bloomglass-variant] .md-code-block,
+body[data-bloomglass-variant] [class*="_tableScroll"] {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-1, #fff), transparent 70%);
+  backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.2);
+}
+body[data-ds-dark-theme] .md-code-block,
+body[data-ds-dark-theme] [class*="_tableScroll"] {
+  background-color: color-mix(in oklch, var(--dsw-alias-bg-layer-1, #101010), transparent 56%);
+}
+body[data-bloomglass-variant] .md-code-block pre,
+body[data-bloomglass-variant] .md-code-block code { background: transparent; }
+
+/* ═══ 表格内部分隔线加强（v0.9.0）用户截图反馈列线几乎不可见 ═══
+   原 CSS 用 var(--bloom-hairline)（莫兰迪 30% alpha）做列分隔，
+   在深色氛围渐变上几乎消失，看起来像没线的「列表」。提到
+   hairline-strong（55% alpha）并给 thead 加一档淡底，列与行都立起来。 */
+body[data-bloomglass-variant] [class*="_tableScroll"] th,
+body[data-bloomglass-variant] [class*="_tableScroll"] td {
+  border-color: var(--bloom-hairline-strong);
+}
+[class*="_tableScroll"] thead th {
+  background: rgba(var(--bloom-morandi), 0.10);
+}
+body[data-ds-dark-theme] [class*="_tableScroll"] thead th {
+  background: rgba(var(--bloom-morandi), 0.08);
+}
+[class*="_tableScroll"] tbody tr:nth-child(even) td {
+  background: rgba(var(--bloom-morandi), 0.03);
+}
+body[data-ds-dark-theme] [class*="_tableScroll"] tbody tr:nth-child(even) td {
+  background: rgba(var(--bloom-morandi), 0.04);
+}
+`
