@@ -1,14 +1,8 @@
 MIT License
 
 Copyright (c) 2026 dsh-bloomglass contributors
-
-This package merges two MIT-licensed upstream projects. Portions are derived
-from, and remain under the copyright of, their original authors:
-
-  dsh-bloom-theme    Copyright (c) 2026 webkubor
-                     https://github.com/webkubor/dsh-bloom-theme
-  dsh-frosted-window Copyright (c) 2026 SenryLee
-                     https://github.com/SenryLee/dsh-frosted-window
+Copyright (c) 2026 webkubor
+Copyright (c) 2026 SenryLee
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
