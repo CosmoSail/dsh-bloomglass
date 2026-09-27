@@ -1,9 +1,17 @@
 {
   "name": "dsh-bloomglass",
   "version": "0.1.0",
-  "description": "Bloom Glass — 把 Bloom 的 10 套 OKLCH 莫兰迪色板与磨砂壁纸玻璃整合为一个 DeepSeek Harness Web 主题插件。官方 Light / Dark / System 仍然掌权。",
+  "description": "A DeepSeek Harness Web theme: ten OKLCH Morandi palettes that adapt to light and dark, plus an optional uploaded wallpaper rendered behind frosted glass panels. / 十套 OKLCH 莫兰迪配色，明暗自适应；可选上传壁纸铺满窗口、界面以磨砂玻璃叠上去。",
   "author": "dsh-bloomglass contributors",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CosmoSail/dsh-bloomglass.git"
+  },
+  "homepage": "https://github.com/CosmoSail/dsh-bloomglass#readme",
+  "bugs": {
+    "url": "https://github.com/CosmoSail/dsh-bloomglass/issues"
+  },
   "type": "module",
   "main": "lib/index.js",
   "exports": {
