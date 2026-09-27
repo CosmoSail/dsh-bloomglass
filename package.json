@@ -27,7 +27,7 @@
   "scripts": {
     "build": "tsdown",
     "bundle": "tsdown",
-    "prepare": "tsdown",
+    "prepack": "tsdown",
     "typecheck": "tsc --noEmit",
     "showcase": "node scripts/generate-wallpaper.mjs && node scripts/generate-showcase.mjs",
     "test": "vitest run",
