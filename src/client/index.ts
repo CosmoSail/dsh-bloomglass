@@ -21,7 +21,7 @@ import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-client-ui-theme/client'
 import { BODY_ATTR, LOCALE_NS, PACKAGE_ID, VARIANT_ATTR } from './constants.ts'
-import { SETTINGS_CSS } from './glass-css.ts'
+import { SETTINGS_CSS, SURFACE_CSS } from './glass-css.ts'
 import { COMPONENT_CSS } from './css/bloom-component.ts'
 import { GLASS_CSS as BLOOM_GLASS_CSS } from './css/bloom-glass.ts'
 import { PALETTE_CSS } from './css/palette-css.ts'
@@ -110,7 +110,7 @@ export function apply(ctx: ClientCtx): void {
    * settings-panel styles. Removing this one node removes the whole theme.
    */
   const ownCss = (variant: Variant): string =>
-    [bloomOwnVarsCss(variant, VARIANT_ATTR), COMPONENT_CSS, BLOOM_GLASS_CSS, SETTINGS_CSS, PALETTE_CSS].join('\n')
+    [bloomOwnVarsCss(variant, VARIANT_ATTR), COMPONENT_CSS, BLOOM_GLASS_CSS, SURFACE_CSS, SETTINGS_CSS, PALETTE_CSS].join('\n')
 
   const mountChrome = (): void => {
     if (styleEl !== undefined && styleEl.isConnected) return

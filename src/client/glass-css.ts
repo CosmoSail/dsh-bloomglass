@@ -1,14 +1,16 @@
 /**
  * Two independently gated stylesheets.
  *
- * GLASS_CSS is the frosted chrome: the wallpaper plate, the dim veil, and the
- * per-column glass. It is gated on FROST_ATTR, which exists only while a
- * wallpaper is actually painted — so retracting the frost leaves the palette
- * theme itself untouched.
+ * GLASS_CSS is the frosted chrome: the wallpaper plate, the dim veil, the
+ * per-column glass, the right sidebar column, and the settings modal. The
+ * per-column part is gated on FROST_ATTR, which exists only while a wallpaper
+ * is actually painted — so retracting the frost leaves the palette theme itself
+ * untouched. The modal and right-sidebar rules are gated on BODY_ATTR, because
+ * both are asked for whenever the theme is installed, not only over a wallpaper.
  *
  * SETTINGS_CSS styles the settings panel and is injected once per activate.
  */
-import { FROST_ATTR } from './constants.ts'
+import { BODY_ATTR, FROST_ATTR } from './constants.ts'
 
 /**
  * Scoped glass stylesheet. Every rule hangs off the plugin body attribute so
@@ -103,6 +105,92 @@ body[${FROST_ATTR}] *:has(> [data-slot='details'])::before {
   body[${FROST_ATTR}] *:has(> [data-slot='sidebar'])::before,
   body[${FROST_ATTR}] *:has(> [data-slot='conversation'])::before,
   body[${FROST_ATTR}] *:has(> [data-slot='details'])::before {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}`.trim()
+
+/**
+ * Surfaces that are frosted whenever the theme is installed, not only while a
+ * wallpaper is painted — so unlike GLASS_CSS this sheet rides the always-on
+ * style tag. Both rules are keyed on stable DSH attributes rather than hashed
+ * CSS-module class names.
+ */
+export const SURFACE_CSS = `
+/*
+ * Right sidebar column. DSH ships it opaque — the ui-layout rule is
+ * '.rightbarCol { background: var(--dsw-alias-bg-base) }' — so it stayed a
+ * solid slab while the other columns frosted. Plate it the same way: make the
+ * column itself transparent and paint the frost on ::before, so the column
+ * never becomes a containing block for position:fixed descendants (the trap
+ * documented for the sidebar in GLASS_CSS).
+ *
+ * 'data-rightbar-col' is what RightbarColumn actually renders. With no
+ * wallpaper behind it the plate resolves to the same colour as the column it
+ * replaced, so this is a no-op until there is something to frost.
+ */
+body[${BODY_ATTR}] [data-rightbar-col] {
+  background-color: transparent !important;
+}
+body[${BODY_ATTR}] [data-rightbar-col]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--dsw-alias-bg-layer-1);
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
+  backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
+}
+
+/*
+ * Fullscreen. The panel leaves the column's grid track and covers the viewport,
+ * while the column itself keeps its docked width — ui-layout only flips
+ * layoutInfo.rightbarFullscreen, it never recomputes cols. A plate sized to the
+ * column therefore showed as a narrow strip down the right edge, with the
+ * fullscreen content left unfrosted.
+ *
+ * data-rightbar-fullscreen is rendered on the frame, an ancestor of the column,
+ * and is present only while fullscreen is on. Fixed positioning resolves
+ * against the viewport because nothing between the column and the root creates
+ * a containing block: the backdrop-filter lives on the pseudo-element, never on
+ * the column itself.
+ *
+ * z-index must leave -1 here. The docked -1 works because the columns sit side
+ * by side, but a viewport-wide fixed layer at -1 drops behind every in-flow
+ * block background in the root stacking context, so the centre column painted
+ * over it and the fullscreen panel had no plate of its own — its content read
+ * as overlapping the conversation. 0 lifts it above the centre column (which
+ * precedes it in DOM order) while the panel's own content, later in the
+ * column's subtree, still paints on top of the plate.
+ */
+body[${BODY_ATTR}] [data-rightbar-fullscreen] [data-rightbar-col]::before {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+/*
+ * Settings modal. Only the card is frosted — the backdrop keeps whatever the
+ * app gives it.
+ *
+ * DSH's Modal primitive blurs the backdrop with
+ * 'backdrop-filter: var(--dsw-mask-blur)' and ships that variable as 'none', so
+ * the mask is deliberately left alone: overriding it would frost the whole
+ * viewport, which is not what this theme is asked for. The card, an opaque
+ * '--dsw-alias-bg-layer-2', is the surface that becomes glass.
+ *
+ * The card is targeted by role="dialog" + aria-modal — the attributes the
+ * primitive itself sets — rather than a hashed CSS-module class name.
+ */
+body[${BODY_ATTR}] [role='dialog'][aria-modal='true'] {
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
+  backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  body[${BODY_ATTR}] [data-rightbar-col]::before,
+  body[${BODY_ATTR}] [role='dialog'][aria-modal='true'] {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }

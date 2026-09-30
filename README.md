@@ -20,6 +20,7 @@
 
 - **10 套配色**：黛蓝 / 朱砂 / 桃夭 / 天青 / 竹青 / 赭石 / 青金 / 琥珀 / 落霞 / 青莲，明暗自适应
 - **壁纸 + 磨砂**：本地 JPEG / PNG / WebP / GIF，无大小限制
+- **磨砂范围**：左侧栏、会话区、右侧栏（含全屏展开）与设置弹窗
 - **一个独立设置栏**：设置 → Bloom Glass，含配色选择 + 玻璃浓度 / 模糊 / 饱和 / 压暗滑杆 + 保存 / 删除，不往「通用」页插行
 - 壁纸关闭时是纯配色模式；打开后表面色按玻璃浓度转为半透明（文字与边框始终不透明）
 - 只走官方 `overrideTokens` 覆盖层，从不 `setTheme('custom')`；不写 `settings.yaml`，不请求任何远程 URL
@@ -31,6 +32,10 @@
 `dsh web` 需已在运行。
 
 ```sh
+# 从 npm 安装
+dsh plugin --profile web add dsh-bloomglass
+
+# 或直接从仓库安装
 dsh plugin --profile web add github:CosmoSail/dsh-bloomglass
 ```
 
@@ -44,7 +49,7 @@ dsh plugin --profile web add github:CosmoSail/dsh-bloomglass
 git clone https://github.com/CosmoSail/dsh-bloomglass.git
 cd dsh-bloomglass
 npm install
-npm test         # vitest，56 个用例
+npm test         # vitest，61 个用例
 npm run typecheck
 npm run build    # tsdown → lib/index.js + lib/client.js
 npm run showcase # 重新生成 docs/showcase 下的演示页

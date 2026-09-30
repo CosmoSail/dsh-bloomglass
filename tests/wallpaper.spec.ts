@@ -1,7 +1,7 @@
 import { describe, expect, it, afterEach } from 'vitest'
 import { BODY_ATTR, FROST_ATTR, PACKAGE_ID } from '../src/client/constants.ts'
 import { DEFAULT_KNOBS } from '../src/client/knobs.ts'
-import { GLASS_CSS, SETTINGS_CSS } from '../src/client/glass-css.ts'
+import { GLASS_CSS, SETTINGS_CSS, SURFACE_CSS } from '../src/client/glass-css.ts'
 import { FrostedPresenter } from '../src/client/wallpaper.ts'
 
 describe('FrostedPresenter', () => {
@@ -54,15 +54,72 @@ describe('FrostedPresenter', () => {
     presenter.dispose()
   })
 
-  it('frosts every column via ::before and never filters the settings dialog', () => {
+  it('frosts every column via ::before', () => {
     expect(GLASS_CSS).toMatch(/\*:has\(> \[data-slot='sidebar'\]\)::before/)
     expect(GLASS_CSS).toMatch(/\*:has\(> \[data-slot='conversation'\]\)::before/)
     expect(GLASS_CSS).toMatch(/\*:has\(> \[data-slot='details'\]\)::before/)
     expect(GLASS_CSS).toContain('border-right: none !important')
-    expect(GLASS_CSS).not.toMatch(/\[role='dialog'\]/)
     expect(GLASS_CSS).not.toMatch(/sidebar\.settings/)
     const sidebarSelf = /\[data-slot='sidebar'\]\s*\{[^}]*backdrop-filter/
     expect(GLASS_CSS).not.toMatch(sidebarSelf)
+  })
+
+  it('frosts the right sidebar column', () => {
+    // ui-layout ships the column opaque — its rule is '.rightbarCol {
+    // background: var(--dsw-alias-bg-base) }' — so it needs the same plate
+    // treatment as the other columns, keyed on the attribute RightbarColumn
+    // actually renders.
+    expect(SURFACE_CSS).toMatch(/\[data-rightbar-col\]\s*\{[^}]*background-color:\s*transparent/)
+    const plate = /\[data-rightbar-col\]::before\s*\{([^}]*)\}/
+    expect(SURFACE_CSS).toMatch(plate)
+    const body = plate.exec(SURFACE_CSS)?.[1] ?? ''
+    expect(body).toContain('backdrop-filter')
+    // The frost stays on the pseudo-element: a filter on the column itself would
+    // make it a containing block for position:fixed descendants.
+    expect(body).toContain('position: absolute')
+  })
+
+  it('moves the right sidebar plate to the viewport when fullscreen', () => {
+    // In fullscreen the panel covers the viewport while the column keeps its
+    // docked width — ui-layout only flips layoutInfo.rightbarFullscreen and
+    // never recomputes cols — so an inset:0 plate on the column showed as a
+    // narrow strip down the right edge. The plate switches to the viewport box.
+    const rule = /\[data-rightbar-fullscreen\]\s+\[data-rightbar-col\]::before\s*\{([^}]*)\}/
+    expect(SURFACE_CSS).toMatch(rule)
+    const body = rule.exec(SURFACE_CSS)?.[1] ?? ''
+    expect(body).toContain('position: fixed')
+    expect(body).toContain('inset: 0')
+    // -1 must not come back: a viewport-wide fixed layer at -1 drops behind
+    // every in-flow block background in the root stacking context, so the centre
+    // column painted over it and the fullscreen panel lost its own plate — its
+    // content then read as overlapping the conversation.
+    expect(body).toMatch(/z-index:\s*0/)
+    expect(body).not.toMatch(/z-index:\s*-/)
+  })
+
+  it('frosts the settings card only, never the backdrop', () => {
+    // The card is targeted by the attributes the Modal primitive sets, not a
+    // hashed CSS-module class name.
+    expect(SURFACE_CSS).toMatch(/\[role='dialog'\]\[aria-modal='true'\]\s*\{[^}]*backdrop-filter/)
+    // The mask must be left alone: DSH blurs it with --dsw-mask-blur (shipped as
+    // 'none'), and overriding that frosts the whole viewport instead of just the
+    // card. Only the card should become glass.
+    expect(SURFACE_CSS).not.toMatch(/--dsw-mask-blur\s*:/)
+  })
+
+  it('ships those two surfaces on the always-on sheet, not the wallpaper one', () => {
+    // GLASS_CSS only exists while a wallpaper is painted; both of these are
+    // asked for whenever the theme is installed, so they must not live there.
+    expect(GLASS_CSS).not.toContain('data-rightbar-col')
+    expect(GLASS_CSS).not.toContain('--dsw-mask-blur')
+    expect(SURFACE_CSS).not.toContain('backdrop-filter: blur(var(--fw-blur)')
+  })
+
+  it('honours prefers-reduced-transparency for the new surfaces too', () => {
+    const reduced = /@media \(prefers-reduced-transparency: reduce\)\s*\{([\s\S]*)\}\s*$/
+    const block = reduced.exec(SURFACE_CSS)?.[1] ?? ''
+    expect(block).toContain('[data-rightbar-col]::before')
+    expect(block).toContain("[role='dialog'][aria-modal='true']")
   })
 
   it('keeps the wallpaper behind the palette ambience layer', () => {
