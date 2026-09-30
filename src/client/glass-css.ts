@@ -144,30 +144,35 @@ body[${BODY_ATTR}] [data-rightbar-col]::before {
 }
 
 /*
- * Fullscreen. The panel leaves the column's grid track and covers the viewport,
- * while the column itself keeps its docked width — ui-layout only flips
- * layoutInfo.rightbarFullscreen, it never recomputes cols. A plate sized to the
- * column therefore showed as a narrow strip down the right edge, with the
- * fullscreen content left unfrosted.
+ * Fullscreen. The panel wrapper DSH renders — its rule is
+ * '.panel { position: absolute; top: 0; bottom: 0; right: 0 }' — is pinned to
+ * the column's right edge and grows leftward, past the column, when fullscreen
+ * sets max-width to the viewport minus the left sidebar. So the frosted area is
+ * neither the column's track nor the whole viewport: a plate on the column
+ * showed as a narrow strip down the right edge, and a viewport-wide one covered
+ * the left sidebar.
  *
- * data-rightbar-fullscreen is rendered on the frame, an ancestor of the column,
- * and is present only while fullscreen is on. Fixed positioning resolves
- * against the viewport because nothing between the column and the root creates
- * a containing block: the backdrop-filter lives on the pseudo-element, never on
- * the column itself.
+ * data-sidebar-right-panel sits on that wrapper itself, so plating it makes the
+ * geometry follow the panel automatically in both modes — no width arithmetic
+ * and no dependency on how ui-layout computed the grid.
  *
- * z-index must leave -1 here. The docked -1 works because the columns sit side
- * by side, but a viewport-wide fixed layer at -1 drops behind every in-flow
- * block background in the root stacking context, so the centre column painted
- * over it and the fullscreen panel had no plate of its own — its content read
- * as overlapping the conversation. 0 lifts it above the centre column (which
- * precedes it in DOM order) while the panel's own content, later in the
- * column's subtree, still paints on top of the plate.
+ * The plate carries no z-index on purpose. -1 would drop it behind every
+ * in-flow block background in the root stacking context, letting the centre
+ * column paint over it; left at auto it is a positioned box later in DOM order
+ * than the centre column, so it clears that column while the panel's own
+ * content, which comes after the pseudo-element, still paints on top.
  */
 body[${BODY_ATTR}] [data-rightbar-fullscreen] [data-rightbar-col]::before {
-  position: fixed;
+  content: none;
+}
+body[${BODY_ATTR}] [data-rightbar-fullscreen] [data-sidebar-right-panel]::before {
+  content: '';
+  position: absolute;
   inset: 0;
-  z-index: 0;
+  pointer-events: none;
+  background: var(--dsw-alias-bg-layer-1);
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
+  backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
 }
 
 /*

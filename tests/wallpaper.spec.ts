@@ -79,22 +79,21 @@ describe('FrostedPresenter', () => {
     expect(body).toContain('position: absolute')
   })
 
-  it('moves the right sidebar plate to the viewport when fullscreen', () => {
-    // In fullscreen the panel covers the viewport while the column keeps its
-    // docked width — ui-layout only flips layoutInfo.rightbarFullscreen and
-    // never recomputes cols — so an inset:0 plate on the column showed as a
-    // narrow strip down the right edge. The plate switches to the viewport box.
-    const rule = /\[data-rightbar-fullscreen\]\s+\[data-rightbar-col\]::before\s*\{([^}]*)\}/
+  it('plates the fullscreen panel itself, not the column or the viewport', () => {
+    // The panel wrapper DSH renders is position:absolute pinned top/bottom/right
+    // and grows leftward in fullscreen, so its box is neither the column track
+    // nor the viewport. data-sidebar-right-panel is on that wrapper, so plating
+    // it makes the geometry follow automatically.
+    const rule = /\[data-rightbar-fullscreen\]\s+\[data-sidebar-right-panel\]::before\s*\{([^}]*)\}/
     expect(SURFACE_CSS).toMatch(rule)
     const body = rule.exec(SURFACE_CSS)?.[1] ?? ''
-    expect(body).toContain('position: fixed')
+    expect(body).toContain('position: absolute')
     expect(body).toContain('inset: 0')
-    // -1 must not come back: a viewport-wide fixed layer at -1 drops behind
-    // every in-flow block background in the root stacking context, so the centre
-    // column painted over it and the fullscreen panel lost its own plate — its
-    // content then read as overlapping the conversation.
-    expect(body).toMatch(/z-index:\s*0/)
-    expect(body).not.toMatch(/z-index:\s*-/)
+    // No z-index: -1 drops behind the centre column's in-flow backgrounds, which
+    // is what made the panel's content read as overlapping the conversation.
+    expect(body).not.toMatch(/z-index/)
+    // The column plate must step aside in fullscreen, or the two would stack.
+    expect(SURFACE_CSS).toMatch(/\[data-rightbar-fullscreen\]\s+\[data-rightbar-col\]::before\s*\{\s*content:\s*none/)
   })
 
   it('frosts the settings card only, never the backdrop', () => {

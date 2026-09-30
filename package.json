@@ -1,6 +1,6 @@
 {
   "name": "dsh-bloomglass",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A DeepSeek Harness Web theme: ten OKLCH Morandi palettes that adapt to light and dark, plus an optional uploaded wallpaper rendered behind frosted glass panels. / 十套 OKLCH 莫兰迪配色，明暗自适应；可选上传壁纸铺满窗口、界面以磨砂玻璃叠上去。",
   "author": "dsh-bloomglass contributors",
   "license": "MIT",
