@@ -209,3 +209,49 @@ export function bloomglassTokens(inputs: TokenInputs): ThemeTokenOverrides {
   const base = bloomTokenOverrides(inputs.variant)
   return inputs.frosted ? applyGlass(base, inputs.glassOpacity) : base
 }
+
+/**
+ * Tokens a second plugin also writes through the official override layer.
+ *
+ * `ds-bot` (the Bot team UI) registers its own layer with exactly these six
+ * names — its `shellTokens()` keeps the Bot shell in step with its own
+ * Appearance theme. The runtime keeps one layer per source and lets the later
+ * seq win per token, so a plugin that registers after us takes these six and
+ * the Bot UI drifts back to its own palette while the rest of the window stays
+ * on ours. The theme re-stacks when one of them is gone, and only then: every
+ * other token it writes is uncontested, and re-registering to defend those
+ * would evict whatever a different plugin legitimately put there.
+ */
+export const SHARED_LAYER_TOKENS = [
+  '--dsw-alias-bg-base',
+  '--dsw-specific-sidebar-fill',
+  '--dsw-specific-input-major',
+  '--dsw-alias-label-primary',
+  '--dsw-alias-label-secondary',
+  '--dsw-alias-label-tertiary',
+] as const
+
+/**
+ * Which shared tokens the composed snapshot currently gives to someone else.
+ *
+ * Reads the snapshot the runtime has already composed — the same object whose
+ * tokens the presenter writes onto the document — so this needs no DOM read,
+ * no timer, and no guessing about which stylesheet won: a value that is not
+ * ours is proof that a later layer took the token.
+ * @param composed - `getTheme().active.tokens`, already resolved for the active scheme.
+ * @param inputs - the inputs our own layer was built from.
+ * @param scheme - the active colour scheme.
+ */
+export function stolenSharedTokens(
+  composed: Record<string, string> | undefined,
+  inputs: TokenInputs,
+  scheme: 'light' | 'dark',
+): string[] {
+  if (composed === undefined) return []
+  const ours = bloomglassTokens(inputs)
+  return SHARED_LAYER_TOKENS.filter((name) => {
+    const want = ours[name]?.[scheme]
+    const have = composed[name]
+    return want !== undefined && typeof have === 'string' && have !== want
+  })
+}

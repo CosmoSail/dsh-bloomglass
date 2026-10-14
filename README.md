@@ -20,6 +20,7 @@
 
 - **10 套配色**：黛蓝 / 朱砂 / 桃夭 / 天青 / 竹青 / 赭石 / 青金 / 琥珀 / 落霞 / 青莲，明暗自适应
 - **DS Bot（Bot 团队）适配**：Bot 侧栏与分组、对话气泡、输入卡片、详情面板、菜单与对话框都跟随当前配色；铺了壁纸时，浮在壁纸上的面板 / 菜单 / 对话框按玻璃层级转半透明并加背景模糊
+- **token 优先权**：ds-bot 也写的 6 个 DSH token，本主题会在它注册之后重新压回自己的值，整窗只留一套配色
 - **壁纸 + 磨砂**：本地 JPEG / PNG / WebP / GIF，无大小限制
 - **磨砂范围**：左侧栏、会话区、右侧栏（含全屏展开）、设置弹窗，以及 DS Bot 的固定面板与弹层
 - **一个独立设置栏**：设置 → Bloom Glass，含配色选择 + 玻璃浓度 / 模糊 / 饱和 / 压暗滑杆 + 保存 / 删除，不往「通用」页插行
@@ -32,7 +33,7 @@
 
 Bot 团队界面由 `ds-bot` 插件渲染，它不读 DSH 的 `--dsw-*` token，而是用自己的 `--bt-*` 变量上色，并写在 `html body` / `html body[data-ds-dark-theme]` 上（挂载时注入，比本插件的样式标签更晚）。本插件把 `--bt-*` 接到同一批 DSH token（用带两个属性选择器的选择器压过它，否则它的后注入样式会赢），所以 Bot 侧栏与分组、气泡、卡片、输入卡片、面板、菜单与对话框都直接跟当前配色和明暗走。铺了壁纸时，`.bt-panel` / `.bt-pane` 在 `::before` 上补玻璃底板（面板自身不加 `backdrop-filter`，否则里面 `position: fixed` 的菜单会改定位基准），菜单与对话框分别取 menu / overlay 两个玻璃角色，DSH 输入卡片交回主题自己的玻璃底板。
 
-ds-bot 自带「设置 → 外观 → 主题 / 强调色」，它同样写 `--bt-*`；装了本主题后，Bot 界面的配色以本主题为准。它另外通过自己的覆盖层写 6 个 DSH token（`--dsw-alias-bg-base`、`--dsw-specific-sidebar-fill`、`--dsw-specific-input-major`、`--dsw-alias-label-primary/secondary/tertiary`），与本主题的覆盖层重叠 —— 两者谁后注册谁生效，这一处按现状保留。
+ds-bot 自带「设置 → 外观 → 主题 / 强调色」，它同样写 `--bt-*`；装了本主题后，Bot 界面的配色以本主题为准，那两项设置对 Bot 界面不再生效。它另外通过自己的覆盖层写 6 个 DSH token（`--dsw-alias-bg-base`、`--dsw-specific-sidebar-fill`、`--dsw-specific-input-major`、`--dsw-alias-label-primary/secondary/tertiary`），而覆盖层是「后注册的层赢」——ds-bot 在自己的挂载时刻注册，晚于本主题，这 6 个就会被它拿走。本主题因此在每次 `theme/change` 里读一次已经合成的 token 快照：只要这 6 个里有任何一个不再是自己写的值，就重新压回自己的层。判断走快照而不是 DOM、不轮询、只在真的被拿走时才动手，也不碰这 6 个以外的任何 token（别的插件写的其它 token 照旧归它们）。
 
 ## 安装
 

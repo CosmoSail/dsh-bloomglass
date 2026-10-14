@@ -33,14 +33,14 @@ import { en, zh, type BloomglassKey } from './locales.ts'
 import type { Variant } from './palette.ts'
 import { SettingsSection, type SettingsSectionInjected } from './SettingsSection.tsx'
 import { createBloomglassStore, type BloomglassState } from './store.ts'
-import { bloomOwnVarsCss, bloomglassTokens, type ThemeTokenOverrides } from './tokens.ts'
+import { bloomOwnVarsCss, bloomglassTokens, stolenSharedTokens, type ThemeTokenOverrides, type TokenInputs } from './tokens.ts'
 import { FrostedPresenter, type ColorScheme } from './wallpaper.ts'
 
 export const name = PACKAGE_ID
 export const inject = ['slots', 'locale', 'theme']
 
 interface ThemeFace {
-  getTheme?: () => { active?: { colorScheme?: string } } | undefined
+  getTheme?: () => { active?: { colorScheme?: string; tokens?: Record<string, string> } } | undefined
   overrideTokens?: (source: string, tokens: ThemeTokenOverrides) => unknown
 }
 
@@ -144,16 +144,49 @@ export function apply(ctx: ClientCtx): void {
 
   /* ── token layer ─────────────────────────────────────────────────────── */
 
+  /** Everything the token pipeline needs, read at the moment it is asked. */
+  const tokenInputs = (): TokenInputs => ({
+    variant: knobs.variant,
+    glassOpacity: knobs.glassOpacity,
+    frosted: frostLive(),
+  })
+
+  /**
+   * True while `stackTokens` is running. Registering publishes `theme/change`
+   * synchronously, and disposing the old layer publishes again, so without this
+   * the theme/change handler below would re-enter through our own writes.
+   */
+  let stacking = false
+
   const stackTokens = (): void => {
-    if (typeof disposeTokens === 'function') disposeTokens()
-    disposeTokens = undefined
-    if (disposed || typeof ctx.theme.overrideTokens !== 'function') return
-    const retract: unknown = ctx.theme.overrideTokens(PACKAGE_ID, bloomglassTokens({
-      variant: knobs.variant,
-      glassOpacity: knobs.glassOpacity,
-      frosted: frostLive(),
-    }))
-    disposeTokens = typeof retract === 'function' ? (retract as () => void) : undefined
+    if (stacking) return
+    stacking = true
+    try {
+      if (typeof disposeTokens === 'function') disposeTokens()
+      disposeTokens = undefined
+      if (disposed || typeof ctx.theme.overrideTokens !== 'function') return
+      const retract: unknown = ctx.theme.overrideTokens(PACKAGE_ID, bloomglassTokens(tokenInputs()))
+      disposeTokens = typeof retract === 'function' ? (retract as () => void) : undefined
+    } finally {
+      stacking = false
+    }
+  }
+
+  /**
+   * Take back the tokens we share with another plugin's layer.
+   *
+   * The runtime stacks layers by registration order — later seq wins per token —
+   * and `ds-bot` registers its own layer at mount and again whenever its
+   * Appearance settings change, i.e. after ours, which would hand the Bot shell
+   * its own greys. The composed snapshot says which of the shared tokens is
+   * currently someone else's, so this re-stacks exactly when we lost one:
+   * no timers, no DOM reads, and no fight over the tokens nobody contests.
+   */
+  const defendSharedTokens = (): void => {
+    if (disposed) return
+    const composed = ctx.theme.getTheme?.()?.active?.tokens
+    if (stolenSharedTokens(composed, tokenInputs(), schemeOf()).length === 0) return
+    stackTokens()
   }
 
   /* ── projection ──────────────────────────────────────────────────────── */
@@ -295,7 +328,12 @@ export function apply(ctx: ClientCtx): void {
     // Stack the palette synchronously: waiting for IndexedDB to answer would
     // flash the official theme before the first paint.
     project(true)
-    const off = ctx.on('theme/change', () => { projectChrome() })
+    const off = ctx.on('theme/change', () => {
+      projectChrome()
+      // Another plugin may have re-registered its layer above ours in the same
+      // change that woke us (ds-bot does); take the shared tokens back.
+      defendSharedTokens()
+    })
     void images.get().then((record) => {
       if (disposed || mutation !== boot) return
       if (record !== undefined) adoptRecord(record, false)
