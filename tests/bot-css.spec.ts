@@ -12,8 +12,20 @@ describe('BOT_CSS — the ds-bot palette bridge', () => {
     expect(mapped.length).toBeGreaterThan(0)
     for (const [, name, value] of mapped) {
       expect(value.trim(), `${name} must resolve through the theme's token layer`)
-        .toMatch(/^var\(--dsw-/)
+        .toMatch(/var\(--dsw-/)
+      expect(value.trim(), `${name} must not be a literal colour`)
+        .not.toMatch(/^#[0-9a-f]{3,8}\b/i)
     }
+  })
+
+  it('builds a covering plate for surfaces that sit on top of a conversation', () => {
+    // The details panel and the exchange sheet cover the chat instead of sitting
+    // beside it, so their plate cannot be a share of the density knob.
+    expect(BOT_CSS).toMatch(/--bt-glass-cover:\s*color-mix\(in oklab, var\(--dsw-alias-bg-overlay\), var\(--bloom-surface-solid, var\(--dsw-alias-bg-layer-1\)\)/)
+    expect(BOT_GLASS_CSS).toMatch(/:is\(\.bt-panel, \.bt-pane\)::before\s*\{[^}]*background-color:\s*var\(--bt-glass-cover\)/)
+    // The exchange footer and the fade above it scroll over their own log.
+    expect(BOT_GLASS_CSS).toMatch(/\.bt-exchange \.bt-dialog-foot\s*\{[^}]*background-color:\s*var\(--bt-glass-cover\)/)
+    expect(BOT_GLASS_CSS).toMatch(/\.bt-exchange \.bt-dialog-foot::before\s*\{[^}]*linear-gradient\(to top, var\(--bt-glass-cover\), transparent\)/)
   })
 
   it('covers the roles ds-bot actually paints with', () => {
@@ -88,7 +100,7 @@ describe('BOT_GLASS_CSS — frost over the Bot UI', () => {
     expect(body).toContain('position: absolute')
     expect(body).toContain('inset: 0')
     expect(body).toContain('backdrop-filter')
-    expect(body).toContain('var(--dsw-alias-bg-layer-1)')
+    expect(body).toContain('background-color: var(--bt-glass-cover)')
   })
 
   it('hands the DSH composer card back to the theme plate', () => {

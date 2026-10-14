@@ -31,7 +31,15 @@
 
 ### DS Bot（Bot 团队）界面
 
-Bot 团队界面由 `ds-bot` 插件渲染，它不读 DSH 的 `--dsw-*` token，而是用自己的 `--bt-*` 变量上色，并写在 `html body` / `html body[data-ds-dark-theme]` 上（挂载时注入，比本插件的样式标签更晚）。本插件把 `--bt-*` 接到同一批 DSH token（用带两个属性选择器的选择器压过它，否则它的后注入样式会赢），所以 Bot 侧栏与分组、气泡、卡片、输入卡片、面板、菜单与对话框都直接跟当前配色和明暗走。铺了壁纸时，`.bt-panel` / `.bt-pane` 在 `::before` 上补玻璃底板（面板自身不加 `backdrop-filter`，否则里面 `position: fixed` 的菜单会改定位基准），菜单与对话框分别取 menu / overlay 两个玻璃角色，DSH 输入卡片交回主题自己的玻璃底板。
+Bot 团队界面由 `ds-bot` 插件渲染，它不读 DSH 的 `--dsw-*` token，而是用自己的 `--bt-*` 变量上色，并写在 `html body` / `html body[data-ds-dark-theme]` 上（挂载时注入，比本插件的样式标签更晚）。本插件把 `--bt-*` 接到同一批 DSH token（用带两个属性选择器的选择器压过它，否则它的后注入样式会赢），所以 Bot 侧栏与分组、气泡、卡片、输入卡片、面板、菜单与对话框都直接跟当前配色和明暗走。
+
+铺了壁纸时有三条规矩：
+
+- **盖在会话上的表面必须有能盖住下层的底板**。Bot↔Bot 会话层（`ExchangeDialog` 的 `.bt-pane.bt-exchange`）和 Bot 详情面板（`.bt-panel`）是 fixed 覆盖层，ds-bot 原来只给它们 `--bt-main` 一层底色；玻璃密度滑到低端时那层只有一两成不透明，下层主对话的字会透上来和它叠在一起。这两处的底板走 `--bt-glass-cover`（overlay 玻璃角色 + 调色板不透明色调混到 96%），底板照旧挂在 `::before` 上 —— 面板自身不加 `backdrop-filter`，否则里面 `position: fixed` 的菜单会改定位基准；会话层的输入栏与它上方的渐隐同样用这块底板。
+- **控件层不借用被削得最狠的角色**。`--bt-main` 被 ds-bot 用在圆图标按钮、标签指示块、开关滑块、输入框上，所以它接的是 shell 自己给浮动按钮用的 `--dsw-alias-button-floating-fill`（同浓度下比 base 厚实得多）；整块面板由上面那条规矩单独铺底。
+- **烘托环要实色**。徽标的 1.5px 烘托环和王冠描边改用 `--bloom-sidebar-solid`（调色板里未 frost 的侧栏色），否则在壁纸上会被吃掉。
+
+菜单与对话框分别取 menu / overlay 两个玻璃角色，DSH 输入卡片交回主题自己的玻璃底板。
 
 ds-bot 自带「设置 → 外观 → 主题 / 强调色」，它同样写 `--bt-*`；装了本主题后，Bot 界面的配色以本主题为准，那两项设置对 Bot 界面不再生效。它另外通过自己的覆盖层写 6 个 DSH token（`--dsw-alias-bg-base`、`--dsw-specific-sidebar-fill`、`--dsw-specific-input-major`、`--dsw-alias-label-primary/secondary/tertiary`），而覆盖层是「后注册的层赢」——ds-bot 在自己的挂载时刻注册，晚于本主题，这 6 个就会被它拿走。本主题因此在每次 `theme/change` 里读一次已经合成的 token 快照：只要这 6 个里有任何一个不再是自己写的值，就重新压回自己的层。判断走快照而不是 DOM、不轮询、只在真的被拿走时才动手，也不碰这 6 个以外的任何 token（别的插件写的其它 token 照旧归它们）。
 
