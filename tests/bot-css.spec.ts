@@ -46,6 +46,25 @@ describe('BOT_CSS — the ds-bot palette bridge', () => {
     // would repaint every avatar in the team.
     expect([...BOT_CSS.matchAll(/--bt-ink-[a-z][a-z0-9-]*\s*:/g)]).toHaveLength(0)
   })
+
+  it('keeps control fills out of the most-veiled surface role', () => {
+    // ds-bot paints round icon buttons, tab thumbs and the switch knob with
+    // --bt-main; the base surface is the most veiled token there is (a fifth of
+    // the glass density, floored at 8%), so at a low glass setting those
+    // controls all but vanish. The floating button fill is the role the shell
+    // itself uses for a control that sits on the page.
+    expect(BOT_CSS).toContain('--bt-main: var(--dsw-alias-button-floating-fill)')
+    expect(BOT_CSS).not.toContain('--bt-main: var(--dsw-alias-bg-base)')
+  })
+
+  it('draws badge rings in the palette opaque tone, not the veiled token', () => {
+    // A ring is a knockout, not a surface: veiled it erases the gap, and the
+    // crown reads as a stray star lying on the avatar.
+    expect(BOT_CSS).toMatch(/\.bt-badge:not\(\.bt-badge-main\)\s*\{[^}]*box-shadow:\s*0 0 0 1\.5px var\(--bloom-sidebar-solid/)
+    expect(BOT_CSS).toMatch(/\.bt-badge-main path\s*\{[^}]*stroke:\s*var\(--bloom-sidebar-solid/)
+    // The couple belongs to the palette sheet, so the frost sheet must not need it.
+    expect(BOT_GLASS_CSS).not.toContain('--bloom-sidebar-solid')
+  })
 })
 
 describe('BOT_GLASS_CSS — frost over the Bot UI', () => {

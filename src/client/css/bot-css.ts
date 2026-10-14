@@ -50,7 +50,14 @@ html body[${BODY_ATTR}][data-ds-dark-theme] {
   --bt-ink-3: var(--dsw-alias-label-tertiary);
   --bt-line: var(--dsw-alias-border-l1);
   --bt-line-2: var(--dsw-alias-border-l2);
-  --bt-main: var(--dsw-alias-bg-base);
+  /* ds-bot paints round icon buttons, tab thumbs, the switch knob, inputs and
+     whole panels with this one role. The base surface is the *most* veiled
+     token there is (a fifth of the glass density, floored at 8%), which at a
+     low glass setting leaves those controls all but invisible; the floating
+     button fill is the role the shell itself uses for a control that sits on
+     top of the page, and it stays legible at every density. Panels, menus and
+     dialogs are re-plated explicitly in BOT_GLASS_CSS below. */
+  --bt-main: var(--dsw-alias-button-floating-fill);
   --bt-sidebar: var(--dsw-specific-sidebar-fill);
   --bt-card: var(--dsw-alias-bg-layer-2);
   --bt-bubble: var(--dsw-specific-bubble);
@@ -67,6 +74,21 @@ html body[${BODY_ATTR}][data-ds-dark-theme] {
      translucent highlight. */
   --bt-user: var(--dsw-alias-button-primary-fill);
   --bt-user-ink: var(--dsw-alias-label-primary-foreground);
+}
+
+/* Badge rings. ds-bot draws the 1.5px gap around a sidebar badge — and the
+   outline that lifts the main Bot's crown off the avatar — in the sidebar's own
+   colour. Under frost that colour is a plate veil, which erases the gap and
+   lets the crown read as a stray star lying on the avatar, so both ride the
+   palette's opaque sidebar tone instead (published by bloomOwnVarsCss; the
+   fallback keeps the mapping honest if that var ever disappears).
+   The :not(.bt-badge-main) guard keeps the crown out of the box-shadow ring on
+   purpose: ds-bot gives that one box-shadow: none and an outlined path. */
+html body[${BODY_ATTR}] .bt-badge:not(.bt-badge-main) {
+  box-shadow: 0 0 0 1.5px var(--bloom-sidebar-solid, var(--bt-sidebar));
+}
+html body[${BODY_ATTR}] .bt-badge-main path {
+  stroke: var(--bloom-sidebar-solid, var(--bt-sidebar));
 }
 `.trim()
 

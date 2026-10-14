@@ -100,6 +100,20 @@ export function bloomOwnVarsCss(variant: unknown, attr: string): string {
   const key: Variant = isVariant(variant) ? variant : 'mist'
   const light = partition(declarations(bloomTokens(PALETTE[key], false))).own
   const dark = partition(declarations(bloomTokens(PALETTE[key], true))).own
+  // The palette's own opaque surface tones, read from the layer *before*
+  // `applyGlass()` re-expresses the surface tokens as plates. Glass is right for
+  // a plate and wrong for anything that only reads as a gap or a solid knob — a
+  // badge ring, a switch thumb — so those get the unfrosted tone instead of a
+  // nearly invisible translucent one at low glass densities.
+  const solid = bloomTokenOverrides(key)
+  const SOLID: Record<string, string> = {
+    '--bloom-surface-solid': '--dsw-alias-bg-base',
+    '--bloom-sidebar-solid': '--dsw-specific-sidebar-fill',
+  }
+  for (const [own, token] of Object.entries(SOLID)) {
+    light[own] = solid[token].light
+    dark[own] = solid[token].dark
+  }
   const render = (map: Record<string, string>): string =>
     Object.entries(map).map(([name, value]) => `${name}: ${value};`).join('')
   return [

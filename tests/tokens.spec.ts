@@ -149,4 +149,17 @@ describe('bloomOwnVarsCss', () => {
     expect(dark?.[1]).toBe(PALETTE.petal.accentD)
     expect(light?.[1]).not.toBe(dark?.[1])
   })
+
+  it('publishes opaque surface tones for the shapes that must not be veiled', () => {
+    // Glass is right for a plate and wrong for a badge ring or a switch thumb,
+    // so the palette ships its own unfrosted surface tones; they are baked
+    // values, never a --dsw- reference (the layer owns those).
+    const solid = bloomTokenOverrides('petal')
+    const sidebarLight = /--bloom-sidebar-solid:\s*([^;]+);/.exec(css)?.[1]
+    const sidebarDark = /\[data-ds-dark-theme\]\{[^}]*--bloom-sidebar-solid:\s*([^;]+);/.exec(css)?.[1]
+    expect(sidebarLight).toBe(solid['--dsw-specific-sidebar-fill'].light)
+    expect(sidebarDark).toBe(solid['--dsw-specific-sidebar-fill'].dark)
+    expect(css).toContain('--bloom-surface-solid')
+    expect(css).not.toContain('--dsw-')
+  })
 })
