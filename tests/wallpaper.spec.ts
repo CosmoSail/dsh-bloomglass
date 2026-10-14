@@ -96,6 +96,34 @@ describe('FrostedPresenter', () => {
     expect(SURFACE_CSS).toMatch(/\[data-rightbar-fullscreen\]\s+\[data-rightbar-col\]::before\s*\{\s*content:\s*none/)
   })
 
+  it('lifts the fullscreen panel above the composer, and only in fullscreen', () => {
+    // Regression: the composer ('position: sticky; z-index: 7', 9 with a trigger
+    // menu open) paints above any positioned element left at 'auto', so the
+    // input bar covered the fullscreen panel. The panel needs a number of its
+    // own, in the gap the host's ladder leaves open.
+    const rule = /\[data-rightbar-fullscreen\]\s+\[data-sidebar-right-panel\]\s*\{([^}]*)\}/
+    expect(SURFACE_CSS).toMatch(rule)
+    const lifted = Number(/z-index:\s*(-?\d+)/.exec(rule.exec(SURFACE_CSS)?.[1] ?? '')?.[1])
+
+    const composerZ = 7
+    const composerMenuZ = 9
+    const dockkitPaneZ = 10
+    const settingsBackdropZ = 1000
+    expect(lifted).toBeGreaterThan(composerZ)
+    // A tie with the composer's menu-open 9 would fall back to DOM order.
+    expect(lifted).toBeGreaterThanOrEqual(composerMenuZ)
+    expect(lifted).toBeLessThan(dockkitPaneZ)
+    expect(lifted).toBeLessThan(settingsBackdropZ)
+
+    // Only the panel in fullscreen carries it: raising the column would change
+    // how the column stacks against the centre column in the ordinary layout,
+    // and the panel's own ::before must keep reading 'auto' (see above).
+    const normalPanel = /body\[[^\]]*\]\s+\[data-rightbar-col\]\s*\{([^}]*)\}/
+    expect(normalPanel.exec(SURFACE_CSS)?.[1] ?? '').not.toMatch(/z-index/)
+    const plate = /\[data-rightbar-fullscreen\]\s+\[data-sidebar-right-panel\]::before\s*\{([^}]*)\}/
+    expect(plate.exec(SURFACE_CSS)?.[1] ?? '').not.toMatch(/z-index/)
+  })
+
   it('frosts the settings card only, never the backdrop', () => {
     // The card is targeted by the attributes the Modal primitive sets, not a
     // hashed CSS-module class name.

@@ -49,7 +49,7 @@ dsh plugin --profile web add github:CosmoSail/dsh-bloomglass
 git clone https://github.com/CosmoSail/dsh-bloomglass.git
 cd dsh-bloomglass
 npm install
-npm test         # vitest，61 个用例
+npm test         # vitest，62 个用例
 npm run typecheck
 npm run build    # tsdown → lib/index.js + lib/client.js
 npm run showcase # 重新生成 docs/showcase 下的演示页
