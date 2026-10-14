@@ -18,14 +18,14 @@ describe('BOT_CSS — the ds-bot palette bridge', () => {
     }
   })
 
-  it('builds a covering plate for surfaces that sit on top of a conversation', () => {
-    // The details panel and the exchange sheet cover the chat instead of sitting
-    // beside it, so their plate cannot be a share of the density knob.
+  it('builds a covering plate for the one strip that scrolls over text', () => {
+    // The exchange sheet's composer footer scrolls over its own transcript, so it
+    // keeps the near-solid cover recipe instead of a share of the density; every
+    // other covering surface takes the overlay glass (checked below).
     expect(BOT_CSS).toMatch(/--bt-glass-cover:\s*color-mix\(in oklab, var\(--dsw-alias-bg-overlay\), var\(--bloom-surface-solid, var\(--dsw-alias-bg-layer-1\)\)/)
-    expect(BOT_GLASS_CSS).toMatch(/:is\(\.bt-panel, \.bt-pane\)::before\s*\{[^}]*background-color:\s*var\(--bt-glass-cover\)/)
-    // The exchange footer and the fade above it scroll over their own log.
     expect(BOT_GLASS_CSS).toMatch(/\.bt-exchange \.bt-dialog-foot\s*\{[^}]*background-color:\s*var\(--bt-glass-cover\)/)
     expect(BOT_GLASS_CSS).toMatch(/\.bt-exchange \.bt-dialog-foot::before\s*\{[^}]*linear-gradient\(to top, var\(--bt-glass-cover\), transparent\)/)
+    expect(BOT_GLASS_CSS).not.toMatch(/:is\(\.bt-panel, \.bt-pane\)::before\s*\{[^}]*var\(--bt-glass-cover\)/)
   })
 
   it('covers the roles ds-bot actually paints with', () => {
@@ -100,7 +100,27 @@ describe('BOT_GLASS_CSS — frost over the Bot UI', () => {
     expect(body).toContain('position: absolute')
     expect(body).toContain('inset: 0')
     expect(body).toContain('backdrop-filter')
-    expect(body).toContain('background-color: var(--bt-glass-cover)')
+    expect(body).toContain('background-color: var(--dsw-alias-bg-overlay)')
+  })
+
+  it('runs one glass family across every covering surface', () => {
+    // Sidebar column, panels, dialogs, menus, pill, cards and the settings nav
+    // all take the overlay role: one recipe, so nothing reads as a flat slab next
+    // to something that is glass.
+    const overlay = [...BOT_GLASS_CSS.matchAll(/background-color: var\(--dsw-alias-bg-overlay\)/g)].length
+    expect(overlay).toBeGreaterThanOrEqual(3)
+    const blockAfter = (needle: string): string =>
+      new RegExp(`${needle}[\\s\\S]*?\\{([^}]*)\\}`).exec(BOT_GLASS_CSS)?.[1] ?? ''
+    expect(blockAfter(':has\\(\\.bt-side\\)')).toContain('background-color: transparent')
+    expect(blockAfter('\\.bt-rail\\)\\)::before')).toContain('var(--dsw-alias-bg-overlay)')
+    expect(blockAfter('\\.bt-settings-nav')).toContain('var(--dsw-alias-bg-overlay)')
+  })
+
+  it('blurs both directions of the conversation bubbles', () => {
+    // Bot messages keep the theme's bubble role; the user's own keeps the brand
+    // tint, thinned, with the ink left to the token layer.
+    expect(BOT_GLASS_CSS).toMatch(/\.bt-bubble\s*\{[^}]*background-color:\s*var\(--dsw-specific-bubble\)[^}]*backdrop-filter/)
+    expect(BOT_GLASS_CSS).toMatch(/\.bt-ubody[^{]*\{[^}]*color-mix\(in oklab, var\(--dsw-alias-button-primary-fill\), transparent 30%\)[^}]*backdrop-filter/)
   })
 
   it('hands the DSH composer card back to the theme plate', () => {

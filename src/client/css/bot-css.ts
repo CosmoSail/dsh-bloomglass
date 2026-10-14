@@ -74,12 +74,10 @@ html body[${BODY_ATTR}][data-ds-dark-theme] {
      translucent highlight. */
   --bt-user: var(--dsw-alias-button-primary-fill);
   --bt-user-ink: var(--dsw-alias-label-primary-foreground);
-  /* The plate for surfaces that *cover* a conversation (the details panel and
-     the Bot↔Bot exchange sheet) rather than sit beside it. The theme's glass
-     roles are a share of the density knob, and the low end of that knob leaves
-     the conversation behind legible through the surface, so two transcripts
-     overlap. This mixes the overlay role with the palette's opaque tone, which
-     puts a floor under the knob while the blur still follows it. */
+  /* The plate for the one strip that scrolls over text of its own: the exchange
+     sheet's composer footer. A share of the glass density would let the log
+     shine through it, and the footer is small enough that a near-solid tone
+     costs nothing. Covering *panels* take the dialogs' overlay glass instead. */
   --bt-glass-cover: color-mix(in oklab, var(--dsw-alias-bg-overlay), var(--bloom-surface-solid, var(--dsw-alias-bg-layer-1)) 96%);
 }
 
@@ -99,43 +97,81 @@ html body[${BODY_ATTR}] .bt-badge-main path {
 }
 `.trim()
 
-/** Surfaces that float over the wallpaper: fixed panels, popovers, dialogs. */
-const PANEL = ':is(.bt-panel, .bt-pane)'
-const POPOVER =
-  ':is(.bt-menu, .bt-drop, .bt-avedit, .bt-connect-tip, .bt-update-pop, .bt-us-pick, .bt-react-strip, .bt-pill)'
-const DIALOG = ':is(.bt-settings, .bt-mem, .bt-palette)'
+/** Panels whose subtree holds `position: fixed` nodes: the plate goes on ::before. */
+const PLATE = ':is(.bt-panel, .bt-pane)'
+/** Surfaces that carry the glass on the element itself. */
+const PANE =
+  ':is(.bt-menu, .bt-drop, .bt-avedit, .bt-connect-tip, .bt-update-pop, .bt-us-pick, .bt-react-strip, .bt-pill, .bt-settings, .bt-mem, .bt-palette, .bt-nc-card, .bt-settings-nav)'
+/** The column that hosts the Bot list (rail or full sidebar). */
+const BOT_COLUMN =
+  ":is(*:has(> [data-slot='sidebar']):has(.bt-side), *:has(> [data-slot='sidebar']):has(.bt-rail))"
+
+/** The one recipe every covering surface uses: theme overlay role + the blur knob. */
+const GLASS = `background-color: var(--dsw-alias-bg-overlay);
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
+  backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));`
+
+/** The same glass with the surface's own tint: message bubbles keep their role. */
+const tintedGlass = (fill: string): string => `background-color: ${fill};
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
+  backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));`
 
 /**
- * Frosted chrome for the Bot UI. The gate needs both body attributes — the
- * theme's, so the sheet cannot outlive it, and the frost's — and it is three
- * attribute-selectors deep, so it also outranks ds-bot's own `:hover` and
- * `[aria-pressed]` fills instead of losing a tie to whichever tag came later.
+ * One glass family for the whole Bot UI.
+ *
+ * Everything that covers the page — the Bot sidebar column, the details panel
+ * and the Bot↔Bot exchange sheet, the dialogs, the menus and popovers, the
+ * header pill, the empty-chat card and the settings dialog's own navigation —
+ * takes the same recipe: the theme's overlay role at the user's blur. Before
+ * this, each of them painted its own flat `--bt-main` fill, so at the low end of
+ * the glass knob some read as opaque slabs with no blur at all (the sidebar was
+ * hidden behind Bloom's own opaque column tint, the bubbles were solid brand).
+ *
+ * Two deliberate exceptions, both documented where they sit: the exchange
+ * sheet's composer footer, which has to hide its *own* scrolling transcript, and
+ * the message bubbles, which keep their role tint so a Bot message and the
+ * user's own message stay distinguishable.
+ *
+ * The gate needs both body attributes — the theme's, so the sheet cannot outlive
+ * it, and the frost's — and it is deep enough in attribute selectors to outrank
+ * ds-bot's own `:hover` and `[aria-pressed]` fills whatever the load order is.
  */
 export const BOT_GLASS_CSS = `
-/* Fixed side panels and the Bot↔Bot exchange sheet. These *cover* the
-   conversation instead of sitting beside it, so their plate cannot be a share of
-   the glass density: at the low end that leaves the conversation behind readable
-   through the sheet and the two transcripts overlap. The cover recipe (built in
-   BOT_CSS) keeps a floor under the knob; the blur still follows it. The plate
-   stays on ::before, and the panel itself stays filter-free for the fixed
-   descendants it hosts. */
-body[${BODY_ATTR}][${FROST_ATTR}] ${PANEL} {
+/* The Bot sidebar. Bloom's own sheet gives the column an opaque accent tint,
+   which paints *over* the frosted plate and hides its blur; under frost the
+   column hands its fill to the plate and the plate takes the family glass, so
+   the wallpaper reads through it blurred. Scoped to the column that hosts the
+   Bot UI, so the ordinary session sidebar keeps the theme's own treatment. */
+body[${BODY_ATTR}][${FROST_ATTR}] ${BOT_COLUMN} {
   background-color: transparent;
 }
-body[${BODY_ATTR}][${FROST_ATTR}] ${PANEL}::before {
+body[${BODY_ATTR}][${FROST_ATTR}] ${BOT_COLUMN}::before {
+  background-color: var(--dsw-alias-bg-overlay);
+}
+
+/* Covering panels: same glass, on ::before, so the panel itself stays
+   filter-free for the fixed descendants it hosts. */
+body[${BODY_ATTR}][${FROST_ATTR}] ${PLATE} {
+  background-color: transparent;
+}
+body[${BODY_ATTR}][${FROST_ATTR}] ${PLATE}::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-color: var(--bt-glass-cover);
-  -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
-  backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
+  ${GLASS}
 }
 
-/* The exchange sheet's composer footer scrolls over its own transcript and
-   ds-bot paints it (and the fade above it) in the flat --bt-main tone, which
-   under frost would let the log shine through the footer. */
+/* Menus, popovers, dialogs, the header pill, the empty-chat card, the settings
+   navigation: the same glass, on the element. */
+body[${BODY_ATTR}][${FROST_ATTR}] ${PANE} {
+  ${GLASS}
+}
+
+/* The exchange sheet's composer footer scrolls over its own transcript, so it
+   needs a plate that hides text rather than a share of the density. It is the
+   one surface that stays near-solid, and it is a thin strip. */
 body[${BODY_ATTR}][${FROST_ATTR}] .bt-exchange .bt-dialog-foot {
   background-color: var(--bt-glass-cover);
 }
@@ -143,40 +179,34 @@ body[${BODY_ATTR}][${FROST_ATTR}] .bt-exchange .bt-dialog-foot::before {
   background: linear-gradient(to top, var(--bt-glass-cover), transparent);
 }
 
-/* Popovers and the header pill: the menu role, one step more opaque than a
-   plate, because their text sits directly on the wallpaper's blur. */
-body[${BODY_ATTR}][${FROST_ATTR}] ${POPOVER} {
-  background-color: var(--dsw-specific-menu);
-  -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
-  backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
+/* Message bubbles: the content tier. The Bot's bubble keeps the theme's bubble
+   role (already a plate veil under frost); the user's own keeps the brand tint,
+   thinned to 70% and blurred, with the ink left opaque — measured 4.98:1 at the
+   lowest density in the dark scheme, i.e. still readable, and it no longer reads
+   as a sticker on the wallpaper. */
+body[${BODY_ATTR}][${FROST_ATTR}] .bt-bubble {
+  ${tintedGlass('var(--dsw-specific-bubble)')}
 }
-
-/* Dialogs: the overlay role, the theme's most opaque glass, so a roster, a
-   memory editor or the palette picker stays readable over a photo. */
-body[${BODY_ATTR}][${FROST_ATTR}] ${DIALOG} {
-  background-color: var(--dsw-alias-bg-overlay);
-  -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
-  backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
-}
-
-/* The settings dialog's own sidebar column, and the empty-chat composer card
-   ds-bot draws outside DSH's composer tree. */
-body[${BODY_ATTR}][${FROST_ATTR}] .bt-settings-nav,
-body[${BODY_ATTR}][${FROST_ATTR}] .bt-nc-card {
-  background-color: var(--dsw-alias-bg-layer-1);
+body[${BODY_ATTR}][${FROST_ATTR}] .bt-ubody,
+body[${BODY_ATTR}][${FROST_ATTR}] [class*="_userRow"] [class*="_bubble"],
+body[${BODY_ATTR}][${FROST_ATTR}] [data-chat-flow-kind='question-reply'] [class*="_bubble"],
+body[${BODY_ATTR}][${FROST_ATTR}] [data-chat-flow-kind='command-input'] [class*="_bubble"] {
+  ${tintedGlass('color-mix(in oklab, var(--dsw-alias-button-primary-fill), transparent 30%)')} !important
 }
 
 /* The composer is DSH's, which this theme already frosts on ::before. ds-bot
-   repaints that card with its own opaque fill and !important, so the plate
-   would never show: hand the card back to the theme's plate. */
+   repaints that card with its own fill and !important, so the plate would never
+   show: hand the card back to the theme's plate. */
 body[${BODY_ATTR}][${FROST_ATTR}] [data-composer-card] {
   background-color: transparent !important;
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  body[${BODY_ATTR}][${FROST_ATTR}] ${PANEL}::before,
-  body[${BODY_ATTR}][${FROST_ATTR}] ${POPOVER},
-  body[${BODY_ATTR}][${FROST_ATTR}] ${DIALOG} {
+  body[${BODY_ATTR}][${FROST_ATTR}] ${BOT_COLUMN}::before,
+  body[${BODY_ATTR}][${FROST_ATTR}] ${PLATE}::before,
+  body[${BODY_ATTR}][${FROST_ATTR}] ${PANE},
+  body[${BODY_ATTR}][${FROST_ATTR}] .bt-bubble,
+  body[${BODY_ATTR}][${FROST_ATTR}] .bt-ubody {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
