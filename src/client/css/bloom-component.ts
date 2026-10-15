@@ -594,6 +594,27 @@ div[class*="_composer"] div[class*="_card"]:hover {
   outline-offset: 2px;
 }
 
+/* ═══ 输入类元素把这圈环让出去（2026-10-15 用户反馈） ═══
+   现象：光标点进输入栏后，输入框左侧（以及右侧）出现一条与输入框等高的竖线，
+   加上真光标就是**两条竖线、像两个光标**。
+
+   根因不在 ds-bot 也不在宿主：Chrome 把「可输入元素」的**鼠标点击**也算成
+   :focus-visible（键盘可达性规范如此），于是上面那条兜底环落在了 contenteditable
+   输入框上。实测聚焦态：环 = 2px × 36px（=输入框整高）落在 x 100.5–102.5，
+   真光标 = 2px × 21px 落在 x 108–110 —— 两条并排，这就是用户看到的两条线。
+   关掉这条环后两条线只剩光标一条（同帧前后对比见本轮证据）。
+
+   为什么整条去掉、而不是只去掉主题那条：只去掉主题的话，会露出浏览器默认的
+   -webkit-focus-ring-color 环（Chrome 暗色下蓝白），还是两条线，只是换了颜色。
+
+   为什么不违背 WCAG 2.4.7：文本输入框的光标本身就是被认可的焦点指示，而输入框
+   的焦点感另由卡片的 focus-within 描边 + 悬停/聚焦的边框过渡承担。只放行文本
+   输入（composer 与 contenteditable textbox）；按钮、开关、设置项的环照旧。 */
+[data-composer-input]:focus-visible,
+[role="textbox"][contenteditable]:focus-visible {
+  outline: none !important;
+}
+
 /* 重新截图/使用观察时可平滑淡入的低频面板入场（默认不绑到常驻元素上） */
 @keyframes bloom-panel-in {
   from { opacity: 0; transform: translateY(6px); }
