@@ -41,7 +41,7 @@ Bot 团队界面由 `ds-bot` 插件渲染，它不读 DSH 的 `--dsw-*` token，
 
 菜单与对话框分别取 menu / overlay 两个玻璃角色，DSH 输入卡片交回主题自己的玻璃底板。
 
-**用户自己发出的消息**（宿主聊天区的那颗气泡，以及 ds-bot 自己渲染的 `.bt-ubody` / `.bt-ububble` 和按下态的小控件）全部由 `--bt-user` / `--bt-user-ink` 这一对驱动 —— ds-bot 自己就是用这一对刷所有「用户侧」表面（`[class*="_userRow"] [class*="_bubble"]`、问答回复、命令输入都算）。所以这里接的是调色板的强调色洗进它的不透明表面色（82% 不透明 + 模糊），而不是品牌色填充：品牌色是按钮的颜色，放在莫兰迪玻璃旁边像贴纸；文字用 `--dsw-alias-label-primary`，实测七种入口在明暗两套下都是 8.3–9.4:1。色板一改、明暗一换，整片聊天区的用户气泡跟着一起动。
+**用户自己发出的消息**（宿主聊天区的那颗气泡，以及 ds-bot 自己渲染的 `.bt-ubody` / `.bt-ububble` 和按下态的小控件）全部由 `--bt-user` / `--bt-user-ink` 这一对驱动 —— ds-bot 自己就是用这一对刷所有「用户侧」表面（`[class*="_userRow"] [class*="_bubble"]`、问答回复、命令输入都算）。这一对直接指向**输入框最右侧那个按钮**的同名变量：发送按钮 `[data-composer-card] button[class*="_primary"]`（空输入时顶替它的语音按钮 `.bt-voice` 也一样）取 `--bt-accent` 底 + `--bt-accent-ink` 字，所以 `--bt-user` 就是 `var(--bt-accent)`、`--bt-user-ink` 就是 `var(--bt-accent-ink)` —— 引用而不是抄色值，换配色 / 换明暗时气泡和按钮永远一起变，实测两者 computed 值逐字相同（mist 暗色 `oklch(0.72 0.12 240)` 底、亮色 `oklch(0.5 0.08 240)` 底，文字对比度 5.3–6.0:1）。这一对是**实色**：按钮是不透明填充，气泡只要带一点透明度就会合成出按钮没有的颜色，所以用户侧气泡不带 `backdrop-filter`（不透明填充后面的模糊既看不见又白耗一次合成）。
 
 ds-bot 自带「设置 → 外观 → 主题 / 强调色」，它同样写 `--bt-*`；装了本主题后，Bot 界面的配色以本主题为准，那两项设置对 Bot 界面不再生效。它另外通过自己的覆盖层写 6 个 DSH token（`--dsw-alias-bg-base`、`--dsw-specific-sidebar-fill`、`--dsw-specific-input-major`、`--dsw-alias-label-primary/secondary/tertiary`），而覆盖层是「后注册的层赢」——ds-bot 在自己的挂载时刻注册，晚于本主题，这 6 个就会被它拿走。本主题因此在每次 `theme/change` 里读一次已经合成的 token 快照：只要这 6 个里有任何一个不再是自己写的值，就重新压回自己的层。判断走快照而不是 DOM、不轮询、只在真的被拿走时才动手，也不碰这 6 个以外的任何 token（别的插件写的其它 token 照旧归它们）。
 

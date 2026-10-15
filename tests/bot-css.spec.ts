@@ -11,24 +11,28 @@ describe('BOT_CSS — the ds-bot palette bridge', () => {
     const mapped = [...BOT_CSS.matchAll(/(--bt-[a-z0-9-]+)\s*:\s*([^;]+);/g)]
     expect(mapped.length).toBeGreaterThan(0)
     for (const [, name, value] of mapped) {
+      // `--bt-` counts as well: the user's voice is deliberately the send
+      // button's own pair (`--bt-accent` / `--bt-accent-ink`) rather than a copy
+      // of its colour, so the two can never drift apart.
       expect(value.trim(), `${name} must resolve through the token layer`)
-        .toMatch(/var\(--(dsw|bloom)-/)
+        .toMatch(/var\(--(dsw|bloom|bt)-/)
       expect(value.trim(), `${name} must not be a literal colour`)
         .not.toMatch(/^#[0-9a-f]{3,8}\b/i)
     }
   })
 
-  it('gives the user voice the palette accent, not the brand fill', () => {
-    // ds-bot paints every user-side surface from this one pair (host chat bubble
-    // in each conversation shape, its own bubbles, pressed chips), so the pair is
-    // where the user's "styles don't agree" complaint is settled: the brand fill
-    // is a button colour, and the ink has to follow the fill that is actually
-    // there — a translucent palette tone needs the primary label, not the
-    // on-brand foreground.
-    expect(BOT_CSS).toMatch(/--bt-user:\s*color-mix\([^;]*var\(--bloom-accent/)
-    expect(BOT_CSS).toMatch(/--bt-user-ink:\s*var\(--dsw-alias-label-primary\)/)
-    expect(BOT_CSS).not.toContain('--bt-user: var(--dsw-alias-button-primary-fill)')
-    expect(BOT_CSS).not.toContain('--bt-user-ink: var(--dsw-alias-label-primary-foreground)')
+  it('gives the user voice the composer send button’s own pair, solid', () => {
+    // ds-bot fills `[data-composer-card] button[class*="_primary"]` with
+    // --bt-accent and inks it with --bt-accent-ink, and paints every user-side
+    // surface from --bt-user/--bt-user-ink. Pointing the user's pair at the
+    // button's pair is what makes the bubble *the button's colour* in every
+    // palette and scheme, since both are custom properties resolved at use time.
+    // No veil: the button is an opaque fill, and any transparency would
+    // composite the bubble to a colour the button does not have.
+    expect(BOT_CSS).toMatch(/--bt-user:\s*var\(--bt-accent\)/)
+    expect(BOT_CSS).toMatch(/--bt-user-ink:\s*var\(--bt-accent-ink\)/)
+    expect(BOT_CSS).not.toMatch(/--bt-user:\s*color-mix/)
+    expect(BOT_CSS).not.toMatch(/--bt-user-ink:\s*var\(--dsw-alias-label-primary\)/)
   })
 
   it('builds a covering plate for the one strip that scrolls over text', () => {
@@ -130,11 +134,13 @@ describe('BOT_GLASS_CSS — frost over the Bot UI', () => {
   })
 
   it('blurs both directions of the conversation bubbles', () => {
-    // Bot messages keep the theme's bubble role; the user's own rides the
-    // --bt-user pair, which is the same colour ds-bot uses for the host chat's
-    // bubble and for its own copies.
+    // Bot messages keep the theme's bubble role and its blur; the user's own is
+    // the send button's solid pair, so it takes no backdrop filter — blurring
+    // behind an opaque fill would cost a pass and change nothing.
     expect(BOT_GLASS_CSS).toMatch(/\.bt-bubble\s*\{[^}]*background-color:\s*var\(--dsw-specific-bubble\)[^}]*backdrop-filter/)
-    expect(BOT_GLASS_CSS).toMatch(/:is\(\.bt-ubody, \.bt-ububble\)\s*\{[^}]*background-color:\s*var\(--bt-user\)[^}]*backdrop-filter/)
+    const userBubble = /:is\(\.bt-ubody, \.bt-ububble\)\s*\{([^}]*)\}/.exec(BOT_GLASS_CSS)?.[1] ?? ''
+    expect(userBubble).toContain('background-color: var(--bt-user)')
+    expect(userBubble).not.toMatch(/backdrop-filter/)
   })
 
   it('densifies the exchange sheet past the point where the host chat shows', () => {
