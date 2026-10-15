@@ -52,12 +52,40 @@ describe('BOT_CSS — the ds-bot palette bridge', () => {
       '--bt-line', '--bt-line-2',
       '--bt-main', '--bt-sidebar', '--bt-card', '--bt-bubble',
       '--bt-hover', '--bt-active',
-      '--bt-accent', '--bt-accent-ink',
+      '--bt-accent-ink',
       '--bt-green', '--bt-star',
       '--bt-tag-bg', '--bt-tag-ink',
       '--bt-user', '--bt-user-ink',
     ]
     expect(roles.filter(role => !names.has(role))).toEqual([])
+  })
+
+  it('leaves the accent fill to ds-bot’s own setting', () => {
+    // The user's accent control writes `--bt-accent` into the stylesheet ds-bot
+    // injects at mount, and this bridge used to outrank that write — which is
+    // exactly why the control did nothing in the Bot UI. The fill is ds-bot's to
+    // own; every surface that paints it (send/stop button, .bt-voice, badges,
+    // switches, and the user's bubble) reads it from there.
+    expect(BOT_CSS).not.toMatch(/--bt-accent\s*:/)
+    expect(BOT_CSS).toMatch(/--bt-user:\s*var\(--bt-accent\)/)
+  })
+
+  it('chooses the accent ink from the accent’s own lightness', () => {
+    // ds-bot's own rule is a luminance threshold at 0.45, which keeps white text
+    // on colours that cannot carry it (its green swatch measures 2.19:1, orange
+    // 2.64, cyan 2.21, violet 2.96, the default blue 4.33 — all below AA), and
+    // that fill is also the user's bubble. The step sits just under the crossover
+    // where dark and light ink swap places: measured over ds-bot's seventeen
+    // swatches, its worst case is 4.65:1.
+    const step = /--bt-accent-ink:\s*oklch\(from var\(--bt-accent\)\s*calc\(0\.99 - clamp\(0, \(l - 0\.513\) \* 1000, 0\.86\)\)\s*0 h\)/
+    expect(BOT_CSS).toMatch(step)
+    // Same specificity as the fallback rule, so it must come after it.
+    const fallback = BOT_CSS.indexOf('--bt-accent-ink: var(--dsw-alias-label-primary-foreground)')
+    expect(fallback).toBeGreaterThan(-1)
+    expect(BOT_CSS.indexOf('@supports (color: oklch(from red l c h))')).toBeGreaterThan(fallback)
+    // An engine without relative colour syntax must keep a usable ink rather
+    // than inherit into an invisible one.
+    expect(BOT_CSS).toMatch(/@supports \(color: oklch\(from red l c h\)\)\s*\{[\s\S]*?--bt-accent-ink:/)
   })
 
   it('outranks the stylesheet ds-bot injects after this one', () => {

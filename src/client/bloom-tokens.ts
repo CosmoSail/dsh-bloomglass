@@ -220,7 +220,13 @@ export function sharedDswTokens(p: PaletteEntry, dark: boolean): string {
   /* tooltip / toast 两档都要是「深底浅字」：亮色拿 tx 压深，暗色拿 bg 压更深 */
   --dsw-alias-tooltip-bg: color-mix(in oklch, ${dark ? bg : tx}, black ${dark ? 22 : 8}%);
   --dsw-alias-toast-bg: color-mix(in oklch, ${dark ? bg : tx}, black ${dark ? 22 : 8}%);
-  --dsw-alias-bg-mask-photo: color-mix(in oklch, ${bg}, black ${dark ? 45 : 30}%);`
+  --dsw-alias-bg-mask-photo: color-mix(in oklch, ${bg}, black ${dark ? 45 : 30}%);
+  /* 文档预览（右侧栏的 PDF / 文档视图）在 DSH 里是两个硬编码的蓝灰静态色，
+     全仓没有一处接管 —— 于是在莫兰迪窗口里，右侧栏一打开文件就只剩这一块
+     蓝灰底板（实测 DSH 值是 neutral-bluish-100）。它语义上就是「页面底色」，
+     跟着变体的 bg 走；label-document-preview 不接，提取到的包里没有任何
+     消费方，改了只是凭空造色。 */
+  --dsw-alias-bg-document-preview: ${bg};`
 }
 
 export function mistLight(p: PaletteEntry): string {

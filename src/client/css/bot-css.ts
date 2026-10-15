@@ -63,7 +63,23 @@ html body[${BODY_ATTR}][data-ds-dark-theme] {
   --bt-bubble: var(--dsw-specific-bubble);
   --bt-hover: var(--dsw-alias-interactive-bg-hover);
   --bt-active: var(--dsw-alias-interactive-bg-active);
-  --bt-accent: var(--dsw-alias-brand-primary);
+  /* ds-bot's accent stays ds-bot's, and the ink stays ours.
+     Its Appearance settings write --bt-accent (a swatch or a custom colour)
+     into the stylesheet it injects at mount, and recompute --bt-accent-ink
+     from it. Declaring --bt-accent here outranked that write — (0,1,2) beats
+     ds-bot's 'html body' (0,0,2) — which is exactly why the accent control did
+     nothing in the Bot UI. The fill is the user's to set, so this bridge stops
+     claiming it; every surface that paints --bt-accent (the composer's
+     send/stop button, .bt-voice, badges, switches, the user's bubble below)
+     follows the setting again.
+     The *ink* is ours, because ds-bot's own rule — luminance(accent) > 0.45 ?
+     '#141414' : '#ffffff' — sits on the wrong side of the crossover: measured
+     against its own swatches, white lands at 2.19:1 on green, 2.21 on cyan,
+     2.64 on orange, 2.77 on sky, 2.96 on violet and 4.33 on the default blue —
+     all below AA, on a fill that is also the user's bubble. The step below
+     measures 4.65:1 at its worst across those same seventeen swatches.
+     The value here is only the fallback for an engine without relative colour
+     syntax; the @supports rule below picks the ink from the accent itself. */
   --bt-accent-ink: var(--dsw-alias-label-primary-foreground);
   --bt-green: var(--dsw-alias-state-success-primary);
   --bt-star: var(--dsw-alias-state-warn-primary);
@@ -77,13 +93,13 @@ html body[${BODY_ATTR}][data-ds-dark-theme] {
      The user asked for the bubble to be *the composer's send button*, so the
      pair is literally the button's pair rather than a copy of its colour. The
      send button is [data-composer-card] button[class*="_primary"], which
-     ds-bot fills with --bt-accent and inks with --bt-accent-ink (the voice
-     button that takes its seat on an empty composer uses the same two); custom
-     properties resolve per element, so referencing them here makes the bubble
-     follow the button through every palette and scheme instead of matching a
-     snapshot of its colour. Solid, not veiled: the button is an opaque fill,
-     and at any transparency the bubble would composite to a different colour
-     than the button it is meant to equal. */
+     ds-bot fills with --bt-accent (the user's accent setting) and inks with
+     --bt-accent-ink (the voice button that takes its seat on an empty composer
+     uses the same two); custom properties resolve per element, so referencing
+     them here makes the bubble follow the button through every accent the user
+     picks instead of matching a snapshot of its colour. Solid, not veiled: the
+     button is an opaque fill, and at any transparency the bubble would
+     composite to a different colour than the button it is meant to equal. */
   --bt-user: var(--bt-accent);
   --bt-user-ink: var(--bt-accent-ink);
   /* The plate for the one strip that scrolls over text of its own: the exchange
@@ -92,6 +108,27 @@ html body[${BODY_ATTR}][data-ds-dark-theme] {
      costs nothing. Covering *panels* take the dialogs' overlay glass, and the
      Bot↔Bot sheet takes it a step denser (see COVER below). */
   --bt-glass-cover: color-mix(in oklab, var(--dsw-alias-bg-overlay), var(--bloom-surface-solid, var(--dsw-alias-bg-layer-1)) 96%);
+}
+
+/* The accent ink, chosen from the accent ds-bot wrote.
+   ds-bot's own test is a luminance threshold at 0.45, which is the wrong side of
+   the crossover: everything from a light green to a mid blue keeps white text
+   (2.2–4.3:1). The step below sits just under the crossover — a near-black and a
+   near-white ink swap places around oklch L 0.58 for greys and higher for a
+   chromatic fill — so a light accent takes dark ink and a dark accent light ink.
+   Measured in the browser over ds-bot's own seventeen swatches, the worst case is
+   4.65:1 (its own rule reaches 2.19:1).
+   calc(0.99 - clamp(0, (l - 0.513) * 1000, 0.86)) is that step: the clamp is 0
+   for a dark accent (ink stays near-white at 0.99) and saturates at 0.86 for a
+   light one (ink drops to 0.13). Chroma 0 keeps the ink neutral — it sits on the
+   user's own colour, not on a palette one.
+   Same specificity as the rule above, so it wins by coming later; an engine
+   without relative colour syntax skips the block and keeps the fallback. */
+@supports (color: oklch(from red l c h)) {
+  html body[${BODY_ATTR}],
+  html body[${BODY_ATTR}][data-ds-dark-theme] {
+    --bt-accent-ink: oklch(from var(--bt-accent) calc(0.99 - clamp(0, (l - 0.513) * 1000, 0.86)) 0 h);
+  }
 }
 
 /* Badge rings. ds-bot draws the 1.5px gap around a sidebar badge — and the

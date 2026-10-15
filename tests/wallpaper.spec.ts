@@ -79,6 +79,25 @@ describe('FrostedPresenter', () => {
     expect(body).toContain('position: absolute')
   })
 
+  it('hands the dock pane surface back to the plate', () => {
+    // Dockkit's tab host paints its own fill — '._tabHost:not(._float) {
+    // background: var(--dsw-alias-bg-base) }' — and it is in-flow content above
+    // the column's plate, so with a file open the right sidebar was that one
+    // token and nothing else. It is also one of the six tokens ds-bot writes
+    // through the official override layer, which is how opening a file and
+    // touching ds-bot's Appearance theme turned the column into ds-bot's opaque
+    // grey. Handing the surface back to the plate moves it onto
+    // --dsw-alias-bg-layer-1, a token nothing else writes.
+    const rule = /\[data-rightbar-col\]\s+:is\(\[data-dockkit-content\]:not\(\[data-dockkit-float\]\),\s*\[data-dockkit-empty\]\)\s*\{([^}]*)\}/
+    expect(SURFACE_CSS).toMatch(rule)
+    expect(rule.exec(SURFACE_CSS)?.[1] ?? '').toContain('background-color: transparent')
+    // Floats carry their own fill and are not the column's surface; the empty
+    // host paints the same token for the "open something" guide, so it counts.
+    expect(SURFACE_CSS).toContain(':not([data-dockkit-float])')
+    expect(SURFACE_CSS).toContain('[data-dockkit-empty]')
+    expect(SURFACE_CSS).toMatch(/\[data-rightbar-col\]::before\s*\{[^}]*var\(--dsw-alias-bg-layer-1\)/)
+  })
+
   it('plates the fullscreen panel itself, not the column or the viewport', () => {
     // The panel wrapper DSH renders is position:absolute pinned top/bottom/right
     // and grows leftward in fullscreen, so its box is neither the column track

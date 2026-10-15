@@ -144,6 +144,30 @@ body[${BODY_ATTR}] [data-rightbar-col]::before {
 }
 
 /*
+ * The plate above is not what paints the column once a file is open.
+ *
+ * Dockkit gives the pane's tab host its own fill — its rule is
+ * '._tabHost:not(._float) { background: var(--dsw-alias-bg-base) }' — and that
+ * host is in-flow content *above* the plate (the plate is a z-index:-1 pseudo
+ * element, so it paints behind everything inside the column). So with a
+ * document open the right sidebar was that one token and nothing else: a flat
+ * opaque slab that ignored the palette, and, worse, one of the six tokens
+ * ds-bot's own Appearance layer also writes — opening a file and touching
+ * ds-bot's theme handed the whole column ds-bot's grey.
+ *
+ * Hand the surface back to the plate instead: the tab host paints nothing, the
+ * column's glass shows through, and the sidebar follows the palette through
+ * --dsw-alias-bg-layer-1, which no other plugin writes. Without a wallpaper the
+ * plate resolves to the same tone the host used to paint, so this changes
+ * nothing until there is frost to show. Floats are excluded — they carry their
+ * own fill and are not the column's surface — and the empty-pane host, which
+ * paints the same token for the "open something" guide, is included.
+ */
+body[${BODY_ATTR}] [data-rightbar-col] :is([data-dockkit-content]:not([data-dockkit-float]), [data-dockkit-empty]) {
+  background-color: transparent;
+}
+
+/*
  * Fullscreen. The panel wrapper DSH renders — its rule is
  * '.panel { position: absolute; top: 0; bottom: 0; right: 0 }' — is pinned to
  * the column's right edge and grows leftward, past the column, when fullscreen

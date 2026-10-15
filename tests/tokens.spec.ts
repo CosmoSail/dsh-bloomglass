@@ -34,6 +34,18 @@ describe('bloomTokenOverrides', () => {
     expect(tokens['--dsw-alias-bg-base'].dark).toBe(PALETTE.cinnabar.bgD)
   })
 
+  it('paints the document preview with the palette, not DSH’s neutral bluish', () => {
+    // DSH ships this one as a static neutral-bluish tone and nothing took it
+    // over, so a PDF opened in the right sidebar stayed the only blue-grey
+    // surface in a Morandi window. It is a page backdrop, so it follows the
+    // variant's own base tone in every palette and mode.
+    for (const variant of VARIANTS) {
+      const tokens = bloomTokenOverrides(variant)
+      expect(tokens['--dsw-alias-bg-document-preview'].light).toBe(PALETTE[variant].bgL)
+      expect(tokens['--dsw-alias-bg-document-preview'].dark).toBe(PALETTE[variant].bgD)
+    }
+  })
+
   it('gives every palette a distinct accent, so a switch is observable', () => {
     const accents = new Set(VARIANTS.map(v => bloomTokenOverrides(v)['--dsw-alias-brand-primary'].light))
     expect(accents.size).toBe(VARIANTS.length)
