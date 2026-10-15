@@ -35,11 +35,13 @@ Bot 团队界面由 `ds-bot` 插件渲染，它不读 DSH 的 `--dsw-*` token，
 
 铺了壁纸时有三条规矩：
 
-- **盖在会话上的表面必须有能盖住下层的底板**。Bot↔Bot 会话层（`ExchangeDialog` 的 `.bt-pane.bt-exchange`）和 Bot 详情面板（`.bt-panel`）是 fixed 覆盖层，ds-bot 原来只给它们 `--bt-main` 一层底色；玻璃密度滑到低端时那层只有一两成不透明，下层主对话的字会透上来和它叠在一起。这两处的底板走 `--bt-glass-cover`（overlay 玻璃角色 + 调色板不透明色调混到 96%），底板照旧挂在 `::before` 上 —— 面板自身不加 `backdrop-filter`，否则里面 `position: fixed` 的菜单会改定位基准；会话层的输入栏与它上方的渐隐同样用这块底板。
+- **盖在会话上的表面必须有能盖住下层的底板**。Bot↔Bot 会话层（`ExchangeDialog` 的 `.bt-pane.bt-exchange`）和 Bot 详情面板（`.bt-panel`）是 fixed 覆盖层，ds-bot 原来只给它们 `--bt-main` 一层底色；玻璃密度滑到低端时那层只有一两成不透明，下层主对话的字会透上来和它叠在一起。底板挂在 `::before` 上 —— 面板自身不加 `backdrop-filter`，否则里面 `position: fixed` 的菜单会改定位基准。会话层比别的弹窗再厚一档：它盖的是用户正在读的另一段对话，overlay 角色的 40% 不足以让下层的字消失（实测 40% / 55% / 70% 都还看得见行，85% 才干净，而且把背景模糊关掉也成立），所以它取 overlay 玻璃 + 75% 调色板不透明色调（合到 85% 不透明，随浓度滑杆继续上升），模糊仍跟用户的滑杆。详情面板与其余弹窗保持 overlay 那一档不变；会话层的输入栏与它上方的渐隐另用 `--bt-glass-cover`（96% 的近实心），因为它要遮的是自己滚动中的日志。
 - **控件层不借用被削得最狠的角色**。`--bt-main` 被 ds-bot 用在圆图标按钮、标签指示块、开关滑块、输入框上，所以它接的是 shell 自己给浮动按钮用的 `--dsw-alias-button-floating-fill`（同浓度下比 base 厚实得多）；整块面板由上面那条规矩单独铺底。
 - **烘托环要实色**。徽标的 1.5px 烘托环和王冠描边改用 `--bloom-sidebar-solid`（调色板里未 frost 的侧栏色），否则在壁纸上会被吃掉。
 
 菜单与对话框分别取 menu / overlay 两个玻璃角色，DSH 输入卡片交回主题自己的玻璃底板。
+
+**用户自己发出的消息**（宿主聊天区的那颗气泡，以及 ds-bot 自己渲染的 `.bt-ubody` / `.bt-ububble` 和按下态的小控件）全部由 `--bt-user` / `--bt-user-ink` 这一对驱动 —— ds-bot 自己就是用这一对刷所有「用户侧」表面（`[class*="_userRow"] [class*="_bubble"]`、问答回复、命令输入都算）。所以这里接的是调色板的强调色洗进它的不透明表面色（82% 不透明 + 模糊），而不是品牌色填充：品牌色是按钮的颜色，放在莫兰迪玻璃旁边像贴纸；文字用 `--dsw-alias-label-primary`，实测七种入口在明暗两套下都是 8.3–9.4:1。色板一改、明暗一换，整片聊天区的用户气泡跟着一起动。
 
 ds-bot 自带「设置 → 外观 → 主题 / 强调色」，它同样写 `--bt-*`；装了本主题后，Bot 界面的配色以本主题为准，那两项设置对 Bot 界面不再生效。它另外通过自己的覆盖层写 6 个 DSH token（`--dsw-alias-bg-base`、`--dsw-specific-sidebar-fill`、`--dsw-specific-input-major`、`--dsw-alias-label-primary/secondary/tertiary`），而覆盖层是「后注册的层赢」——ds-bot 在自己的挂载时刻注册，晚于本主题，这 6 个就会被它拿走。本主题因此在每次 `theme/change` 里读一次已经合成的 token 快照：只要这 6 个里有任何一个不再是自己写的值，就重新压回自己的层。判断走快照而不是 DOM、不轮询、只在真的被拿走时才动手，也不碰这 6 个以外的任何 token（别的插件写的其它 token 照旧归它们）。
 

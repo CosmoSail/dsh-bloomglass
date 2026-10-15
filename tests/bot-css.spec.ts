@@ -7,15 +7,28 @@ const MR = BODY_ATTR
 const FR = FROST_ATTR
 
 describe('BOT_CSS — the ds-bot palette bridge', () => {
-  it('re-points every role at a DSH token rather than a literal colour', () => {
+  it('re-points every role at a token rather than a literal colour', () => {
     const mapped = [...BOT_CSS.matchAll(/(--bt-[a-z0-9-]+)\s*:\s*([^;]+);/g)]
     expect(mapped.length).toBeGreaterThan(0)
     for (const [, name, value] of mapped) {
-      expect(value.trim(), `${name} must resolve through the theme's token layer`)
-        .toMatch(/var\(--dsw-/)
+      expect(value.trim(), `${name} must resolve through the token layer`)
+        .toMatch(/var\(--(dsw|bloom)-/)
       expect(value.trim(), `${name} must not be a literal colour`)
         .not.toMatch(/^#[0-9a-f]{3,8}\b/i)
     }
+  })
+
+  it('gives the user voice the palette accent, not the brand fill', () => {
+    // ds-bot paints every user-side surface from this one pair (host chat bubble
+    // in each conversation shape, its own bubbles, pressed chips), so the pair is
+    // where the user's "styles don't agree" complaint is settled: the brand fill
+    // is a button colour, and the ink has to follow the fill that is actually
+    // there — a translucent palette tone needs the primary label, not the
+    // on-brand foreground.
+    expect(BOT_CSS).toMatch(/--bt-user:\s*color-mix\([^;]*var\(--bloom-accent/)
+    expect(BOT_CSS).toMatch(/--bt-user-ink:\s*var\(--dsw-alias-label-primary\)/)
+    expect(BOT_CSS).not.toContain('--bt-user: var(--dsw-alias-button-primary-fill)')
+    expect(BOT_CSS).not.toContain('--bt-user-ink: var(--dsw-alias-label-primary-foreground)')
   })
 
   it('builds a covering plate for the one strip that scrolls over text', () => {
@@ -117,10 +130,23 @@ describe('BOT_GLASS_CSS — frost over the Bot UI', () => {
   })
 
   it('blurs both directions of the conversation bubbles', () => {
-    // Bot messages keep the theme's bubble role; the user's own keeps the brand
-    // tint, thinned, with the ink left to the token layer.
+    // Bot messages keep the theme's bubble role; the user's own rides the
+    // --bt-user pair, which is the same colour ds-bot uses for the host chat's
+    // bubble and for its own copies.
     expect(BOT_GLASS_CSS).toMatch(/\.bt-bubble\s*\{[^}]*background-color:\s*var\(--dsw-specific-bubble\)[^}]*backdrop-filter/)
-    expect(BOT_GLASS_CSS).toMatch(/\.bt-ubody[^{]*\{[^}]*color-mix\(in oklab, var\(--dsw-alias-button-primary-fill\), transparent 30%\)[^}]*backdrop-filter/)
+    expect(BOT_GLASS_CSS).toMatch(/:is\(\.bt-ubody, \.bt-ububble\)\s*\{[^}]*background-color:\s*var\(--bt-user\)[^}]*backdrop-filter/)
+  })
+
+  it('densifies the exchange sheet past the point where the host chat shows', () => {
+    // The sheet is the one covering surface that has to erase what is behind it:
+    // a share of the glass density still lets the host conversation be read.
+    const sheet = /\.bt-exchange::before\s*\{([^}]*)\}/.exec(BOT_GLASS_CSS)?.[1] ?? ''
+    expect(sheet).toContain('color-mix(in oklab, var(--dsw-alias-bg-overlay), var(--bloom-surface-solid')
+    expect(sheet).toMatch(/\b75%\)/)
+    // The panel/dialog tier keeps the plain overlay role, and the near-solid
+    // recipe stays reserved for the composer strip that scrolls over its own log.
+    expect(BOT_GLASS_CSS).toMatch(/:is\(\.bt-panel, \.bt-pane\)::before\s*\{[^}]*background-color:\s*var\(--dsw-alias-bg-overlay\)/)
+    expect(BOT_GLASS_CSS).not.toMatch(/:is\(\.bt-panel, \.bt-pane\)::before\s*\{[^}]*var\(--bt-glass-cover\)/)
   })
 
   it('hands the DSH composer card back to the theme plate', () => {
@@ -129,8 +155,10 @@ describe('BOT_GLASS_CSS — frost over the Bot UI', () => {
     expect(BOT_GLASS_CSS).toMatch(/\[data-composer-card\]\s*\{[^}]*background-color:\s*transparent\s*!important/)
   })
 
-  it('consumes only variables the presenter publishes', () => {
-    const published = new Set(['--bloom-glass-blur', '--fw-saturate', '--fw-dim', '--bloom-ambience'])
+  it('consumes only variables the theme publishes', () => {
+    // Frost's own knob plus the palette sheet's opaque surface tone, which
+    // bloomOwnVarsCss writes on the same body element.
+    const published = new Set(['--bloom-glass-blur', '--fw-saturate', '--fw-dim', '--bloom-ambience', '--bloom-surface-solid'])
     const consumed = [...BOT_GLASS_CSS.matchAll(/var\((--[\w-]+)/g)].map(match => match[1])
     const frostOwned = consumed.filter(name => name.startsWith('--fw-') || name.startsWith('--bloom-'))
     expect(frostOwned.length).toBeGreaterThan(0)

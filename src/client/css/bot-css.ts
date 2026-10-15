@@ -69,15 +69,24 @@ html body[${BODY_ATTR}][data-ds-dark-theme] {
   --bt-star: var(--dsw-alias-state-warn-primary);
   --bt-tag-bg: var(--dsw-alias-interactive-bg-hover);
   --bt-tag-ink: var(--dsw-alias-label-secondary);
-  /* The user's own voice: ds-bot fills a bubble and tints selected chips with
-     this pair, so it needs a filled colour with contrasting ink rather than a
-     translucent highlight. */
-  --bt-user: var(--dsw-alias-button-primary-fill);
-  --bt-user-ink: var(--dsw-alias-label-primary-foreground);
+  /* The user's voice. ds-bot paints *every* user-side surface from this one
+     pair — the host chat's own bubble in every conversation shape (direct,
+     group, question-reply, command-input), its own .bt-ubody/.bt-ububble
+     copies, and the pressed chips (mic, voice, task day, question options) —
+     so this is the place to put the user's voice right, once. The brand fill
+     is the wrong voice for this shell: a saturated plate next to Morandi glass
+     reads as a sticker, and the host bubble is not a button. The palette's
+     accent, washed into its opaque surface tone and left slightly translucent
+     (82%) so the blur behind it still shows, keeps it in the family while
+     staying clearly "mine"; the ink is the primary label, so the contrast no
+     longer depends on the fill being dark. */
+  --bt-user: color-mix(in oklab, color-mix(in oklab, var(--bloom-surface-solid, var(--dsw-alias-bg-layer-1)), var(--bloom-accent, var(--dsw-alias-brand-primary)) 22%), transparent 18%);
+  --bt-user-ink: var(--dsw-alias-label-primary);
   /* The plate for the one strip that scrolls over text of its own: the exchange
      sheet's composer footer. A share of the glass density would let the log
      shine through it, and the footer is small enough that a near-solid tone
-     costs nothing. Covering *panels* take the dialogs' overlay glass instead. */
+     costs nothing. Covering *panels* take the dialogs' overlay glass, and the
+     Bot↔Bot sheet takes it a step denser (see COVER below). */
   --bt-glass-cover: color-mix(in oklab, var(--dsw-alias-bg-overlay), var(--bloom-surface-solid, var(--dsw-alias-bg-layer-1)) 96%);
 }
 
@@ -115,6 +124,25 @@ const GLASS = `background-color: var(--dsw-alias-bg-overlay);
 const tintedGlass = (fill: string): string => `background-color: ${fill};
   -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
   backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));`
+
+/**
+ * The Bot↔Bot exchange sheet's plate — the one covering surface that has to
+ * *erase* what is behind it, not merely tint it.
+ *
+ * The sheet drops over the host conversation, so the user reads the two at once.
+ * A share of the glass density leaves the host's own lines visible through it
+ * however soft the blur is: measured on the harness (14px text behind the sheet,
+ * the user's 8px blur) the residual line signal is 7% of the host's own at the
+ * overlay's 40%, 5% at 55%, 2% at 70% and 1% at 85% — only from 85% up is
+ * nothing of the line left to see. The recipe stays the family's (the same
+ * overlay role, the same blur knob) and takes a 75% share of the palette's
+ * opaque tone, which lands at 85% opacity at the shipped glass density and rises
+ * with the slider. If the backdrop cannot be composited at all —
+ * `prefers-reduced-transparency`, or a frame that cuts the backdrop — this
+ * density still brings the host's text from 40% of its contrast down to 4.5%,
+ * and the blur is what removes it outright.
+ */
+const COVER = 'color-mix(in oklab, var(--dsw-alias-bg-overlay), var(--bloom-surface-solid, var(--dsw-alias-bg-layer-1)) 75%)'
 
 /**
  * One glass family for the whole Bot UI.
@@ -163,6 +191,13 @@ body[${BODY_ATTR}][${FROST_ATTR}] ${PLATE}::before {
   ${GLASS}
 }
 
+/* The Bot↔Bot exchange sheet: the family glass, at the density that erases the
+   host conversation behind it (see COVER). Everything else about the plate —
+   position, the blur knob, the panel staying filter-free — is the rule above. */
+body[${BODY_ATTR}][${FROST_ATTR}] .bt-exchange::before {
+  background-color: ${COVER};
+}
+
 /* Menus, popovers, dialogs, the header pill, the empty-chat card, the settings
    navigation: the same glass, on the element. */
 body[${BODY_ATTR}][${FROST_ATTR}] ${PANE} {
@@ -179,19 +214,20 @@ body[${BODY_ATTR}][${FROST_ATTR}] .bt-exchange .bt-dialog-foot::before {
   background: linear-gradient(to top, var(--bt-glass-cover), transparent);
 }
 
-/* Message bubbles: the content tier. The Bot's bubble keeps the theme's bubble
-   role (already a plate veil under frost); the user's own keeps the brand tint,
-   thinned to 70% and blurred, with the ink left opaque — measured 4.98:1 at the
-   lowest density in the dark scheme, i.e. still readable, and it no longer reads
-   as a sticker on the wallpaper. */
+/* Message bubbles: the content tier. Both sides keep their own role tint so a
+   Bot message and the user's own stay distinguishable, and both take the blur.
+   The user's side is the one pair --bt-user / --bt-user-ink: ds-bot paints the
+   host chat's bubble in *every* conversation shape with it ([class*="_userRow"]
+   [class*="_bubble"], question replies, command input), and these two classes
+   are the copies ds-bot renders itself. Colouring the pair instead of each
+   entry point is what makes every conversation agree — and it leaves ds-bot's own
+   !important rule (which sets the host bubble's surface and ink) saying the
+   right thing rather than fighting it. */
 body[${BODY_ATTR}][${FROST_ATTR}] .bt-bubble {
   ${tintedGlass('var(--dsw-specific-bubble)')}
 }
-body[${BODY_ATTR}][${FROST_ATTR}] .bt-ubody,
-body[${BODY_ATTR}][${FROST_ATTR}] [class*="_userRow"] [class*="_bubble"],
-body[${BODY_ATTR}][${FROST_ATTR}] [data-chat-flow-kind='question-reply'] [class*="_bubble"],
-body[${BODY_ATTR}][${FROST_ATTR}] [data-chat-flow-kind='command-input'] [class*="_bubble"] {
-  ${tintedGlass('color-mix(in oklab, var(--dsw-alias-button-primary-fill), transparent 30%)')} !important
+body[${BODY_ATTR}][${FROST_ATTR}] :is(.bt-ubody, .bt-ububble) {
+  ${tintedGlass('var(--bt-user)')}
 }
 
 /* The composer is DSH's, which this theme already frosts on ::before. ds-bot
@@ -206,7 +242,7 @@ body[${BODY_ATTR}][${FROST_ATTR}] [data-composer-card] {
   body[${BODY_ATTR}][${FROST_ATTR}] ${PLATE}::before,
   body[${BODY_ATTR}][${FROST_ATTR}] ${PANE},
   body[${BODY_ATTR}][${FROST_ATTR}] .bt-bubble,
-  body[${BODY_ATTR}][${FROST_ATTR}] .bt-ubody {
+  body[${BODY_ATTR}][${FROST_ATTR}] :is(.bt-ubody, .bt-ububble) {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
