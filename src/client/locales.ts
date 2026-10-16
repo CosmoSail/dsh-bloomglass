@@ -7,7 +7,7 @@
 export const zh = {
   nav: 'Bloom Glass',
   title: 'Bloom Glass 主题',
-  description: '十套莫兰迪配色打底，可选一张壁纸铺满窗口、界面以磨砂玻璃叠上去。浅色 / 深色仍跟随官方外观。',
+  description: '十套中国传统色配色打底，可选一张壁纸铺满窗口、界面以磨砂玻璃叠上去。浅色 / 深色仍跟随官方外观。',
   palette: '配色',
   frost: '壁纸与玻璃',
   enable: '启用壁纸与磨砂',
@@ -33,7 +33,7 @@ export type BloomglassKey = keyof typeof zh
 export const en = {
   nav: 'Bloom Glass',
   title: 'Bloom Glass theme',
-  description: 'Ten Morandi palettes underneath, and optionally one wallpaper filling the window with the chrome frosted on top. Light / Dark still follow official appearance.',
+  description: 'Ten Chinese traditional colour palettes underneath, and optionally one wallpaper filling the window with the chrome frosted on top. Light / Dark still follow official appearance.',
   palette: 'Palette',
   frost: 'Wallpaper & glass',
   enable: 'Enable wallpaper and frost',

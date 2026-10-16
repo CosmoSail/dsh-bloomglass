@@ -3,7 +3,7 @@
  *
  * 结构：
  *   bloomTokens       每变体的 --bloom-* 自有 token（质感层的唯一色源 SSOT）
- *   borderStack       border 四档阶梯（暗色必须走 morandi，不能用前景色 mix）
+ *   borderStack       border 四档阶梯（暗色必须走 dye 真色轨，不能用前景色 mix）
  *   labelStack        次级文字四档（单调递减，两档都过 WCAG AA）
  *   sharedDswTokens   状态色 / 反色 / toast / tooltip（三处共用，防变体漂移）
  *   mistLight/Dark    mist 完整骨架
@@ -23,17 +23,20 @@ import { OTHER_VARIANTS } from './palette.ts'
  * 有了这层，COMPONENT_CSS 只需写一份、全部引用 var(--bloom-*)，
  * 不必为 4 个变体 × 明暗各抄一遍。
  *
- * --bloom-morandi   气质轨 RGB 三元组，供 rgba() 做低透明度氛围渐变与冷光
+ * --bloom-dye       传统色真色的 RGB 三元组：细线、描边、标记、小面积淡底
+ * --bloom-wash      同色相同明度、彩度 55% 的淡染档：**大面积**渐变专用
+ *                   （朱砂/青莲的彩度是旧档两倍，真色铺面积会变成染色）
  * --bloom-shadow-*  长距柔和阴影三档（原版 typora 的 --shadow-sm/md/lg）
- * --bloom-hairline  冷光细线：极低透明度的莫兰迪色，用于分割线/描边
+ * --bloom-hairline  冷光细线：极低透明度的真色，用于分割线/描边
  * --bloom-glow      冷光辉：描边外侧的微弱扩散，深色下尤其出高级感
  */
 export function bloomTokens(p: PaletteEntry, dark: boolean): string {
   const tx = dark ? p.txD : p.txL
-  const m = p.morandi
+  const m = p.dye
   const motion = dark ? p.motionD : p.motionL
   return `
-  --bloom-morandi: ${m};
+  --bloom-dye: ${p.dye};
+  --bloom-wash: ${p.wash};
   --bloom-accent: ${dark ? p.accentD : p.accentL};
   --bloom-motion-1: ${motion[0]};
   --bloom-motion-2: ${motion[1]};
@@ -74,15 +77,15 @@ export function bloomTokens(p: PaletteEntry, dark: boolean): string {
  * 这是骨架 —— 其它变体只覆盖「主色 + 背景调」相关的行。
  */
 /**
- * border 阶梯（l1 最淡 → l4 最强）—— **暗色必须走 morandi 气质轨**。
+ * border 阶梯（l1 最淡 → l4 最强）—— **暗色必须走 dye 真色轨**。
  *
  * 这是「前景色 token 当背景/边框用」这个反模式的第三次复发（前两次是
  * markdown-inline-code 和 --bloom-shadow，见 DEV_NOTES 2026-08-18）：
  * 暗色的 tx 是近白 oklch(96%)，`mix(tx, 58%)` 得到 42% 不透明的近白 ——
- * 在莫兰迪暗底上就是一圈扎眼的白框（用户实拍反馈：「白色边框很突兀」）。
+ * 在深色底上就是一圈扎眼的白框（用户实拍反馈：「白色边框很突兀」）。
  *
- * 暗色改用 rgba(morandi, α)：morandi 是中等亮度的低饱和主题色（如 sage
- * 是 138,154,91 灰绿），同样的可见度但不刺眼，且边框跟着变体走色相 ——
+ * 暗色改用 rgba(dye, α)：dye 是传统色本体、中等亮度的主题色（如竹青
+ * 是 120,146,98 的灰绿），同样的可见度但不刺眼，且边框跟着变体走色相 ——
  * 这正是 --bloom-hairline 一直在用的思路，只是 border 阶梯漏了。
  * 亮色仍用 mix(tx)：亮色的 tx 是深色，当边框是对的。
  *
@@ -91,7 +94,7 @@ export function bloomTokens(p: PaletteEntry, dark: boolean): string {
  * 继承过 mist 的错误值（DEV_NOTES 2026-08-18）。现在只有一个真源。
  */
 export function borderStack(p: PaletteEntry, dark: boolean): string {
-  const m = p.morandi
+  const m = p.dye
   const tx = dark ? p.txD : p.txL
   return dark
     ? `  --dsw-alias-border-l1: rgba(${m}, 0.10);
@@ -146,7 +149,7 @@ export function labelStack(p: PaletteEntry, dark: boolean): string {
  * **variantBlock 一个都没有** —— 于是除 mist 之外的 7 个变体
  * （cinnabar/petal/ripple/sage/stone/lapis/amber）全部回落到 DSH 原生值：
  * 错误红实测是 DSH 的 #ec1313（4.13:1，够不上 AA），tooltip 是蓝灰
- * oklch(30% 0.02 240)，跟莫兰迪色相完全不搭。
+ * oklch(30% 0.02 240)，跟本变体的色相完全不搭。
  *
  * 更隐蔽的是 --dsw-alias-state-business-primary：bloomTokens 已把它接管成
  * accent，但 mist 块里还留着旧的蓝色定义 oklch(62% 0.1 250)，同一选择器内
@@ -222,11 +225,11 @@ export function sharedDswTokens(p: PaletteEntry, dark: boolean): string {
   --dsw-alias-toast-bg: color-mix(in oklch, ${dark ? bg : tx}, black ${dark ? 22 : 8}%);
   --dsw-alias-bg-mask-photo: color-mix(in oklch, ${bg}, black ${dark ? 45 : 30}%);
   /* 文档预览（右侧栏的 PDF / 文档视图）在 DSH 里是三个硬编码的蓝灰静态色，
-     全仓没有一处接管 —— 于是在莫兰迪窗口里，右侧栏一打开文件就只剩这块蓝灰
+     全仓没有一处接管 —— 于是在主题窗口里，右侧栏一打开文件就只剩这块蓝灰
      底板（实测 DSH 值：底 neutral-bluish-100/950、状态字 neutral-bluish-700）。
      bg 语义就是「页面底色」，跟着变体的 bg 走；label 是 PDF 预览体里的状态
      文字（.ZhMWpq_body .ZhMWpq_status 消费），按次级墨色同一配方给，
-     否则一整片莫兰迪里会剩下一行蓝灰字。 */
+     否则一整片国色里会剩下一行蓝灰字。 */
   --dsw-alias-bg-document-preview: ${bg};
   --dsw-alias-label-document-preview: ${mix(tx, dark ? 30 : 28)};`
 }

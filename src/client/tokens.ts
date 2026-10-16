@@ -169,7 +169,7 @@ function glassAlphas(glassOpacity: number): Record<GlassRole, number> {
 
 /**
  * Re-express a palette colour at a given opacity without shifting its hue.
- * `color-mix` in oklch keeps the Morandi character that converting to rgba
+ * `color-mix` in oklch keeps the palette's character that converting to rgba
  * would flatten.
  * @param color - any CSS colour, typically one of Bloom's oklch values.
  * @param alpha - target opacity in [0, 1].

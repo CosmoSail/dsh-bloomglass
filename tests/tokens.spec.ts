@@ -37,7 +37,7 @@ describe('bloomTokenOverrides', () => {
   it('paints the document preview with the palette, not DSH’s neutral bluish', () => {
     // DSH ships these as static neutral-bluish tones and nothing took them over,
     // so a PDF opened in the right sidebar stayed the only blue-grey surface in a
-    // Morandi window: the page backdrop, and the status line the viewer puts on
+    // themed window: the page backdrop, and the status line the viewer puts on
     // it ('.ZhMWpq_body .ZhMWpq_status' reads label-document-preview). The
     // backdrop is the variant's own base tone; the status text takes the same
     // secondary-ink recipe the rest of the shell uses.
@@ -154,8 +154,19 @@ describe('bloomOwnVarsCss', () => {
   })
 
   it('publishes the variables Bloom stylesheets read', () => {
-    for (const name of ['--bloom-morandi', '--bloom-accent', '--bloom-glass-blur', '--bloom-hairline']) {
+    for (const name of ['--bloom-dye', '--bloom-wash', '--bloom-accent', '--bloom-glass-blur', '--bloom-hairline']) {
       expect(css, name).toContain(name)
+    }
+  })
+
+  it('keeps the true colour and its muted tier apart', () => {
+    // Large-area gradients read --bloom-wash; thin marks read --bloom-dye. The two
+    // must not be the same value, or 朱砂 / 青莲 (chroma ~0.21, twice the old
+    // track) would stain every big surface they touch.
+    for (const variant of VARIANTS) {
+      const p = PALETTE[variant]
+      expect(p.dye, variant).not.toBe(p.wash)
+      expect(p.wash, variant).toMatch(/^\d{1,3}, \d{1,3}, \d{1,3}$/)
     }
   })
 

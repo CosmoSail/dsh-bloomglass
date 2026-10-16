@@ -10,7 +10,7 @@
 /**
  * 玻璃层（v0.5.0，主视觉）—— 不再有壁纸/氛围层。
  *
- * 背景即 body 的莫兰迪氛围渐变（见 COMPONENT_CSS 第 1 节，已增强）。
+ * 背景即 body 的传统色氛围渐变（见 COMPONENT_CSS 第 1 节，已增强）。
  * 玻璃由三件事读出来，缺一不可：
  *   1. 半透底（透明 60~82%）让氛围渐变的色相透过来；
  *   2. backdrop blur + saturate：面板与背景/内容交界产生霜化；
@@ -77,7 +77,7 @@ body[data-bloomglass-variant="aurora"]::before {
    撞出一道突兀的色块边界(用户实拍反馈:「对话和轨迹这里」)。
 
    玻璃需要面积才成立。窄条带该做的是「分界」而不是「面」,所以只留一条
-   morandi 发丝底边,底色完全交给 body 的氛围渐变。 */
+   dye 发丝底边,底色完全交给 body 的氛围渐变。 */
 body[data-bloomglass-variant] div[class*="_tabs"] {
   background-color: transparent;
   backdrop-filter: none;
@@ -201,7 +201,7 @@ body[data-bloomglass-variant] div[class*="_composer"] div[class*="_card"] {
      三层叠：① 顶部内高光（光从上方来）；② 紧贴的硬短影（贴着卡边的
      0.5px 影，像把卡片按下去一点弹回来的感觉）；③ 远散的长距柔影
      （把卡片安放在画布上）；④ 主题色 tint 外晕（"这张卡属于这里"——
-     莫兰迪主题自己的颜色，不是死的灰黑阴影）。 */
+     主题自己的传统色，不是死的灰黑阴影）。 */
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.28),
     0 1px 2px -1px rgba(0, 0, 0, 0.18),
@@ -325,7 +325,7 @@ body[data-bloomglass-variant] [class*="_card"]:hover:not([class*="_cardActive"])
 
 /* 「浅色 / 深色 / 跟随系统」选中态的边框：DSH 用 --dsw-static-neutral-bluish-400
    （#adb2b8）画它。那是 static 层的中性灰阶 —— 绕过了 alias 层，主题的
-   --dsw-alias-border-* 改不到它，于是在莫兰迪暗底上留下一圈刺眼的灰白边
+   --dsw-alias-border-* 改不到它，于是在深色底上留下一圈刺眼的灰白边
    （用户实拍反馈「白色边框很突兀」，而且只有选中那一个特别亮）。
 
    选中态本该是主题色，这里按 accent 接管。并且**不**整体覆盖
@@ -349,7 +349,7 @@ body[data-bloomglass-variant] .md-code-block pre,
 body[data-bloomglass-variant] .md-code-block code { background: transparent; }
 
 /* ═══ 表格内部分隔线加强（v0.9.0）用户截图反馈列线几乎不可见 ═══
-   原 CSS 用 var(--bloom-hairline)（莫兰迪 30% alpha）做列分隔，
+   原 CSS 用 var(--bloom-hairline)（真色 30% alpha）做列分隔，
    在深色氛围渐变上几乎消失，看起来像没线的「列表」。提到
    hairline-strong（55% alpha）并给 thead 加一档淡底，列与行都立起来。 */
 body[data-bloomglass-variant] [class*="_tableScroll"] th,
@@ -357,15 +357,15 @@ body[data-bloomglass-variant] [class*="_tableScroll"] td {
   border-color: var(--bloom-hairline-strong);
 }
 [class*="_tableScroll"] thead th {
-  background: rgba(var(--bloom-morandi), 0.10);
+  background: rgba(var(--bloom-wash), 0.10);
 }
 body[data-ds-dark-theme] [class*="_tableScroll"] thead th {
-  background: rgba(var(--bloom-morandi), 0.08);
+  background: rgba(var(--bloom-wash), 0.08);
 }
 [class*="_tableScroll"] tbody tr:nth-child(even) td {
-  background: rgba(var(--bloom-morandi), 0.03);
+  background: rgba(var(--bloom-wash), 0.03);
 }
 body[data-ds-dark-theme] [class*="_tableScroll"] tbody tr:nth-child(even) td {
-  background: rgba(var(--bloom-morandi), 0.04);
+  background: rgba(var(--bloom-wash), 0.04);
 }
 `

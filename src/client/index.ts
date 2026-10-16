@@ -5,7 +5,7 @@
  * namespace: Bloom wrote ~90 `--dsw-*` properties from a `<style>` tag with no
  * disposer, while Frosted stacked 18 background tokens through the official
  * override layer, which DSH applies as *inline* body styles and therefore wins
- * regardless of order. The result was neutral-grey glass plates under Morandi
+ * regardless of order. The result was neutral-grey glass plates under the palette
  * labels.
  *
  * This plugin keeps one pipeline instead:
@@ -15,7 +15,7 @@
  *
  * Frosted's contribution is no longer a competing palette but an alpha
  * transform applied to Bloom's own surface colours, so a wallpaper dims the
- * Morandi tints rather than replacing them.
+ * the palette's own tints rather than replacing them.
  */
 import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-client-locale/client'

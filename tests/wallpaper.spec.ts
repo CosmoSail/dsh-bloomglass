@@ -154,7 +154,7 @@ describe('FrostedPresenter', () => {
     // Dockkit draws the first dock column with
     //   '._tabCell[data-dockkit-host=dock][data-dockkit-column="0"] > ._tabHost
     //      { border-left: .5px solid var(--dsw-alias-border-l4) }'
-    // — a 40%-ink line (the theme's own border-l4 is rgba(morandi, .40)) down the
+    // — a 40%-ink line (the theme's own border-l4 is rgba(dye, .40)) down the
     // rail's whole height, and the one hard divider a gradient cannot dissolve.
     //
     // It is painted on the tab *host*, which carries data-dockkit-column as well

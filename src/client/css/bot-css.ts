@@ -9,7 +9,7 @@
  * own `--bt-*` palette, written on `html body` and
  * `html body[data-ds-dark-theme]` by a stylesheet it injects when it mounts —
  * which is after this plugin's tag, so today the Bot UI keeps its own greys
- * inside a Morandi shell, and stays opaque over a wallpaper.
+ * inside a Chinese-traditional-colour shell, and stays opaque over a wallpaper.
  *
  * This module fixes both halves:
  *

@@ -1,12 +1,12 @@
 # dsh-bloomglass
 
-一个 DeepSeek Harness Web 主题插件：十套 OKLCH 莫兰迪配色打底，可选一张壁纸铺满窗口、界面以磨砂玻璃叠上去。官方 Light / Dark / System 仍然掌权。已适配 DS Bot（Bot 团队）界面。
+一个 DeepSeek Harness Web 主题插件：十套 OKLCH 中国传统色（国色）配色打底，可选一张壁纸铺满窗口、界面以磨砂玻璃叠上去。官方 Light / Dark / System 仍然掌权。已适配 DS Bot（Bot 团队）界面。
 
 ## 效果展示
 
 10 套配色，每套都有亮色与暗色（底色 / 正文色 / 强调色 / 层级面色）：
 
-![10 套莫兰迪配色](docs/showcase/palette-board.png)
+![10 套中国传统色配色](docs/showcase/palette-board.png)
 
 | 亮色 · 黛蓝 | 暗色 · 天青 |
 | --- | --- |
@@ -67,7 +67,7 @@ dsh plugin --profile web add github:CosmoSail/dsh-bloomglass
 git clone https://github.com/CosmoSail/dsh-bloomglass.git
 cd dsh-bloomglass
 npm install
-npm test         # vitest，89 个用例
+npm test         # vitest，115 个用例
 npm run typecheck
 npm run build    # tsdown → lib/index.js + lib/client.js
 npm run showcase # 重新生成 docs/showcase 下的演示页

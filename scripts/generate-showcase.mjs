@@ -37,7 +37,8 @@ const DEMO = {
   return \`--dsw-alias-bg-base: \${bg};\`
 }`,
   composer: '输入消息，或按 / 查看命令…',
-  table: [['变体', '色相', '对比度'], ['黛蓝', '240', '5.13:1'], ['朱砂', '25', '4.72:1'], ['桃夭', '350', '4.64:1']],
+  // 演示表格里的数字必须与 palette.ts 的实测表一致 —— 它会印进 README 的截图里。
+  table: [['变体', '色相', '对比度'], ['黛蓝', '259', '6.16:1'], ['朱砂', '33', '5.86:1'], ['桃夭', '7', '5.45:1']],
 }
 
 /**
@@ -271,7 +272,7 @@ function paletteBoard() {
   .legend{display:flex;gap:18px;color:#8d97a2;font-size:11.5px;margin-top:16px}
 </style></head>
 <body>
-  <h1>Bloom Glass · 10 套莫兰迪配色</h1>
+  <h1>Bloom Glass · 10 套中国传统色配色</h1>
   <div class="sub">左：亮色　右：暗色　　每格展示底色、正文色、强调色与层级面色</div>
   ${rows}
   <div class="legend"><span>亮色</span><span>暗色</span><span>● 强调色</span><span>▬ 层级面色</span></div>

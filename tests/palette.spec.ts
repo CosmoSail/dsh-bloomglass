@@ -74,7 +74,7 @@ describe('palette contrast floors', () => {
   })
 
   it('keeps the light track deepened and the dark track untouched', () => {
-    // 2026-10-16 (owner): the light Morandi tones were a notch too pale, so every
+    // 2026-10-16 (owner): the light tones were a notch too pale, so every
     // variant's light track dropped by 4–5L with its accent following 2.0–3.2L
     // down to hold the ratio above. This guards the direction: no light base may
     // climb back above 94L, the two surface steps must stay below it, and the

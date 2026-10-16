@@ -239,7 +239,7 @@ body[${BODY_ATTR}][${FROST_ATTR}] [data-rightbar-col]::before {
  * Dockkit ships
  *   '._tabCell[data-dockkit-host=dock][data-dockkit-column="0"] > ._tabHost
  *      { border-left: .5px solid var(--dsw-alias-border-l4) }'
- * — a 40%-ink line (the theme's own border-l4 is 'rgba(morandi, .40)') down the
+ * — a 40%-ink line (the theme's own border-l4 is 'rgba(dye, .40)') down the
  * rail's whole height. It is painted on the tab *host*, and dockkit puts
  * 'data-dockkit-column' on that host as well as on its cell:
  *   '<div class="__tabCell" data-dockkit-host="dock" data-dockkit-column="0">

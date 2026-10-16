@@ -14,7 +14,7 @@
 export const COMPONENT_CSS = `
 /* ═══ 1. 氛围层 ═══════════════════════════════════════════════════
    原版 body 的三层叠加：大尺度径向光晕 + 斜向淡染 + 顶部柔光。
-   全部用气质轨(morandi)的极低透明度，这是莫兰迪「灰调通透」的来源。
+   全部用气质轨(dye / wash)的极低透明度，这是「灰调通透」的来源。
 
    v0.10.x（owner 反馈「没光感」）：把 veil 换成 aurora-stream 并提高透明度。
    aurora-stream 来自 motion 谱，是每个变体的三色光谱（鼠尾草=草绿系、青金=蓝系），
@@ -90,7 +90,7 @@ body[data-bloomglass-variant] [class*="_scrollBody"] {
 }
 
 /* ═══ 2. 冷光线条 ═════════════════════════════════════════════════
-   细、冷、低透明度的莫兰迪描边 + 极弱外辉。深色下最出效果。 */
+   细、冷、低透明度的传统色描边 + 极弱外辉。深色下最出效果。 */
 
 /* ═══ 侧栏 ════════════════════════════════════════════════════════
    之前只给了右侧一道竖线，内部还是一整块死板的纯色。补足：顶部氛围淡染、
@@ -98,10 +98,10 @@ body[data-bloomglass-variant] [class*="_scrollBody"] {
 [class*="_sidebarCol"] {
   position: relative;
   box-shadow: 1px 0 0 var(--bloom-hairline), 8px 0 32px -10px var(--bloom-glow);
-  /* 顶部莫兰迪淡染，跟主区氛围同源，消除"两块拼起来"的割裂感 */
+  /* 顶部真色淡染（大面积走 wash 档），跟主区氛围同源，消除"两块拼起来"的割裂感 */
   background-image:
-    linear-gradient(180deg, rgba(var(--bloom-morandi), 0.1), transparent 260px),
-    radial-gradient(600px circle at 0% 0%, rgba(var(--bloom-morandi), 0.08), transparent 60%);
+    linear-gradient(180deg, rgba(var(--bloom-wash), 0.1), transparent 260px),
+    radial-gradient(600px circle at 0% 0%, rgba(var(--bloom-wash), 0.08), transparent 60%);
 }
 
 /* 会话条目：圆角 + 过渡。hover / 选中的着色统一在 §6「会话行」那一处，
@@ -118,7 +118,7 @@ body[data-bloomglass-variant] [class*="_scrollBody"] {
   font-weight: 500;
   color: var(--dsw-alias-label-primary);
 }
-/* v0.10.x（owner 反馈「脏」）：左侧 3px 蓝竖条是脏点 —— 莫兰迪克制不应有这种色块。
+/* v0.10.x（owner 反馈「脏」）：左侧 3px 蓝竖条是脏点 —— 主题的克制不应有这种色块。
    删掉 ::before。选中感靠 bg 的 8% 染色传达。 */
 
 /* 新建会话按钮：几何形状在这里，**底色在下面「描边按钮」那一节**（v0.10.x 起
@@ -128,7 +128,7 @@ body[data-bloomglass-variant] [class*="_scrollBody"] {
   border: 0;
   border-radius: 10px;
 }
-/* 图标和文字都用主色 —— 不让 accent 出现在按钮的图标上，跟莫兰迪统一 */
+/* 图标和文字都用主色 —— 不让 accent 出现在按钮的图标上，跟主题统一 */
 [class*="_sidebarCol"] button[class*="_newSession"] svg,
 [class*="_sidebarCol"] button[class*="_newChat"] svg {
   color: var(--dsw-alias-label-primary);
@@ -257,7 +257,7 @@ div[class*="_panel"] {
 div[class*="_card"]:hover,
 div[class*="_toolRow"]:hover {
   border-color: var(--bloom-hairline);
-  background: rgba(var(--bloom-morandi), 0.05);
+  background: rgba(var(--bloom-dye), 0.05);
 }
 /* 展开态：DSH 的终端区（_terminal）自带 1px 边框 + 12px 圆角，
    外层 card 再描一圈就是两个几乎同尺寸的圆角框相套（实测 439px 套 377px）＝框中框。
@@ -278,7 +278,7 @@ div[class*="_composer"] div[class*="_card"] {
   border-radius: 16px;
   /* 三层：顶部内高光（模拟光从上方打来）+ 长距柔影 + 外侧冷辉 */
   box-shadow:
-    inset 0 1px 0 rgba(var(--bloom-morandi), 0.14),
+    inset 0 1px 0 rgba(var(--bloom-dye), 0.14),
     var(--bloom-shadow),
     0 0 24px -14px var(--bloom-glow);
   transition: border-color 0.22s ease, box-shadow 0.22s ease;
@@ -286,7 +286,7 @@ div[class*="_composer"] div[class*="_card"] {
 div[class*="_composer"] div[class*="_card"]:focus-within {
   border-color: var(--bloom-hairline-strong);
   box-shadow:
-    inset 0 1px 0 rgba(var(--bloom-morandi), 0.2),
+    inset 0 1px 0 rgba(var(--bloom-dye), 0.2),
     var(--bloom-shadow),
     0 0 0 2px var(--bloom-glow);
 }
@@ -317,11 +317,11 @@ div[class*="_bubble"] {
   bottom: -0.34em;
   height: 2px;
   border-radius: 999px;
-  background: linear-gradient(90deg, rgba(var(--bloom-morandi), 0.45), transparent);
+  background: linear-gradient(90deg, rgba(var(--bloom-dye), 0.45), transparent);
 }
 [class*="_markdown"] h1::after { width: 76px; height: 3px; }
 [class*="_markdown"] h2::after { width: 56px; }
-[class*="_markdown"] h3::after { width: 40px; background: linear-gradient(90deg, rgba(var(--bloom-morandi), 0.28), transparent); }
+[class*="_markdown"] h3::after { width: 40px; background: linear-gradient(90deg, rgba(var(--bloom-dye), 0.28), transparent); }
 
 hr {
   border: 0;
@@ -330,13 +330,13 @@ hr {
 }
 
 blockquote {
-  border-left: 3px solid rgba(var(--bloom-morandi), 0.55);
+  border-left: 3px solid rgba(var(--bloom-dye), 0.55);
   border-radius: 12px;
-  background: rgba(var(--bloom-morandi), 0.07);
+  background: rgba(var(--bloom-wash), 0.07);
   box-shadow: var(--bloom-shadow-sm);
 }
 
-/* 代码：内联块用莫兰迪淡底（变量已在 alias 层修正为背景色），
+/* 代码：内联块用传统色淡底（变量已在 alias 层修正为背景色），
    块级代码加冷光描边 + 圆角，消除方角感 */
 code {
   border-radius: 6px;
@@ -376,7 +376,7 @@ pre code {
 [class*="_tableScroll"] {
   border: 1px solid var(--bloom-hairline);
   border-radius: 10px;
-  background: rgba(var(--bloom-morandi), 0.02);
+  background: rgba(var(--bloom-wash), 0.02);
 }
 /* min-width:100% 而不是 width:100%：
    DSH 原生表格按内容定宽，而 _tableScroll 容器是块级全宽。上面刚给容器加了边框+圆角，
@@ -404,13 +404,13 @@ body[data-bloomglass-variant] [class*="_tableScroll"] td {
 [class*="_tableScroll"] th:first-child,
 [class*="_tableScroll"] td:first-child { padding-left: 16px; }
 [class*="_tableScroll"] thead th {
-  background: rgba(var(--bloom-morandi), 0.10);
+  background: rgba(var(--bloom-wash), 0.10);
   font-weight: 600;
   border-bottom-width: 1px;
   border-bottom-color: var(--bloom-hairline-strong);
   color: var(--dsw-alias-label-secondary, currentColor);
 }
-[class*="_tableScroll"] tbody tr:hover { background: rgba(var(--bloom-morandi), 0.06); }
+[class*="_tableScroll"] tbody tr:hover { background: rgba(var(--bloom-wash), 0.06); }
 /* 空 cell 视觉降权：透明度 0.35，省得缺值列（P1 状态空）显得行"断了一截" */
 [class*="_tableScroll"] td:empty { opacity: 0.35; }
 
@@ -526,7 +526,7 @@ body {
 /* 组标题下曾有一道渐隐光带（左浓右透）。删掉了：侧栏里有 18 个分组，
  * 一组一条 = 18 条横线，正是 owner 说的「取消网格」要取消的东西
  * （2026-09-10 实拍反馈"细节不满意"）。浅色下线的左端是 28% accent，
- * 在莫兰迪里更是一条明显的彩色规线。
+ * 在国色里更是一条明显的彩色规线。
  *
  * 分组识别现在靠三件不画线的东西：组标题自带文件夹图标、条目相对缩进、
  * 组间 16px 留白。实测这三样够了 —— 加线只是把"够了"变成"吵"。 */
@@ -577,7 +577,7 @@ div[class*="_composer"] div[class*="_card"]:hover {
 /* ═══ 焦点环兜底：统一成主题色 ═══
    DSH 有些控件（例如设置面板右上角的关闭按钮）没定义自己的 focus 样式，
    于是露出**浏览器默认**的 focus ring —— Chrome 暗色下是一圈亮蓝
-   rgb(153,200,255)，跟 8 套莫兰迪配色全都打架（用户实拍反馈里那个蓝圈）。
+   rgb(153,200,255)，跟 10 套配色全都打架（用户实拍反馈里那个蓝圈）。
    注意它不是 DSH 的 token，改 --dsw-* 改不到，只能靠这条兜底。
 
    用 :focus-visible 而不是 :focus —— 只在键盘导航时出现，鼠标点击不显示，
@@ -929,7 +929,7 @@ body[data-bloomglass-variant] [class*="_footerActions"] {
  * DSH 禁用主按钮（空输入时的发送键等）的原生做法：fill 压到 10% + 整体再叠
  * opacity .4，但文字/图标仍用「fill 上的前景」label-primary-foreground ——
  * 那个 token 亮色语义就是白（static neutral-bluish-00）。白箭头浮在洗白的
- * 淡染底上，禁用态形同消失（禁用 bloom 样式实测原生同样如此，只是莫兰迪的
+ * 淡染底上，禁用态形同消失（禁用 bloom 样式实测原生同样如此，只是传统色的
  * 淡底把它衬得更明显）。README 挂着 WCAG 徽章，这里修正：禁用态的底已经是
  * 近白的淡染，图标用正文字色（label-primary）才读得清，明暗自适应 ——
  * 暗色下两者同为亮色，行为不变，只有亮色被纠正。 */
