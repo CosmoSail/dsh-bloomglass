@@ -128,10 +128,11 @@ html body[${BODY_ATTR}][data-ds-dark-theme] {
    0.1791 is that crossover (where white's 1.05/(Y+0.05) meets black's
    (Y+0.05)/0.05), and the two inks are written in xyz-d65: black is 0 0 0, white
    is the sRGB white point. The multiplier makes the changeover 1e-9 wide, and a
-   full scan of the cube puts the nearest 8-bit colour below the threshold at
-   #97687b, 1.1e-8 away — eleven times further than the ramp is wide — so no
-   accent a colour picker can produce lands on a mid-grey ink at its own lightness
-   (an earlier, gentle, ramp did exactly that at ~1:1).
+   full scan of the cube — read through the CSS Color 4 sRGB→XYZ matrix, the one
+   the engine computes y with — puts the nearest 8-bit colour on the side a ramp
+   can degrade (#915bcd) at 1.18e-8, twelve times further than the ramp is wide,
+   so no accent a colour picker can produce lands on a mid-grey ink at its own
+   lightness (an earlier, gentle, ramp did exactly that at ~1:1).
    Same specificity as the rule above, so it wins by coming later; an engine
    without relative colour syntax skips the block and keeps the fallback. */
 @supports (color: color(from red xyz-d65 x y z)) {

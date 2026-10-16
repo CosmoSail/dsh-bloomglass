@@ -83,9 +83,10 @@ describe('BOT_CSS — the ds-bot palette bridge', () => {
     expect(ink).toContain('0.1791 - y')
     expect(ink).toContain('0.9505')
     expect(ink).toContain('1.089')
-    // The multiplier keeps the changeover 1e-9 wide; the nearest 8-bit colour
-    // below the threshold is 1.1e-8 away, so no accent a picker can produce lands
-    // on a mid-grey ink at its own lightness (the ~1:1 hole a gentle ramp opens).
+    // The multiplier keeps the changeover 1e-9 wide; the nearest 8-bit colour on
+    // the side a ramp can degrade (#915bcd, under the CSS Color 4 matrix the
+    // engine reads y through) is 1.18e-8 away, so no accent a picker can produce
+    // lands on a mid-grey ink at its own lightness (the ~1:1 hole a ramp opens).
     expect(ink).toContain('1000000000')
     expect(BOT_CSS).not.toMatch(/--bt-accent-ink:\s*oklch\(/)
     // Same specificity as the fallback rule, so it must come after it.
