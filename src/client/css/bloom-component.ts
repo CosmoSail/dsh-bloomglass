@@ -121,21 +121,14 @@ body[data-bloomglass-variant] [class*="_scrollBody"] {
 /* v0.10.x（owner 反馈「脏」）：左侧 3px 蓝竖条是脏点 —— 莫兰迪克制不应有这种色块。
    删掉 ::before。选中感靠 bg 的 8% 染色传达。 */
 
-/* 新建会话按钮：极淡底色，无 border，文字与图标都用主文字色（owner 反馈「脏」——
-   之前 accent 色的 svg + accent 染色 bg + hairline border 三层叠，跟莫兰迪"统一克制"冲突）。
-   现在的按钮只靠 5% accent 染色跟会话行区分，没有色块、没有边框、没有彩色文字。 */
+/* 新建会话按钮：几何形状在这里，**底色在下面「描边按钮」那一节**（v0.10.x 起
+   是渐变），避免同一件东西两处各写一遍 —— 这个仓为「三处定义漂移」出血过。 */
 [class*="_sidebarCol"] button[class*="_newSession"],
 [class*="_sidebarCol"] button[class*="_newChat"] {
-  background: color-mix(in oklch, var(--bloom-accent) 5%, transparent);
   border: 0;
   border-radius: 10px;
-  transition: background 180ms ease;
 }
-[class*="_sidebarCol"] button[class*="_newSession"]:hover,
-[class*="_sidebarCol"] button[class*="_newChat"]:hover {
-  background: color-mix(in oklch, var(--bloom-accent) 12%, transparent);
-}
-/* 图标和文字都用主色 —— 不让 accent 出现在按钮上，跟莫兰迪统一 */
+/* 图标和文字都用主色 —— 不让 accent 出现在按钮的图标上，跟莫兰迪统一 */
 [class*="_sidebarCol"] button[class*="_newSession"] svg,
 [class*="_sidebarCol"] button[class*="_newChat"] svg {
   color: var(--dsw-alias-label-primary);
@@ -838,9 +831,8 @@ body[data-bloomglass-variant] [class*="_header"]:has(> [class*="_tabs"])::after 
   display: none;
 }
 
-/* 描边按钮 → 浅底。新会话 / Session 日志 / 本主题切换器三个长得一样，
-   一起处理，免得只改自己的显得突兀 */
-body[data-bloomglass-variant] [class*="_newSession"],
+/* 描边按钮 → 浅底。Session 日志 / 本主题切换器两个长得一样，一起处理，
+   免得只改自己的显得突兀。 */
 body[data-bloomglass-variant] [class*="_sessionLogButton"],
 body[data-bloomglass-variant] .dsh-bloom-trigger {
   border-color: transparent;
@@ -852,10 +844,41 @@ body[data-bloomglass-variant] .dsh-bloom-trigger {
     transform var(--bloom-dur-fast, .16s) var(--bloom-ease, ease),
     box-shadow var(--bloom-dur-fast, .16s) var(--bloom-ease, ease);
 }
-body[data-bloomglass-variant] [class*="_newSession"]:hover,
 body[data-bloomglass-variant] [class*="_sessionLogButton"]:hover,
 body[data-bloomglass-variant] .dsh-bloom-trigger:hover {
   background: color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 86%);
+}
+
+/* ═══ 新会话：渐变按钮（2026-10-16 owner 反馈「明显色块」）═══════════
+ * 8% 平铺的 accent 底在侧栏里就是一个实心圆角方块：四个角一样亮，读成"一块色"。
+ * 改成 118° 对角渐变，三档从 18% 收到 4% —— 亮的一头在左上，右下几乎回到桌面上，
+ * 于是它读成"一片光"，仍然明确是个按钮。
+ *
+ * 端点全部由 --bloom-accent 混出来，没有一个写死的色值：0.1.6 起 Bot UI 的强调色
+ * 由 ds-bot 自己掌握（bot-css.ts 那侧只保留墨色），渐变要是写死就会在换色后露馅。
+ * hover 整体提一档（26/13/6），按下沿用侧栏通用按钮的 scale（§6）；边框、圆角、
+ * 图标色分别在「描边按钮」和侧栏那两处，这里只管底色。 */
+body[data-bloomglass-variant] [class*="_newSession"] {
+  border-color: transparent;
+  background-color: transparent;
+  background-image: linear-gradient(
+    118deg,
+    color-mix(in oklch, var(--bloom-accent, #6b8f71) 18%, transparent),
+    color-mix(in oklch, var(--bloom-accent, #6b8f71) 9%, transparent) 52%,
+    color-mix(in oklch, var(--bloom-accent, #6b8f71) 4%, transparent)
+  );
+  transition:
+    background-image var(--bloom-dur-fast, .16s) var(--bloom-ease, ease),
+    transform var(--bloom-dur-fast, .16s) var(--bloom-ease, ease),
+    box-shadow var(--bloom-dur-fast, .16s) var(--bloom-ease, ease);
+}
+body[data-bloomglass-variant] [class*="_newSession"]:hover {
+  background-image: linear-gradient(
+    118deg,
+    color-mix(in oklch, var(--bloom-accent, #6b8f71) 26%, transparent),
+    color-mix(in oklch, var(--bloom-accent, #6b8f71) 13%, transparent) 52%,
+    color-mix(in oklch, var(--bloom-accent, #6b8f71) 6%, transparent)
+  );
 }
 
 /* 侧栏底部操作区：上边框 → 向上扩散的极淡阴影 */

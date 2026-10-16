@@ -64,19 +64,38 @@ describe('FrostedPresenter', () => {
     expect(GLASS_CSS).not.toMatch(sidebarSelf)
   })
 
-  it('frosts the right sidebar column', () => {
+  it('frosts the right sidebar column, and ramps its surface when there is no frost', () => {
     // ui-layout ships the column opaque — its rule is '.rightbarCol {
-    // background: var(--dsw-alias-bg-base) }' — so it needs the same plate
-    // treatment as the other columns, keyed on the attribute RightbarColumn
-    // actually renders.
+    // background: var(--dsw-alias-bg-base) }' — so the column is made
+    // transparent and its surface moves to ::before, keyed on the attribute
+    // RightbarColumn actually renders.
     expect(SURFACE_CSS).toMatch(/\[data-rightbar-col\]\s*\{[^}]*background-color:\s*transparent/)
-    const plate = /\[data-rightbar-col\]::before\s*\{([^}]*)\}/
-    expect(SURFACE_CSS).toMatch(plate)
-    const body = plate.exec(SURFACE_CSS)?.[1] ?? ''
-    expect(body).toContain('backdrop-filter')
-    // The frost stays on the pseudo-element: a filter on the column itself would
-    // make it a containing block for position:fixed descendants.
-    expect(body).toContain('position: absolute')
+    const always = /body\[[^\]]*\]\s*\[data-rightbar-col\]::before\s*\{([^}]*)\}/.exec(SURFACE_CSS)?.[1] ?? ''
+    // Without a wallpaper the surface has to *ramp*: the conversation column is
+    // transparent, so the shell's --bloom-ambience wash runs through it, and a
+    // flat plate stopped that wash at the rail's edge (a one-pixel 0.61-luminance
+    // step — the dividing line). Three stops, no hard edge, and the geometry
+    // stays on the pseudo-element: a filter on the column itself would make it a
+    // containing block for position:fixed descendants.
+    expect(always).toContain('linear-gradient')
+    expect(always).toContain('var(--dsw-alias-bg-layer-1)')
+    expect(always).toContain('position: absolute')
+    expect(always).not.toContain('backdrop-filter')
+    // Frost takes the plate back to one tone over the blur: both sides are the
+    // same glass there, and a ramp would dip the tint to zero along the seam.
+    const frosted = new RegExp(`body\\[[^\\]]*\\]\\[${FROST_ATTR}\\]\\s*\\[data-rightbar-col\\]::before\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
+    expect(frosted).toContain('backdrop-filter')
+    expect(frosted).toContain('background-color: var(--dsw-alias-bg-layer-1)')
+    expect(frosted).toContain('background-image: none')
+  })
+
+  it('takes the dock rail’s own hairline off', () => {
+    // Dockkit draws the first dock column with 'border-left: .5px solid
+    // var(--dsw-alias-border-l4)' — a 40%-ink line down the rail's whole height,
+    // and the one hard divider a gradient cannot dissolve (it survives frost,
+    // where the tone step is already 0.004). The host's column borders are
+    // already turned off the same way in GLASS_CSS.
+    expect(SURFACE_CSS).toMatch(/\[data-rightbar-col\]\s*\[data-dockkit-column='0'\]\s*\{[^}]*border-left:\s*0/)
   })
 
   it('hands the dock pane surface back to the plate', () => {
@@ -86,8 +105,8 @@ describe('FrostedPresenter', () => {
     // token and nothing else. It is also one of the six tokens ds-bot writes
     // through the official override layer, which is how opening a file and
     // touching ds-bot's Appearance theme turned the column into ds-bot's opaque
-    // grey. Handing the surface back to the plate moves it onto
-    // --dsw-alias-bg-layer-1, a token nothing else writes.
+    // grey. Handing the surface back moves it onto --dsw-alias-bg-layer-1, a
+    // token nothing else writes.
     const rule = /\[data-rightbar-col\]\s+:is\(\[data-dockkit-content\]:not\(\[data-dockkit-float\]\),\s*\[data-dockkit-empty\]\)\s*\{([^}]*)\}/
     expect(SURFACE_CSS).toMatch(rule)
     expect(rule.exec(SURFACE_CSS)?.[1] ?? '').toContain('background-color: transparent')

@@ -44,3 +44,41 @@ describe('COMPONENT_CSS — the focus ring', () => {
     expect(block).not.toContain('body[')
   })
 })
+
+/**
+ * The new-session button became a gradient (user report: the flat 8% accent fill
+ * read as a solid block). What matters structurally is that the endpoints are
+ * *derived* from the accent — 0.1.6 handed the Bot UI's accent back to ds-bot,
+ * and a hard-coded stop would not survive the change — and that the hover state
+ * stays a gradient rather than falling back to a flat fill.
+ */
+describe('COMPONENT_CSS — the new-session gradient', () => {
+  const base = /body\[data-bloomglass-variant\]\s*\[class\*="_newSession"\]\s*\{([^}]*)\}/.exec(COMPONENT_CSS)?.[1] ?? ''
+  const hover = /body\[data-bloomglass-variant\]\s*\[class\*="_newSession"\]:hover\s*\{([^}]*)\}/.exec(COMPONENT_CSS)?.[1] ?? ''
+
+  it('paints a gradient whose stops all come from the accent', () => {
+    expect(base).toContain('background-image: linear-gradient')
+    expect(base).toContain('background-color: transparent')
+    const stops = [...base.matchAll(/color-mix\(in oklch, var\(--bloom-accent[^)]*\)[^,)]*, transparent\)/g)]
+    expect(stops.length).toBeGreaterThanOrEqual(3)
+    // No literal colour in the fill. The `var(--bloom-accent, #6b8f71)` fallback
+    // is the usual guard for the variable being absent, not a stop.
+    const withoutFallback = base.replace(/var\(--bloom-accent,\s*#[0-9a-f]{6}\)/gi, 'var(--bloom-accent)')
+    expect(withoutFallback).not.toMatch(/#[0-9a-f]{3,8}\b/i)
+    expect(withoutFallback).not.toMatch(/rgb\(/)
+    // The three stops ramp down, so the fill reads as light rather than a block.
+    const alphas = [...base.matchAll(/var\(--bloom-accent[^)]*\)\s*(\d+)%, transparent\)/g)].map(m => Number(m[1]))
+    expect(alphas.length).toBeGreaterThanOrEqual(3)
+    expect(alphas[0]).toBeGreaterThan(alphas[1])
+    expect(alphas[1]).toBeGreaterThan(alphas[2])
+  })
+
+  it('keeps a steeper gradient on hover', () => {
+    expect(hover).toContain('background-image: linear-gradient')
+    expect(hover).not.toContain('background-color:')
+    const alphas = [...hover.matchAll(/var\(--bloom-accent[^)]*\)\s*(\d+)%, transparent\)/g)].map(m => Number(m[1]))
+    expect(alphas.length).toBeGreaterThanOrEqual(3)
+    const baseAlphas = [...base.matchAll(/var\(--bloom-accent[^)]*\)\s*(\d+)%, transparent\)/g)].map(m => Number(m[1]))
+    expect(alphas[0]).toBeGreaterThan(baseAlphas[0])
+  })
+})

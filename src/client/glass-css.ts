@@ -120,14 +120,29 @@ export const SURFACE_CSS = `
 /*
  * Right sidebar column. DSH ships it opaque — the ui-layout rule is
  * '.rightbarCol { background: var(--dsw-alias-bg-base) }' — so it stayed a
- * solid slab while the other columns frosted. Plate it the same way: make the
- * column itself transparent and paint the frost on ::before, so the column
- * never becomes a containing block for position:fixed descendants (the trap
- * documented for the sidebar in GLASS_CSS).
+ * solid slab. Make the column itself transparent, always, and paint whatever
+ * surface it gets on ::before (never on the column: a backdrop-filter there
+ * would make it a containing block for position:fixed descendants, the trap
+ * documented in GLASS_CSS).
  *
- * 'data-rightbar-col' is what RightbarColumn actually renders. With no
- * wallpaper behind it the plate resolves to the same colour as the column it
- * replaced, so this is a no-op until there is something to frost.
+ * The surface is a *gradient*, and which gradient depends on the frost, because
+ * the two modes have different tones to meet:
+ *
+ *   no wallpaper — the conversation column is transparent and the shell's
+ *     --bloom-ambience wash (COMPONENT_CSS, background-attachment: fixed) runs
+ *     straight through it, while a flat plate would stop that wash dead at the
+ *     rail's left edge and start a slab: measured on the harness as a one-pixel
+ *     step of 0.61 luminance in light mode (0.25 in dark) — the dividing line
+ *     the dashboard reported. So the rail starts *as* the wash and fades its own
+ *     plate tone in over 72px: the boundary dissolves into a ramp instead of a
+ *     step.
+ *
+ *   wallpaper — both sides are the same translucent glass (--dsw-alias-bg-layer-1
+ *     at the glass density, over the same blur), so the plate stays uniform: any
+ *     ramp here would dip the tint to zero along the seam and repaint the very
+ *     edge we are removing (the same scan measures 0.004).
+ *
+ * 'data-rightbar-col' is what RightbarColumn actually renders.
  */
 body[${BODY_ATTR}] [data-rightbar-col] {
   background-color: transparent !important;
@@ -138,9 +153,34 @@ body[${BODY_ATTR}] [data-rightbar-col]::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: var(--dsw-alias-bg-layer-1);
+  /* From the page's own wash, through a half-strength midpoint, into the rail's
+     plate tone: three stops, no step. */
+  background-image: linear-gradient(
+    to right,
+    color-mix(in oklch, var(--dsw-alias-bg-layer-1), transparent 100%),
+    color-mix(in oklch, var(--dsw-alias-bg-layer-1), transparent 55%) 34px,
+    var(--dsw-alias-bg-layer-1) 72px
+  );
+}
+body[${BODY_ATTR}][${FROST_ATTR}] [data-rightbar-col]::before {
+  background-image: none;
+  background-color: var(--dsw-alias-bg-layer-1);
   -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
   backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
+}
+
+/*
+ * The dock rail's own hairline. Dockkit draws the first dock column's tab host
+ * with 'border-left: .5px solid var(--dsw-alias-border-l4)' — a 40%-ink line
+ * down the rail's whole height, on top of whichever surface the theme paints
+ * there, and the one *hard* divider the gradient above cannot dissolve (it is
+ * still there under frost, where the tone step is already 0.004). The theme
+ * already turns the host's own column borders off the same way in GLASS_CSS
+ * ('border-right: none !important' for the sidebar slot, 'border-left: none'
+ * for details); this is the same line for the rail.
+ */
+body[${BODY_ATTR}] [data-rightbar-col] [data-dockkit-column='0'] {
+  border-left: 0;
 }
 
 /*
@@ -155,13 +195,12 @@ body[${BODY_ATTR}] [data-rightbar-col]::before {
  * ds-bot's own Appearance layer also writes — opening a file and touching
  * ds-bot's theme handed the whole column ds-bot's grey.
  *
- * Hand the surface back to the plate instead: the tab host paints nothing, the
- * column's glass shows through, and the sidebar follows the palette through
- * --dsw-alias-bg-layer-1, which no other plugin writes. Without a wallpaper the
- * plate resolves to the same tone the host used to paint, so this changes
- * nothing until there is frost to show. Floats are excluded — they carry their
- * own fill and are not the column's surface — and the empty-pane host, which
- * paints the same token for the "open something" guide, is included.
+ * Hand the surface back instead: the tab host paints nothing, the column's own
+ * surface (the theme's plate under frost, the page's wash without one) shows
+ * through, and the rail follows the palette through --dsw-alias-bg-layer-1,
+ * which no other plugin writes. Floats are excluded — they carry their own fill
+ * and are not the column's surface — and the empty-pane host, which paints the
+ * same token for the "open something" guide, is included.
  */
 body[${BODY_ATTR}] [data-rightbar-col] :is([data-dockkit-content]:not([data-dockkit-float]), [data-dockkit-empty]) {
   background-color: transparent;

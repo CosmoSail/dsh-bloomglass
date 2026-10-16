@@ -33,17 +33,24 @@ export function isVariant(value: unknown): value is Variant {
  * 一旦把 accent 拿去刷大面积，petal 就会从藕粉变成荧光洋红 —— 莫兰迪感就没了。
  *
  * 亮色 accent 的 L 值已按 WCAG AA(4.5:1) 反推校准（底色为各变体的 bgL）。
+ *
+ * 2026-10-16（owner：浅色模式下莫兰迪色加深）亮色档整体下压一档：底色 -4L、
+ * 两级表面 -5L，强调色按各自对比度反推再压低 2.0~3.2L —— 底色变深会同时吃掉
+ * accent 的对比度，不跟着压就会有一半变体跌破 4.5。色相与彩度一律不动，
+ * 10 套的 L 间距保持不变（相互差异不变）；暗色档一档没动。
+ *
  * accent × bg 实测对比度（10 变体 × 明暗，全部 ≥ 4.5:1）——
- * 这一对同时也是主按钮的 fill × dimmed（见 tokens.ts 的 button-primary-dimmed）：
+ * 这一对同时也是主按钮的 fill × dimmed（见 tokens.ts 的 button-primary-dimmed）。
+ * 下表由 make-contrast 脚本在浏览器里以 canvas 取真实 sRGB 值算出：
  *
  *   变体       亮色     暗色        变体       亮色     暗色
- *   mist     5.28:1   5.96:1      stone    5.48:1   7.77:1
- *   cinnabar 4.87:1   5.63:1      lapis    5.63:1   7.31:1
- *   petal    4.55:1   6.07:1      amber    4.54:1   7.65:1
- *   ripple   4.61:1   8.51:1      aurora   5.10:1   7.74:1
- *   sage     4.53:1   7.42:1      lavender 5.24:1   6.81:1
+ *   mist     5.13:1   5.98:1      stone    5.32:1   7.79:1
+ *   cinnabar 4.72:1   5.63:1      lapis    5.48:1   7.32:1
+ *   petal    4.64:1   6.08:1      amber    4.60:1   7.66:1
+ *   ripple   4.62:1   8.49:1      aurora   4.63:1   8.50:1
+ *   sage     4.60:1   7.42:1      lavender 5.06:1   6.81:1
  *
- * 最紧的是 sage 亮色 4.53:1 —— 改任何变体的 accentL/bgL 前先重算，
+ * 最紧的是 sage / amber 亮色 4.60:1 —— 改任何变体的 accentL/bgL 前先重算，
  * 别只看「颜色好不好看」。（此前这段注释停在 petal 3.55 / ripple 3.02，
  * 那是校准**前**的值，且自相矛盾地标着「达标」。）
  */
@@ -70,74 +77,74 @@ export interface PaletteEntry {
 
 export const PALETTE: Record<Variant, PaletteEntry> = {
   mist: {
-    accentL: 'oklch(50% 0.08 240)',  accentD: 'oklch(72% 0.12 240)',
+    accentL: 'oklch(48% 0.08 240)',  accentD: 'oklch(72% 0.12 240)',
     morandi: '146, 168, 179',
-    bgL: 'oklch(96% 0.01 240)',      bgD: 'oklch(28% 0.02 240)',
+    bgL: 'oklch(92% 0.01 240)',      bgD: 'oklch(28% 0.02 240)',
     txL: 'oklch(25% 0.02 240)',      txD: 'oklch(96% 0.01 240)',
-    sfL: 'oklch(94% 0.01 240)',      sfD: 'oklch(34% 0.02 240)',
-    sf2L: 'oklch(91% 0.01 240)',     sf2D: 'oklch(40% 0.02 240)',
+    sfL: 'oklch(89% 0.01 240)',      sfD: 'oklch(34% 0.02 240)',
+    sf2L: 'oklch(86% 0.01 240)',     sf2D: 'oklch(40% 0.02 240)',
     motionL: ['oklch(50% 0.08 240)', 'oklch(50% 0.10 210)', 'oklch(50% 0.09 275)'],
     motionD: ['oklch(72% 0.12 240)', 'oklch(74% 0.13 210)', 'oklch(74% 0.11 275)'],
   },
   cinnabar: {
-    accentL: 'oklch(55% 0.18 25)',   accentD: 'oklch(72% 0.12 25)',
+    accentL: 'oklch(53% 0.18 25)',   accentD: 'oklch(72% 0.12 25)',
     morandi: '215, 75, 75',
-    bgL: 'oklch(97% 0.005 25)',      bgD: 'oklch(28% 0.02 25)',
+    bgL: 'oklch(93% 0.005 25)',      bgD: 'oklch(28% 0.02 25)',
     txL: 'oklch(25% 0.02 25)',       txD: 'oklch(96% 0.01 25)',
-    sfL: 'oklch(95% 0.005 25)',      sfD: 'oklch(34% 0.02 25)',
-    sf2L: 'oklch(92% 0.005 25)',     sf2D: 'oklch(40% 0.02 25)',
+    sfL: 'oklch(90% 0.005 25)',      sfD: 'oklch(34% 0.02 25)',
+    sf2L: 'oklch(87% 0.005 25)',     sf2D: 'oklch(40% 0.02 25)',
     motionL: ['oklch(55% 0.18 25)', 'oklch(55% 0.16 65)', 'oklch(55% 0.15 350)'],
     motionD: ['oklch(72% 0.12 25)', 'oklch(74% 0.14 65)', 'oklch(73% 0.13 350)'],
   },
   petal: {
-    accentL: 'oklch(58% 0.22 350)',  accentD: 'oklch(75% 0.18 350)',
+    accentL: 'oklch(54.8% 0.22 350)',  accentD: 'oklch(75% 0.18 350)',
     morandi: '232, 133, 155',
-    bgL: 'oklch(98% 0.01 350)',      bgD: 'oklch(28% 0.02 350)',
+    bgL: 'oklch(94% 0.01 350)',      bgD: 'oklch(28% 0.02 350)',
     txL: 'oklch(25% 0.02 354)',      txD: 'oklch(98% 0.01 350)',
-    sfL: 'oklch(96% 0.015 350)',     sfD: 'oklch(34% 0.02 350)',
-    sf2L: 'oklch(94% 0.015 350)',    sf2D: 'oklch(40% 0.02 350)',
+    sfL: 'oklch(91% 0.015 350)',     sfD: 'oklch(34% 0.02 350)',
+    sf2L: 'oklch(89% 0.015 350)',    sf2D: 'oklch(40% 0.02 350)',
     motionL: ['oklch(58% 0.22 350)', 'oklch(58% 0.17 310)', 'oklch(58% 0.17 20)'],
     motionD: ['oklch(75% 0.18 350)', 'oklch(75% 0.14 310)', 'oklch(76% 0.14 20)'],
   },
   ripple: {
-    accentL: 'oklch(51% 0.12 195)',  accentD: 'oklch(75% 0.12 195)',
+    accentL: 'oklch(48% 0.12 195)',  accentD: 'oklch(75% 0.12 195)',
     morandi: '95, 168, 178',
-    bgL: 'oklch(96% 0.01 195)',      bgD: 'oklch(20% 0.02 195)',
+    bgL: 'oklch(92% 0.01 195)',      bgD: 'oklch(20% 0.02 195)',
     txL: 'oklch(25% 0.02 195)',      txD: 'oklch(96% 0.01 195)',
-    sfL: 'oklch(94% 0.01 195)',      sfD: 'oklch(28% 0.02 195)',
-    sf2L: 'oklch(92% 0.01 195)',     sf2D: 'oklch(38% 0.02 195)',
+    sfL: 'oklch(89% 0.01 195)',      sfD: 'oklch(28% 0.02 195)',
+    sf2L: 'oklch(87% 0.01 195)',     sf2D: 'oklch(38% 0.02 195)',
     motionL: ['oklch(51% 0.12 195)', 'oklch(51% 0.13 225)', 'oklch(51% 0.11 165)'],
     motionD: ['oklch(75% 0.12 195)', 'oklch(76% 0.14 225)', 'oklch(77% 0.12 165)'],
   },
   /* v0.5.0 新增（源自 typora-Bloom-theme 成功变体）：
      色值由 Typora dist/*.css 的 accent/bg/surface/text 直接转 oklch，hue 对齐原版 */
   sage: {
-    accentL: 'oklch(54.1% 0.111 115)',  accentD: 'oklch(71.9% 0.120 115)',
+    accentL: 'oklch(50.9% 0.111 115)',  accentD: 'oklch(71.9% 0.120 115)',
     morandi: '138, 154, 91',
-    bgL: 'oklch(97% 0.011 112)',      bgD: 'oklch(20% 0.019 113)',
+    bgL: 'oklch(93% 0.011 112)',      bgD: 'oklch(20% 0.019 113)',
     txL: 'oklch(25% 0.02 116)',       txD: 'oklch(96% 0.011 118)',
-    sfL: 'oklch(94.9% 0.009 113)',    sfD: 'oklch(27.9% 0.02 116)',
-    sf2L: 'oklch(91.9% 0.009 113)',   sf2D: 'oklch(34% 0.03 116)',
+    sfL: 'oklch(89.9% 0.009 113)',    sfD: 'oklch(27.9% 0.02 116)',
+    sf2L: 'oklch(86.9% 0.009 113)',   sf2D: 'oklch(34% 0.03 116)',
     motionL: ['oklch(54.1% 0.111 115)', 'oklch(54.1% 0.12 83)', 'oklch(54.1% 0.10 152)'],
     motionD: ['oklch(71.9% 0.120 115)', 'oklch(71.9% 0.13 83)', 'oklch(71.9% 0.11 152)'],
   },
   stone: {
-    accentL: 'oklch(49.9% 0.06 29)',   accentD: 'oklch(75% 0.12 30)',
+    accentL: 'oklch(47.9% 0.06 29)',   accentD: 'oklch(75% 0.12 30)',
     morandi: '180, 160, 155',
-    bgL: 'oklch(95.9% 0.01 25)',      bgD: 'oklch(20.1% 0.019 30)',
+    bgL: 'oklch(91.9% 0.01 25)',      bgD: 'oklch(20.1% 0.019 30)',
     txL: 'oklch(25% 0.02 29)',        txD: 'oklch(95.9% 0.01 25)',
-    sfL: 'oklch(94.1% 0.01 33)',      sfD: 'oklch(27.9% 0.02 28)',
-    sf2L: 'oklch(91% 0.01 33)',       sf2D: 'oklch(33.9% 0.03 28)',
+    sfL: 'oklch(89.1% 0.01 33)',      sfD: 'oklch(27.9% 0.02 28)',
+    sf2L: 'oklch(86% 0.01 33)',       sf2D: 'oklch(33.9% 0.03 28)',
     motionL: ['oklch(49.9% 0.06 29)', 'oklch(49.9% 0.075 0)', 'oklch(49.9% 0.07 60)'],
     motionD: ['oklch(75% 0.12 30)', 'oklch(75% 0.13 0)', 'oklch(75% 0.11 62)'],
   },
   lapis: {
-    accentL: 'oklch(50% 0.13 258)',   accentD: 'oklch(74% 0.10 255)',
+    accentL: 'oklch(48% 0.13 258)',   accentD: 'oklch(74% 0.10 255)',
     morandi: '47, 98, 172',
-    bgL: 'oklch(97.4% 0.006 240)',    bgD: 'oklch(23.1% 0.019 249)',
+    bgL: 'oklch(93.4% 0.006 240)',    bgD: 'oklch(23.1% 0.019 249)',
     txL: 'oklch(23% 0.02 249)',       txD: 'oklch(96.1% 0.008 237)',
-    sfL: 'oklch(95.6% 0.008 242)',    sfD: 'oklch(30.1% 0.022 251)',
-    sf2L: 'oklch(92.4% 0.013 244)',   sf2D: 'oklch(35.9% 0.025 251)',
+    sfL: 'oklch(90.6% 0.008 242)',    sfD: 'oklch(30.1% 0.022 251)',
+    sf2L: 'oklch(87.4% 0.013 244)',   sf2D: 'oklch(35.9% 0.025 251)',
     motionL: ['oklch(50% 0.13 258)', 'oklch(50% 0.12 226)', 'oklch(50% 0.11 295)'],
     motionD: ['oklch(74% 0.10 255)', 'oklch(74% 0.11 225)', 'oklch(74% 0.10 292)'],
   },
@@ -146,12 +153,12 @@ export const PALETTE: Record<Variant, PaletteEntry> = {
      整图就「红橙棕一片」。把 bg/sf 提亮一档（保持暖度），让暗色琥珀呼吸出来；
      txD 改成中性微暖，让暖白 vs 暖棕之间还有一丝冷暖差可对比。 */
   amber: {
-    accentL: 'oklch(55.5% 0.12 70)',  accentD: 'oklch(78% 0.11 70)',
+    accentL: 'oklch(52.3% 0.12 70)',  accentD: 'oklch(78% 0.11 70)',
     morandi: '159, 100, 1',
-    bgL: 'oklch(97.5% 0.008 74)',     bgD: 'oklch(26% 0.018 60)',
+    bgL: 'oklch(93.5% 0.008 74)',     bgD: 'oklch(26% 0.018 60)',
     txL: 'oklch(24% 0.02 74)',        txD: 'oklch(95% 0.008 70)',
-    sfL: 'oklch(95.6% 0.01 82)',      sfD: 'oklch(32% 0.020 60)',
-    sf2L: 'oklch(93% 0.014 78)',      sf2D: 'oklch(38% 0.022 60)',
+    sfL: 'oklch(90.6% 0.01 82)',      sfD: 'oklch(32% 0.020 60)',
+    sf2L: 'oklch(88% 0.014 78)',      sf2D: 'oklch(38% 0.022 60)',
     motionL: ['oklch(55.5% 0.12 70)', 'oklch(55.5% 0.11 38)', 'oklch(55.5% 0.12 100)'],
     motionD: ['oklch(78% 0.11 70)', 'oklch(78% 0.12 38)', 'oklch(78% 0.11 100)'],
   },
@@ -162,7 +169,7 @@ export const PALETTE: Record<Variant, PaletteEntry> = {
      落霞提亮一档、彩度更高（morandi 218,158,72，accent C 0.145），读作「金」而非「棕」。
      accent×bg 两档对比度由 contrast-guard 守着，改完必须跑 npm run check。 */
   aurora: {
-    accentL: 'oklch(55% 0.145 72)',   accentD: 'oklch(80% 0.13 72)',
+    accentL: 'oklch(52.6% 0.145 72)',   accentD: 'oklch(80% 0.13 72)',
     morandi: '218, 158, 72',
     /* v0.12.1：底色去黄（owner 2026-09-15 反馈「视觉不舒服、不高级、有点脏」）。
        原因是**背景自己带色**：bgL 彩度 0.012 @ hue 80 是全套最高，而 hue 80 正是
@@ -171,10 +178,10 @@ export const PALETTE: Record<Variant, PaletteEntry> = {
        改法：底色系彩度压到 0.004~0.006（回到近中性），色相 80→72 避开黄绿；
        暖色全部集中到 accent 与 motion 上。高级感来自「底色干净、强调克制」，
        不是把主色摊到整个背景上。 */
-    bgL: 'oklch(98% 0.004 72)',       bgD: 'oklch(24.5% 0.008 70)',
+    bgL: 'oklch(94% 0.004 72)',       bgD: 'oklch(24.5% 0.008 70)',
     txL: 'oklch(24% 0.012 72)',       txD: 'oklch(95% 0.005 72)',
-    sfL: 'oklch(96.2% 0.005 72)',     sfD: 'oklch(30.5% 0.01 70)',
-    sf2L: 'oklch(93.4% 0.007 72)',    sf2D: 'oklch(36.5% 0.012 70)',
+    sfL: 'oklch(91.2% 0.005 72)',     sfD: 'oklch(30.5% 0.01 70)',
+    sf2L: 'oklch(88.4% 0.007 72)',    sf2D: 'oklch(36.5% 0.012 70)',
     motionL: ['oklch(55% 0.145 72)', 'oklch(56% 0.15 50)', 'oklch(56% 0.13 32)'],
     motionD: ['oklch(80% 0.13 72)', 'oklch(80% 0.14 50)', 'oklch(80% 0.12 32)'],
   },
@@ -183,12 +190,12 @@ export const PALETTE: Record<Variant, PaletteEntry> = {
      紫一旦上彩度就变霓虹，莫兰迪的紫必须是"蒙了一层灰的紫"。
      motion 三色取 265/295/325，是同一束紫光偏冷偏暖的两侧。 */
   lavender: {
-    accentL: 'oklch(52% 0.11 295)',   accentD: 'oklch(75% 0.11 295)',
+    accentL: 'oklch(50% 0.11 295)',   accentD: 'oklch(75% 0.11 295)',
     morandi: '164, 148, 190',
-    bgL: 'oklch(97% 0.012 295)',      bgD: 'oklch(26% 0.02 295)',
+    bgL: 'oklch(93% 0.012 295)',      bgD: 'oklch(26% 0.02 295)',
     txL: 'oklch(25% 0.02 295)',       txD: 'oklch(96% 0.012 295)',
-    sfL: 'oklch(95% 0.014 295)',      sfD: 'oklch(32% 0.022 295)',
-    sf2L: 'oklch(92.5% 0.016 295)',   sf2D: 'oklch(38% 0.024 295)',
+    sfL: 'oklch(90% 0.014 295)',      sfD: 'oklch(32% 0.022 295)',
+    sf2L: 'oklch(87.5% 0.016 295)',   sf2D: 'oklch(38% 0.024 295)',
     motionL: ['oklch(52% 0.11 295)', 'oklch(52% 0.10 265)', 'oklch(53% 0.12 325)'],
     motionD: ['oklch(75% 0.11 295)', 'oklch(75% 0.11 265)', 'oklch(76% 0.12 325)'],
   },
