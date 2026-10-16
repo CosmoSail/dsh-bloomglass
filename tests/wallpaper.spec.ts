@@ -92,19 +92,30 @@ describe('FrostedPresenter', () => {
     expect(frosted).toContain('background-image: none')
   })
 
-  it('gives the rail a surface of its own, one palette step off the page', () => {
+  it('gives the rail a surface of its own, deep enough to read as a second region', () => {
     // Second pass (owner, 2026-10-16): with the line gone the two regions read as
-    // one field — "两块区域颜色相近不能明显区分". The rail therefore takes a rung of
-    // the palette's own surface ladder in the direction each mode lifts surfaces
-    // — the ladder is steeper in dark mode, so the two modes take different rungs
-    // — and is mixed 4% toward the accent so the panel carries the variant's hue
-    // instead of reading as neutral grey.
+    // one field — "两块区域颜色相近不能明显区分". Third pass: "色差不够", so the step
+    // is mixed from the label colour rather than the accent — the accent's
+    // lightness swings across the palette (aurora's is the brightest of the ten),
+    // which is what left aurora at 2.1L in light and behind the field in dark.
     const light = new RegExp(`body\\[[^\\]]*\\]\\s*\\[data-rightbar-col\\]\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
     const dark = new RegExp(`body\\[[^\\]]*\\]\\[data-ds-dark-theme\\]\\s*\\[data-rightbar-col\\]\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
-    expect(light).toMatch(/--bloom-rail-surface:\s*color-mix\(in oklch, var\(--bloom-accent[^,]*, #6b8f71\), var\(--dsw-alias-bg-layer-3\) 96%\)/)
-    expect(dark).toMatch(/--bloom-rail-surface:\s*color-mix\(in oklch, var\(--bloom-accent[^,]*, #6b8f71\), var\(--dsw-alias-bg-layer-2\) 96%\)/)
+    const shape = (rung: number, ink: number) =>
+      new RegExp(`--bloom-rail-surface:\\s*color-mix\\(in oklch, var\\(--bloom-accent[^,]*, #6b8f71\\),\\s*color-mix\\(in oklch, var\\(--dsw-alias-label-primary\\), var\\(--dsw-alias-bg-layer-${rung}\\) ${100 - ink}%\\) ${100 - 4}%\\)`)
+    expect(light).toMatch(shape(3, 12))
+    expect(dark).toMatch(shape(2, 14))
     // No literal colour anywhere in it — the accent is ds-bot's to move (0.1.6).
     expect(light.replace(/var\(--bloom-accent,\s*#[0-9a-f]{6}\)/i, '')).not.toMatch(/#[0-9a-f]{3,8}\b/i)
+  })
+
+  it('gives aurora one rung more in dark mode', () => {
+    // Aurora's ribbons lift the conversation field itself (~11L in dark), which
+    // swallowed the shared step: every other variant measured +12…+14L against
+    // the field, aurora +5.4. One rung more puts it back in line.
+    const aurora = new RegExp(`body\\[[^\\]]*\\]\\[data-ds-dark-theme\\]\\[data-bloomglass-variant='aurora'\\]\\s*\\[data-rightbar-col\\]\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
+    expect(aurora).toMatch(/--bloom-rail-surface:\s*color-mix\(in oklch, var\(--bloom-accent[^,]*, #6b8f71\),\s*color-mix\(in oklch, var\(--dsw-alias-label-primary\), var\(--dsw-alias-bg-layer-2\) 78%\) 95%\)/)
+    // Only aurora is singled out, and only in dark mode.
+    expect(SURFACE_CSS.match(/data-bloomglass-variant='aurora'/g)).toHaveLength(1)
   })
 
   it('keeps the rail’s tone under an open document, and only without frost', () => {
