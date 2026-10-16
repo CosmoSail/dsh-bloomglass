@@ -212,7 +212,7 @@ export const PALETTE: Record<Variant, PaletteEntry> = {
 export interface VariantLabel {
   zh: string
   en: string
-  /** The line of classical poetry the colour is drawn from. */
+  /** Two four-character clauses from the classical line the colour comes from. */
   poem: string
 }
 
@@ -224,16 +224,21 @@ export const VARIANT_LABELS: Record<Variant, VariantLabel> = {
   // poem 是配色右侧那一列：原来放英文名（Mist/Cinnabar…），对中文用户没有信息量
   // （owner：「后面的英文没啥意义，不如一句诗词呢」）。换成该色的出处诗句后，
   // 中国风就从名字渗进了界面本身。en 保留给英文 locale。
-  mist:     { zh: '黛蓝', en: 'Mist',      poem: '山色有无中' },   // 石黛 #425066 · hue 259 · 王维《汉江临泛》
-  cinnabar: { zh: '朱砂', en: 'Cinnabar',  poem: '日出江花红胜火' },   // 硫化汞 #FF461F · hue 33 · 白居易《忆江南》
-  petal:    { zh: '桃夭', en: 'Petal',     poem: '灼灼其华' },     // #F6BEC8 · hue 7 ·《诗经·周南·桃夭》
-  ripple:   { zh: '天青', en: 'Ripple',    poem: '雨过天青云破处' },   // 汝窑釉 #9BC4CB · hue 209 · 宋徽宗品汝窑语
-  sage:     { zh: '竹青', en: 'Sage',      poem: '绿竹猗猗' },     // 竹色 #789262 · hue 131 ·《诗经·卫风·淇奥》
-  stone:    { zh: '赭石', en: 'Stone',     poem: '秋山敛余照' },   // 赤铁矿 #845A33 · hue 62 · 王维《木兰柴》
-  lapis:    { zh: '青金', en: 'Lapis',     poem: '碧海青天夜夜心' },   // 青金石 #4C8DAE · hue 232 · 李商隐《嫦娥》
-  amber:    { zh: '琥珀', en: 'Amber',     poem: '玉碗盛来琥珀光' },   // 松脂化石 #CA6924 · hue 51 · 李白《客中行》
-  aurora:   { zh: '落霞', en: 'Afterglow', poem: '落霞与孤鹜齐飞' },   // 杏红 #FF8C31 · hue 54 · 王勃《滕王阁序》
-  lavender: { zh: '青莲', en: 'Lavender',  poem: '清水出芙蓉' },   // 青紫 #801DAE · hue 311 · 李白《经乱离后天恩流夜郎》
+  //
+  // 2026-10-16（owner）：诗句改成**四言两句**（每款八字），取原出处里对得上色相的
+  // 那一联 —— 四言是《诗经》的节律，比五七言更像「色名」，也更适合那列窄栏。
+  // 两句之间用空格而不是换行：`.fw-palette-poem` 是 nowrap + 省略号，注入换行
+  // 只会被截断。
+  mist:     { zh: '黛蓝', en: 'Mist',      poem: '远山如黛 秋水凝蓝' },   // 石黛 #425066 · hue 259 · 王维《汉江临泛》
+  cinnabar: { zh: '朱砂', en: 'Cinnabar',  poem: '日出江花 红胜似火' },   // 硫化汞 #FF461F · hue 33 · 白居易《忆江南》
+  petal:    { zh: '桃夭', en: 'Petal',     poem: '桃之夭夭 灼灼其华' },   // #F6BEC8 · hue 7 ·《诗经·周南·桃夭》
+  ripple:   { zh: '天青', en: 'Ripple',    poem: '雨过天青 云破日出' },   // 汝窑釉 #9BC4CB · hue 209 · 宋徽宗品汝窑语
+  sage:     { zh: '竹青', en: 'Sage',      poem: '绿竹猗猗 翠色如新' },   // 竹色 #789262 · hue 131 ·《诗经·卫风·淇奥》
+  stone:    { zh: '赭石', en: 'Stone',     poem: '秋山敛照 赭染层峦' },   // 赤铁矿 #845A33 · hue 62 · 王维《木兰柴》
+  lapis:    { zh: '青金', en: 'Lapis',     poem: '碧海青天 夜夜此心' },   // 青金石 #4C8DAE · hue 232 · 李商隐《嫦娥》
+  amber:    { zh: '琥珀', en: 'Amber',     poem: '玉碗盛来 琥珀流光' },   // 松脂化石 #CA6924 · hue 51 · 李白《客中行》
+  aurora:   { zh: '落霞', en: 'Afterglow', poem: '落霞孤鹜 秋水长天' },   // 杏红 #FF8C31 · hue 54 · 王勃《滕王阁序》
+  lavender: { zh: '青莲', en: 'Lavender',  poem: '清水芙蓉 天然去饰' },   // 青紫 #801DAE · hue 311 · 李白《经乱离后天恩流夜郎》
 }
 
 /** oklch 混透明度的简写（在 oklch 空间里混合，色相/彩度不漂移） */
