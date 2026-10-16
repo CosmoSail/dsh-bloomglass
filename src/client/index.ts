@@ -105,6 +105,47 @@ export function apply(ctx: ClientCtx): void {
   /** True while a wallpaper is actually painted behind the UI. */
   const frostLive = (): boolean => knobs.enabled && store.get().previewUrl !== null
 
+  /* ── foreign stylesheets ────────────────────────────────────────────────
+   *
+   * ds-bot injects the sheets that carry its whole shell by hand — fourteen of
+   * them, marked `data-dsh-bot="<tag>"` and *not* `data-plugin`. The client
+   * module system attributes injected styles by sweeping the document:
+   * `claimStyles(id)` tags every `style:not([data-plugin])` for whichever module
+   * is materializing at that moment, and `removeOwnedStyles(id)` deletes them
+   * again with that module whenever it is hot-replaced, invalidated or pruned.
+   * Until those tags carry the right owner, the Bot UI's sheets belong to
+   * whoever materializes after ds-bot and die with it: the team interface falls
+   * back to unstyled — giant un-sized avatars, bare buttons and inputs, React
+   * tree and slot registrations intact — and a refresh repairs it. That is the
+   * failure the owner kept hitting (2026-10-15 while toggling official
+   * experimental plugins; 2026-10-16 after this theme's bundle was rebuilt and
+   * replaced underneath a running app, which is when this plugin was the one
+   * holding the tags).
+   *
+   * ds-bot's own marker names the owner exactly, so attribute those tags to
+   * `ds-bot`: bookkeeping the framework would have done had the tags arrived
+   * pre-tagged, and the *right* attribution — ds-bot's own invalidation still
+   * takes its sheets with it. Plugins that inject through `data-plugin-css`
+   * (this theme, dsh-better-sidebar) tag `data-plugin` themselves and are safe.
+   *
+   * The fix belongs upstream: `claimStyles` should snapshot the tags its factory
+   * added instead of sweeping the document (reported 2026-10-15).
+   */
+  const DS_BOT_STYLE_ATTR = 'data-dsh-bot'
+  const DS_BOT_MODULE_ID = 'ds-bot'
+
+  /** Point one hand-injected ds-bot sheet at its real owner. Idempotent. */
+  const claimBotStyle = (node: Element): void => {
+    if (!node.matches(`style[${DS_BOT_STYLE_ATTR}]`)) return
+    if (node.getAttribute('data-plugin') === DS_BOT_MODULE_ID) return
+    node.setAttribute('data-plugin', DS_BOT_MODULE_ID)
+  }
+
+  /** Attribute every ds-bot sheet already in the document. */
+  const claimBotStyles = (): void => {
+    for (const node of document.querySelectorAll(`style[${DS_BOT_STYLE_ATTR}]`)) claimBotStyle(node)
+  }
+
   /* ── stylesheet ─────────────────────────────────────────────────────────
    * One tag carries everything: the palette's own `--bloom-*` block (rewritten
    * whenever the palette changes), Bloom's component and glass sheets, the
@@ -298,6 +339,24 @@ export function apply(ctx: ClientCtx): void {
   }
 
   ctx.effect(() => ctx.locale.register(LOCALE_NS, { zh, en }), `${PACKAGE_ID}: locale`)
+
+  /* Hand the Bot UI's sheets to their owner. Both orders matter: ds-bot may have
+     materialized before this plugin (its sheets are already in the document, and
+     the last sweep may have filed them under someone else) or after it (they
+     arrive later). Attribute what is here, then keep watching, so no future
+     sweep can take them. */
+  ctx.effect(() => {
+    claimBotStyles()
+    const observer = new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (node instanceof Element) claimBotStyle(node)
+        }
+      }
+    })
+    observer.observe(document.head, { childList: true })
+    return () => { observer.disconnect() }
+  }, `${PACKAGE_ID}: ds-bot sheet ownership`)
 
   const injected = (): SettingsSectionInjected => ({
     store,
