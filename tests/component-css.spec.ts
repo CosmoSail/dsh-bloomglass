@@ -50,7 +50,8 @@ describe('COMPONENT_CSS — the focus ring', () => {
  * read as a solid block). What matters structurally is that the endpoints are
  * *derived* from the accent — 0.1.6 handed the Bot UI's accent back to ds-bot,
  * and a hard-coded stop would not survive the change — and that the hover state
- * stays a gradient rather than falling back to a flat fill.
+ * brightens the same gradient by an animatable amount rather than swapping in a
+ * second background-image (which cannot be transitioned).
  */
 describe('COMPONENT_CSS — the new-session gradient', () => {
   const base = /body\[data-bloomglass-variant\]\s*\[class\*="_newSession"\]\s*\{([^}]*)\}/.exec(COMPONENT_CSS)?.[1] ?? ''
@@ -59,26 +60,31 @@ describe('COMPONENT_CSS — the new-session gradient', () => {
   it('paints a gradient whose stops all come from the accent', () => {
     expect(base).toContain('background-image: linear-gradient')
     expect(base).toContain('background-color: transparent')
-    const stops = [...base.matchAll(/color-mix\(in oklch, var\(--bloom-accent[^)]*\)[^,)]*, transparent\)/g)]
+    const stops = [...base.matchAll(/color-mix\(in oklch, var\(--bloom-accent/g)]
     expect(stops.length).toBeGreaterThanOrEqual(3)
     // No literal colour in the fill. The `var(--bloom-accent, #6b8f71)` fallback
     // is the usual guard for the variable being absent, not a stop.
     const withoutFallback = base.replace(/var\(--bloom-accent,\s*#[0-9a-f]{6}\)/gi, 'var(--bloom-accent)')
     expect(withoutFallback).not.toMatch(/#[0-9a-f]{3,8}\b/i)
     expect(withoutFallback).not.toMatch(/rgb\(/)
-    // The three stops ramp down, so the fill reads as light rather than a block.
-    const alphas = [...base.matchAll(/var\(--bloom-accent[^)]*\)\s*(\d+)%, transparent\)/g)].map(m => Number(m[1]))
-    expect(alphas.length).toBeGreaterThanOrEqual(3)
-    expect(alphas[0]).toBeGreaterThan(alphas[1])
-    expect(alphas[1]).toBeGreaterThan(alphas[2])
+    // The three stops ramp down (18 → 9 → 4), so the fill reads as light rather
+    // than a block.
+    const alphas = [...base.matchAll(/calc\((\d+)% \* var\(--bloom-newchat-boost\)\)/g)].map(m => Number(m[1]))
+    expect(alphas).toEqual([18, 9, 4])
+    expect(base).toContain(') 52%,')
   })
 
-  it('keeps a steeper gradient on hover', () => {
-    expect(hover).toContain('background-image: linear-gradient')
+  it('raises the stops through an interpolatable number on hover', () => {
+    // background-image cannot be transitioned, so a second, brighter gradient
+    // would switch instantly (reviewer's note, 2026-10-16). A registered custom
+    // property interpolates — the same @property technique the composer halo
+    // uses — and the hover state only moves that number.
+    expect(COMPONENT_CSS).toMatch(/@property --bloom-newchat-boost\s*\{[^}]*syntax:\s*'<number>'/)
+    expect(COMPONENT_CSS).toMatch(/@property --bloom-newchat-boost\s*\{[^}]*initial-value:\s*1;/)
+    expect(hover).toContain('--bloom-newchat-boost: 1.45')
+    expect(hover).not.toContain('background-image')
     expect(hover).not.toContain('background-color:')
-    const alphas = [...hover.matchAll(/var\(--bloom-accent[^)]*\)\s*(\d+)%, transparent\)/g)].map(m => Number(m[1]))
-    expect(alphas.length).toBeGreaterThanOrEqual(3)
-    const baseAlphas = [...base.matchAll(/var\(--bloom-accent[^)]*\)\s*(\d+)%, transparent\)/g)].map(m => Number(m[1]))
-    expect(alphas[0]).toBeGreaterThan(baseAlphas[0])
+    // 18 / 9 / 4 × 1.45 = 26.1 / 13.05 / 5.8 — the brightness the old hover had.
+    expect(base).toContain('--bloom-newchat-boost var(')
   })
 })
