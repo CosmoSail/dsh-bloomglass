@@ -78,15 +78,47 @@ describe('FrostedPresenter', () => {
     // stays on the pseudo-element: a filter on the column itself would make it a
     // containing block for position:fixed descendants.
     expect(always).toContain('linear-gradient')
-    expect(always).toContain('var(--dsw-alias-bg-layer-1)')
+    expect(always).toContain('var(--bloom-rail-surface)')
     expect(always).toContain('position: absolute')
     expect(always).not.toContain('backdrop-filter')
+    // The ramp has to *start* fully transparent, or the seam turns back into the
+    // step the gradient exists to remove.
+    expect(always).toMatch(/linear-gradient\([^)]*color-mix\(in oklch, var\(--bloom-rail-surface\), transparent 100%\)/)
     // Frost takes the plate back to one tone over the blur: both sides are the
     // same glass there, and a ramp would dip the tint to zero along the seam.
     const frosted = new RegExp(`body\\[[^\\]]*\\]\\[${FROST_ATTR}\\]\\s*\\[data-rightbar-col\\]::before\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
     expect(frosted).toContain('backdrop-filter')
     expect(frosted).toContain('background-color: var(--dsw-alias-bg-layer-1)')
     expect(frosted).toContain('background-image: none')
+  })
+
+  it('gives the rail a surface of its own, one palette step off the page', () => {
+    // Second pass (owner, 2026-10-16): with the line gone the two regions read as
+    // one field — "两块区域颜色相近不能明显区分". The rail therefore takes a rung of
+    // the palette's own surface ladder in the direction each mode lifts surfaces
+    // — the ladder is steeper in dark mode, so the two modes take different rungs
+    // — and is mixed 4% toward the accent so the panel carries the variant's hue
+    // instead of reading as neutral grey.
+    const light = new RegExp(`body\\[[^\\]]*\\]\\s*\\[data-rightbar-col\\]\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
+    const dark = new RegExp(`body\\[[^\\]]*\\]\\[data-ds-dark-theme\\]\\s*\\[data-rightbar-col\\]\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
+    expect(light).toMatch(/--bloom-rail-surface:\s*color-mix\(in oklch, var\(--bloom-accent[^,]*, #6b8f71\), var\(--dsw-alias-bg-layer-3\) 96%\)/)
+    expect(dark).toMatch(/--bloom-rail-surface:\s*color-mix\(in oklch, var\(--bloom-accent[^,]*, #6b8f71\), var\(--dsw-alias-bg-layer-2\) 96%\)/)
+    // No literal colour anywhere in it — the accent is ds-bot's to move (0.1.6).
+    expect(light.replace(/var\(--bloom-accent,\s*#[0-9a-f]{6}\)/i, '')).not.toMatch(/#[0-9a-f]{3,8}\b/i)
+  })
+
+  it('keeps the rail’s tone under an open document, and only without frost', () => {
+    // The document preview body paints '--dsw-alias-bg-document-preview' (the
+    // page's bg, handed over in tokens.ts) across the whole pane, so with a file
+    // open it would cover the rail's tone — the two regions would look alike
+    // again exactly when the rail is in use. Scoped to the rail, and off under
+    // frost where the rail is a flat glass plate that must match the
+    // conversation side tone for tone.
+    const scoped = new RegExp(`body\\[[^\\]]*\\]:not\\(\\[${FROST_ATTR}\\]\\)\\s*\\[data-rightbar-col\\]\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
+    expect(scoped).toContain('--dsw-alias-bg-document-preview: var(--bloom-rail-surface)')
+    // The frost branch must not carry it.
+    const frostedScope = new RegExp(`body\\[[^\\]]*\\]\\[${FROST_ATTR}\\]\\s*\\[data-rightbar-col\\]\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
+    expect(frostedScope).not.toContain('--dsw-alias-bg-document-preview')
   })
 
   it('takes the dock rail’s own hairline off — on the tab host, at a specificity that wins', () => {
@@ -114,8 +146,8 @@ describe('FrostedPresenter', () => {
     // token and nothing else. It is also one of the six tokens ds-bot writes
     // through the official override layer, which is how opening a file and
     // touching ds-bot's Appearance theme turned the column into ds-bot's opaque
-    // grey. Handing the surface back moves it onto --dsw-alias-bg-layer-1, a
-    // token nothing else writes.
+    // grey. Handing the surface back moves it onto the rail's own tone, which
+    // nothing else writes.
     const rule = /\[data-rightbar-col\]\s+:is\(\[data-dockkit-content\]:not\(\[data-dockkit-float\]\),\s*\[data-dockkit-empty\]\)\s*\{([^}]*)\}/
     expect(SURFACE_CSS).toMatch(rule)
     expect(rule.exec(SURFACE_CSS)?.[1] ?? '').toContain('background-color: transparent')
@@ -123,7 +155,10 @@ describe('FrostedPresenter', () => {
     // host paints the same token for the "open something" guide, so it counts.
     expect(SURFACE_CSS).toContain(':not([data-dockkit-float])')
     expect(SURFACE_CSS).toContain('[data-dockkit-empty]')
-    expect(SURFACE_CSS).toMatch(/\[data-rightbar-col\]::before\s*\{[^}]*var\(--dsw-alias-bg-layer-1\)/)
+    // The plate it hands the surface back to is the rail's own tone (see the
+    // gradient test above), under frost the flat glass plate.
+    expect(SURFACE_CSS).toMatch(/\[data-rightbar-col\]::before\s*\{[^}]*var\(--bloom-rail-surface\)/)
+    expect(SURFACE_CSS).toMatch(/\[data-rightbar-col\]::before\s*\{[^}]*background-color: var\(--dsw-alias-bg-layer-1\)/)
   })
 
   it('plates the fullscreen panel itself, not the column or the viewport', () => {

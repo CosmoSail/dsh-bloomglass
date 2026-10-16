@@ -134,18 +134,53 @@ export const SURFACE_CSS = `
  *     rail's left edge and start a slab: measured on the harness as a one-pixel
  *     step of 0.61 luminance in light mode (0.25 in dark) — the dividing line
  *     the dashboard reported. So the rail starts *as* the wash and fades its own
- *     plate tone in over 72px: the boundary dissolves into a ramp instead of a
+ *     plate tone in over 96px: the boundary dissolves into a ramp instead of a
  *     step.
+ *
+ *     Second pass (owner, 2026-10-16): with the line gone the two regions then
+ *     read as *one* field — "两块区域颜色相近不能明显区分". The rail needs its own
+ *     tone, not the page's: --bloom-rail-surface below is one palette step off
+ *     the page in the direction each mode lifts surfaces (darker in light,
+ *     lighter in dark) plus a 4% accent mix, so the panel carries the palette
+ *     instead of reading as neutral grey. Far from the seam the difference is
+ *     plain; at the seam it is still zero (the ramp starts fully transparent),
+ *     which is what keeps a region boundary from becoming a dividing line.
  *
  *   wallpaper — both sides are the same translucent glass (--dsw-alias-bg-layer-1
  *     at the glass density, over the same blur), so the plate stays uniform: any
  *     ramp here would dip the tint to zero along the seam and repaint the very
- *     edge we are removing (the same scan measures 0.004).
+ *     edge we are removing (the same scan measures 0.004). A *tinted* flat plate
+ *     here would be worse still — flat tint against flat tint on both sides is a
+ *     one-pixel step of the full difference. So the tint is deliberately
+ *     confined to the no-frost branch.
  *
  * 'data-rightbar-col' is what RightbarColumn actually renders.
  */
 body[${BODY_ATTR}] [data-rightbar-col] {
   background-color: transparent !important;
+  /* Darker (light mode) / lighter (dark mode) than the page, one step of the
+     palette's own surface ladder, nudged 4% toward the accent so the panel
+     belongs to the variant. --dsw-alias-bg-layer-3 is -5…-6L under the base in
+     light mode; --dsw-alias-bg-layer-2 is +6…+8L above it in dark (see the
+     per-mode override below) — the ladder is steeper in dark, so the two modes
+     take different rungs to land on the same perceived step. */
+  --bloom-rail-surface: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-3) 96%);
+}
+body[${BODY_ATTR}][data-ds-dark-theme] [data-rightbar-col] {
+  --bloom-rail-surface: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-2) 96%);
+}
+/*
+ * The document preview paints its own page colour through
+ * '--dsw-alias-bg-document-preview' (tokens.ts hands it the page's bg), and that
+ * body fills the pane — so with a file open it would cover the rail's tone and
+ * the two regions would look alike again exactly when the rail is in use. Inside
+ * the rail (and only there) that token becomes the rail's own surface.
+ *
+ * Not under frost: there the rail is a flat glass plate that has to match the
+ * conversation side tone for tone, so the preview keeps the plate colour.
+ */
+body[${BODY_ATTR}]:not([${FROST_ATTR}]) [data-rightbar-col] {
+  --dsw-alias-bg-document-preview: var(--bloom-rail-surface);
 }
 body[${BODY_ATTR}] [data-rightbar-col]::before {
   content: '';
@@ -154,12 +189,12 @@ body[${BODY_ATTR}] [data-rightbar-col]::before {
   z-index: -1;
   pointer-events: none;
   /* From the page's own wash, through a half-strength midpoint, into the rail's
-     plate tone: three stops, no step. */
+     surface tone: three stops, no step. */
   background-image: linear-gradient(
     to right,
-    color-mix(in oklch, var(--dsw-alias-bg-layer-1), transparent 100%),
-    color-mix(in oklch, var(--dsw-alias-bg-layer-1), transparent 55%) 34px,
-    var(--dsw-alias-bg-layer-1) 72px
+    color-mix(in oklch, var(--bloom-rail-surface), transparent 100%),
+    color-mix(in oklch, var(--bloom-rail-surface), transparent 45%) 48px,
+    var(--bloom-rail-surface) 96px
   );
 }
 body[${BODY_ATTR}][${FROST_ATTR}] [data-rightbar-col]::before {
