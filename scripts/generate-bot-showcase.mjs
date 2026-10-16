@@ -138,31 +138,83 @@ const DS_BOT_CSS = WRAP_IDS.map((name) => cssBlob(bundle, name)).join('\n')
 const TOKENS = bloomglassTokens({ variant: VARIANT, glassOpacity: 0.18, frosted: false })
 
 // ── invented content ────────────────────────────────────────────────────────
+// Each Bot gets a hand-drawn mascot face: nothing here is a photograph, a real
+// avatar, or ds-bot's own character art — just paths and circles in the owner's
+// palette, so the shot shows a face per Bot without borrowing anything real.
+const FACE = {
+  pen: { c1: '#E4785A', c2: '#B34A31', head: 'rect' },      // 写作
+  code: { c1: '#5C93A6', c2: '#33657A', head: 'circle' },   // 代码
+  lens: { c1: '#7EA268', c2: '#4F7040', head: 'hex' },      // 调研
+  seal: { c1: '#8E6CB0', c2: '#5E4480', head: 'squircle' }, // 质检
+  team: { c1: '#D1A05C', c2: '#9A6D33', head: 'circle' },   // 群
+}
 const BOTS = [
-  { name: '示例·写作', tag: 'Main', sub: '文档与文案' },
-  { name: '示例·代码', tag: '工程', sub: '工程实现', active: true, badge: 'working' },
-  { name: '示例·调研', tag: '调研', sub: '资料与出处' },
-  { name: '示例·质检', tag: '测试', sub: '复核与验收', badge: 'alert', alert: '2' },
+  { name: '示例·写作', tag: 'Main', sub: '文档与文案', face: 'pen' },
+  { name: '示例·代码', tag: '工程', sub: '工程实现', face: 'code', active: true, badge: 'working' },
+  { name: '示例·调研', tag: '调研', sub: '资料与出处', face: 'lens' },
+  { name: '示例·质检', tag: '测试', sub: '复核与验收', face: 'seal', badge: 'alert', alert: '2' },
 ]
+const GROUP = { name: '示例·项目群', face: 'team' }
+/** [bot face key, message text] — the user's own line is `null`. */
 const MESSAGES = [
-  ['bot', '口径按上次定的那版改完了：配色表、四言文案、右栏接缝。'],
-  ['bot', '三处都在本地跑通了，截图也生成好了。'],
-  ['you', '好，我先看看效果。'],
-  ['bot', '有问题随时说，我这边随时改。'],
+  ['code', '口径按上次定的那版改完了：配色表、四言文案、右栏接缝。'],
+  ['pen', '我这边把四言诗补齐了，十条都对上色相。'],
+  [null, '好，我先看看效果。'],
+  ['lens', '出处我核过一遍，图鉴和中科院数据集都对得上。'],
 ]
 const PANEL_ROWS = [
-  ['角色', '工程'],
+  ['成员', '4 名'],
   ['模型', '示例模型'],
   ['今日任务', '3 项'],
   ['记忆', '12 条'],
 ]
 
+/** One mascot head, 100×100 viewBox, scaled by the caller. */
+const faceSvg = (kind) => {
+  const f = FACE[kind]
+  const id = `btf-${kind}`
+  const head = {
+    circle: '<circle cx="50" cy="50" r="46"/>',
+    rect: '<rect x="6" y="6" width="88" height="88" rx="16"/>',
+    squircle: '<rect x="5" y="9" width="90" height="82" rx="30"/>',
+    hex: '<path d="M50 3 93 27v46L50 97 7 73V27z"/>',
+  }[f.head]
+  return `<svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true">
+    <defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="16" y1="8" x2="86" y2="94">
+      <stop offset="0" stop-color="${f.c1}"/><stop offset="1" stop-color="${f.c2}"/>
+    </linearGradient></defs>
+    <g fill="url(#${id})">${head}
+      <rect x="22" y="14" width="8" height="16" rx="4"/><rect x="70" y="14" width="8" height="16" rx="4"/>
+    </g>
+    <g stroke="${f.c1}" stroke-width="5" stroke-linecap="round" fill="none">
+      <path d="M31 30v10M69 30v10"/>
+    </g>
+    <g fill="#1b1f24">
+      <rect x="28" y="42" width="16" height="${kind === 'code' ? 12 : 15}" rx="${kind === 'code' ? 2 : 7}"/>
+      <rect x="56" y="42" width="16" height="${kind === 'code' ? 12 : 15}" rx="${kind === 'code' ? 2 : 7}"/>
+    </g>
+    <g stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none" opacity=".9">
+      <circle cx="36" cy="49" r="3.4"/><circle cx="64" cy="49" r="3.4"/>
+    </g>
+    ${kind === 'lens'
+      ? '<g stroke="#1b1f24" stroke-width="3.4" fill="none" opacity=".8"><path d="M24 45h20v12H24zM56 45h20v12H56zM44 50h12"/></g>'
+      : ''}
+    ${kind === 'seal'
+      ? `<g stroke="${f.c2}" stroke-width="6" stroke-linecap="round" fill="none"><path d="M36 72l9 9 20-22"/></g>`
+      : `<g stroke="${f.c2}" stroke-width="5" stroke-linecap="round" fill="none"><path d="${kind === 'code' ? 'M38 72h24' : 'M38 74q12 10 24 0'}"/></g>`}
+    ${kind === 'team'
+      ? '<g fill="#fff" opacity=".85"><circle cx="34" cy="12" r="5"/><circle cx="50" cy="8" r="5"/><circle cx="66" cy="12" r="5"/></g>'
+      : ''}
+  </svg>`
+}
+
 const face = (size, from, to, radius = '50%') =>
   `<span style="display:block;width:${size}px;height:${size}px;border-radius:${radius};background:linear-gradient(160deg,${from},${to})"></span>`
+const botFace = (kind, size) => `<span style="display:block;width:${size}px;height:${size}px">${faceSvg(kind)}</span>`
 // `--bt-size` drives the badge geometry; without it .bt-badge-main has no size
 // and its svg stretches over the whole avatar box.
-const mark = (size, from, to, badge = '') =>
-  `<span class="bt-mark" style="--bt-size:${size}px">${face(size, from, to)}${badge}</span>`
+const mark = (size, kind, badge = '') =>
+  `<span class="bt-mark" style="--bt-size:${size}px">${botFace(kind, size)}${badge}</span>`
 
 const botRows = BOTS.map((bot) => {
   const badge = bot.badge === 'working'
@@ -172,7 +224,7 @@ const botRows = BOTS.map((bot) => {
       : ''
   return `
         <button class="bt-row"${bot.active ? ' aria-current="page"' : ''}>
-          ${mark(36, '#9fb6c6', '#54748c', badge)}
+          ${mark(36, bot.face, badge)}
           <span class="bt-row-body">
             <span class="bt-row-name"><span class="bt-row-title">${bot.name}</span><span class="bt-tag">${bot.tag}</span></span>
             <span class="bt-row-sub">${bot.sub}</span>
@@ -180,9 +232,19 @@ const botRows = BOTS.map((bot) => {
         </button>`
 }).join('')
 
-const messages = MESSAGES.map(([who, text]) => (who === 'you'
-  ? `<div class="bt-umsg"><div class="bt-ustack"><div class="bt-ubody">${text}</div></div></div>`
-  : `<div class="bt-msg"><div class="bt-msg-line"><div class="bt-bubble">${text}</div></div></div>`)).join('\n        ')
+// A group room, so the transcript carries ds-bot's own per-message lead avatar
+// ('.bt-lead' → BotMark at 22px) and the speaker's name above each bubble — the
+// layout in which every Bot's face is visible inside the conversation itself.
+const messages = MESSAGES.map(([kind, text]) => {
+  if (kind === null) {
+    return `<div class="bt-umsg"><div class="bt-ustack"><div class="bt-ubody">${text}</div></div></div>`
+  }
+  const bot = BOTS.find((b) => b.face === kind)
+  return `<div class="bt-group-msg">
+          <span class="bt-group-name" style="color:${FACE[kind].c2}">${bot.name}</span>
+          <div class="bt-msg"><div class="bt-msg-line"><button class="bt-lead" aria-label="打开 ${bot.name} 的会话">${botFace(kind, 22)}</button><div class="bt-bubble">${text}</div></div></div>
+        </div>`
+}).join('\n        ')
 
 const page = (dark) => `<!doctype html>
 <html data-windows-titlebar><head><meta charset="utf-8">
@@ -240,21 +302,21 @@ const page = (dark) => `<!doctype html>
         <button class="bt-round" aria-label="新建"><svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M10 4v12" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>
       </div>
       <div class="bt-list">${botRows}
-        <div class="bt-tile-wrap"><button class="bt-tile">${mark(44, '#b9a7c9', '#7a6b8f', '<span class="bt-badge bt-badge-alert">3</span>')}<span class="bt-tile-name">示例·项目群</span></button></div>
+        <div class="bt-tile-wrap"><button class="bt-tile">${mark(44, GROUP.face, '<span class="bt-badge bt-badge-alert">3</span>')}<span class="bt-tile-name">${GROUP.name}</span></button></div>
       </div>
       <div class="bt-side-foot"><button class="bt-connect">连接插件</button></div>
     </div>
   </div></div>
 
   <div class="BynINW_centerCol"><div class="conv-slot" data-slot="conversation">
-    <div class="bt-head"><button class="bt-pill">${mark(26, '#9fb6c6', '#54748c')}<span class="bt-pill-name">示例·代码</span><span class="bt-pill-go">▾</span></button></div>
+    <div class="bt-head"><button class="bt-pill">${mark(26, GROUP.face)}<span class="bt-pill-name">${GROUP.name}</span><span class="bt-pill-go">▾</span></button></div>
     <div class="chat-scroll">
         ${messages}
     </div>
     <div class="composer-wrap">
       <div class="_composer_x" data-composer-card>
         <div class="_card_x">
-          <span class="ph">给 示例·代码 发消息…</span>
+          <span class="ph">给 ${GROUP.name} 发消息…</span>
           <button class="_primary_x" aria-label="发送"><svg width="16" height="16" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 16V4M5 9l5-5 5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></button>
         </div>
       </div>
@@ -266,7 +328,7 @@ const page = (dark) => `<!doctype html>
   <div class="bt-panel-grip"></div>
   <div class="bt-panel-view">
     <div class="bt-tabs"><button class="bt-tab" aria-selected="true">详情</button><button class="bt-tab">记忆</button></div>
-    <div class="bt-drawer-id">${mark(52, '#a8c0cf', '#5d7f96')}<span class="bt-drawer-name">示例·代码</span><span class="bt-drawer-sub">在线 · 工程</span></div>
+    <div class="bt-drawer-id">${mark(52, GROUP.face)}<span class="bt-drawer-name">${GROUP.name}</span><span class="bt-drawer-sub">在线 · 4 名成员</span></div>
     <div class="panel-rows">
       ${PANEL_ROWS.map(([k, v]) => `<div class="pnl-row"><b>${k}</b><span>${v}</span></div>`).join('\n      ')}
     </div>
