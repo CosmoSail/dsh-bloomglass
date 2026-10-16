@@ -854,6 +854,17 @@ body[data-bloomglass-variant] .dsh-bloom-trigger:hover {
  * 改成 118° 对角渐变，三档从 18% 收到 4% —— 亮的一头在左上，右下几乎回到桌面上，
  * 于是它读成"一片光"，仍然明确是个按钮。
  *
+ * ⚠️ 选择器必须限定 button（owner 二次反馈「分了几块渐变色区域」，2026-10-16）：
+ * 上一版裸写 [class*="_newSession"]，而 DSH 这个按钮的内部结构是
+ *   button._newSession
+ *     ├ span._newSessionLabelMask
+ *     │   └ span._newSessionContent（图标 + span._newSessionLabel）
+ *     └ span._newSessionShortcut
+ * —— 四层子元素的类名都含 "_newSession"，于是**每一层各自在自身体内画了一遍
+ * 同一条渐变**（子盒子更窄、位置不同），看上去就是几个渐变块拼在一起；快捷键
+ * 提示那个 span 也被刷上了底色。按钮本体只有一个，限定 button 后整条渐变只在
+ * 按钮盒里铺一次，连贯。
+ *
  * 端点全部由 --bloom-accent 混出来，没有一个写死的色值：0.1.6 起 Bot UI 的强调色
  * 由 ds-bot 自己掌握（bot-css.ts 那侧只保留墨色），渐变要是写死就会在换色后露馅。
  * 按下沿用侧栏通用按钮的 scale（§6）；边框、圆角、图标色分别在「描边按钮」和侧栏
@@ -873,7 +884,7 @@ body[data-bloomglass-variant] .dsh-bloom-trigger:hover {
   inherits: false;
   initial-value: 1;
 }
-body[data-bloomglass-variant] [class*="_newSession"] {
+body[data-bloomglass-variant] button[class*="_newSession"] {
   border-color: transparent;
   background-color: transparent;
   background-image: linear-gradient(
@@ -887,8 +898,25 @@ body[data-bloomglass-variant] [class*="_newSession"] {
     transform var(--bloom-dur-fast, .16s) var(--bloom-ease, ease),
     box-shadow var(--bloom-dur-fast, .16s) var(--bloom-ease, ease);
 }
-body[data-bloomglass-variant] [class*="_newSession"]:hover {
+body[data-bloomglass-variant] button[class*="_newSession"]:hover {
   --bloom-newchat-boost: 1.45;
+}
+
+/* 快捷键提示（⌘N / Ctrl+N）：只要字，不要底色、不要色块，且**默认隐藏**。
+ * 上面那条限定 button 之后它已经没有渐变底了，这里再钉死一次（'background: none'
+ * 是给任何宿主底色兜底），并把「鼠标移到按钮上才显示」写成本仓自己的规则 —— 宿主
+ * 只在 :hover/:focus-visible 时把它从 opacity:0 提到 1、且没有 transition，这里补
+ * 上过渡（owner 要求「鼠标光标没有移动到按钮上面时，字隐藏」）。
+ * 只改颜色与不透明度，不动 pointer-events 与字号：宿主那两条保持原样。 */
+body[data-bloomglass-variant] button[class*="_newSession"] [class*="_newSessionShortcut"] {
+  background: none;
+  border: 0;
+  color: var(--dsw-alias-label-secondary);
+  opacity: 0;
+  transition: opacity var(--bloom-dur-fast, .16s) var(--bloom-ease, ease);
+}
+body[data-bloomglass-variant] button[class*="_newSession"]:is(:hover, :focus-visible) [class*="_newSessionShortcut"] {
+  opacity: 1;
 }
 
 /* 侧栏底部操作区：上边框 → 向上扩散的极淡阴影 */

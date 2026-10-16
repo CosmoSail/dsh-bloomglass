@@ -170,16 +170,31 @@ body[${BODY_ATTR}][${FROST_ATTR}] [data-rightbar-col]::before {
 }
 
 /*
- * The dock rail's own hairline. Dockkit draws the first dock column's tab host
- * with 'border-left: .5px solid var(--dsw-alias-border-l4)' — a 40%-ink line
- * down the rail's whole height, on top of whichever surface the theme paints
- * there, and the one *hard* divider the gradient above cannot dissolve (it is
- * still there under frost, where the tone step is already 0.004). The theme
- * already turns the host's own column borders off the same way in GLASS_CSS
- * ('border-right: none !important' for the sidebar slot, 'border-left: none'
- * for details); this is the same line for the rail.
+ * The dock rail's own hairline, and the reason the ramp above was not enough.
+ *
+ * Dockkit ships
+ *   '._tabCell[data-dockkit-host=dock][data-dockkit-column="0"] > ._tabHost
+ *      { border-left: .5px solid var(--dsw-alias-border-l4) }'
+ * — a 40%-ink line (the theme's own border-l4 is 'rgba(morandi, .40)') down the
+ * rail's whole height. It is painted on the tab *host*, and dockkit puts
+ * 'data-dockkit-column' on that host as well as on its cell:
+ *   '<div class="__tabCell" data-dockkit-host="dock" data-dockkit-column="0">
+ *      <section class="__tabHost" data-dockkit-content={id} data-dockkit-column="0">'
+ * so a rule of the form '[data-rightbar-col] [data-dockkit-column='0']' does
+ * match the host — but it only reaches (0,3,1) against the host rule's (0,4,0),
+ * and loses. That is the dividing line the owner still saw after the ramp
+ * (2026-10-16): the tone step was gone, the 0.5px line was not.
+ *
+ * Naming the host's own attribute in the same compound selector is what wins:
+ * only the section carries both data-dockkit-column and data-dockkit-content,
+ * so the rule lands on exactly the element the hairline is drawn on, at
+ * (0,4,1). The theme turns the host's column borders off the same way in
+ * GLASS_CSS ('border-right: none !important' for the sidebar slot,
+ * 'border-left: none' for details); this is the same line for the rail. The
+ * bare 'column' rule stays for the cell, which carries no border of its own.
  */
-body[${BODY_ATTR}] [data-rightbar-col] [data-dockkit-column='0'] {
+body[${BODY_ATTR}] [data-rightbar-col] [data-dockkit-column='0'],
+body[${BODY_ATTR}] [data-rightbar-col] [data-dockkit-column='0'][data-dockkit-content] {
   border-left: 0;
 }
 

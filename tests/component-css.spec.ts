@@ -54,8 +54,33 @@ describe('COMPONENT_CSS — the focus ring', () => {
  * second background-image (which cannot be transitioned).
  */
 describe('COMPONENT_CSS — the new-session gradient', () => {
-  const base = /body\[data-bloomglass-variant\]\s*\[class\*="_newSession"\]\s*\{([^}]*)\}/.exec(COMPONENT_CSS)?.[1] ?? ''
-  const hover = /body\[data-bloomglass-variant\]\s*\[class\*="_newSession"\]:hover\s*\{([^}]*)\}/.exec(COMPONENT_CSS)?.[1] ?? ''
+  const base = /body\[data-bloomglass-variant\]\s*button\[class\*="_newSession"\]\s*\{([^}]*)\}/.exec(COMPONENT_CSS)?.[1] ?? ''
+  const hover = /body\[data-bloomglass-variant\]\s*button\[class\*="_newSession"\]:hover\s*\{([^}]*)\}/.exec(COMPONENT_CSS)?.[1] ?? ''
+
+  it('paints the gradient on the button only, never on the parts inside it', () => {
+    // Owner report, second pass (2026-10-16): the new gradient read as "分了几块
+    // 渐变色区域". The button's own children carry the same class fragment —
+    // …_newSessionLabelMask / …_newSessionContent / …_newSessionLabel /
+    // …_newSessionShortcut — so an unqualified [class*="_newSession"] painted a
+    // copy of the gradient inside every one of those boxes, and tinted the
+    // shortcut. The tag qualifier is what keeps it to the button's own box.
+    expect(base).not.toBe('')
+    expect(COMPONENT_CSS).not.toMatch(/body\[data-bloomglass-variant\]\s*\[class\*="_newSession"\]\s*\{/)
+  })
+
+  it('gives the shortcut hint text only, hidden until the button is hovered', () => {
+    // "另外这个按钮的快捷键提示不需要渐变色也不要明显色块，只显示字（鼠标光标
+    // 没有移动到按钮上面时，字隐藏）" — the host already hides it with opacity 0
+    // and lifts it on :hover/:focus-visible; the theme adds the colour and a
+    // transition, and pins the background off whatever the host paints there.
+    const shortcut = /body\[data-bloomglass-variant\]\s*button\[class\*="_newSession"\]\s*\[class\*="_newSessionShortcut"\]\s*\{([^}]*)\}/.exec(COMPONENT_CSS)?.[1] ?? ''
+    expect(shortcut).toContain('background: none')
+    expect(shortcut).toContain('border: 0')
+    expect(shortcut).toContain('opacity: 0')
+    expect(shortcut).not.toContain('gradient')
+    const shown = /body\[data-bloomglass-variant\]\s*button\[class\*="_newSession"\]:is\(:hover,\s*:focus-visible\)\s*\[class\*="_newSessionShortcut"\]\s*\{([^}]*)\}/.exec(COMPONENT_CSS)?.[1] ?? ''
+    expect(shown).toContain('opacity: 1')
+  })
 
   it('paints a gradient whose stops all come from the accent', () => {
     expect(base).toContain('background-image: linear-gradient')

@@ -89,13 +89,22 @@ describe('FrostedPresenter', () => {
     expect(frosted).toContain('background-image: none')
   })
 
-  it('takes the dock rail’s own hairline off', () => {
-    // Dockkit draws the first dock column with 'border-left: .5px solid
-    // var(--dsw-alias-border-l4)' — a 40%-ink line down the rail's whole height,
-    // and the one hard divider a gradient cannot dissolve (it survives frost,
-    // where the tone step is already 0.004). The host's column borders are
-    // already turned off the same way in GLASS_CSS.
-    expect(SURFACE_CSS).toMatch(/\[data-rightbar-col\]\s*\[data-dockkit-column='0'\]\s*\{[^}]*border-left:\s*0/)
+  it('takes the dock rail’s own hairline off — on the tab host, at a specificity that wins', () => {
+    // Dockkit draws the first dock column with
+    //   '._tabCell[data-dockkit-host=dock][data-dockkit-column="0"] > ._tabHost
+    //      { border-left: .5px solid var(--dsw-alias-border-l4) }'
+    // — a 40%-ink line (the theme's own border-l4 is rgba(morandi, .40)) down the
+    // rail's whole height, and the one hard divider a gradient cannot dissolve.
+    //
+    // It is painted on the tab *host*, which carries data-dockkit-column as well
+    // as data-dockkit-content, so '[data-rightbar-col] [data-dockkit-column=0]'
+    // does match it — but only at (0,3,1) against the host rule's (0,4,0), and it
+    // loses. That is why the owner still saw a dividing line after the ramp
+    // (2026-10-16). Naming data-dockkit-content in the same compound reaches
+    // (0,4,1) on exactly the element the hairline is drawn on.
+    expect(SURFACE_CSS).toMatch(
+      /\[data-rightbar-col\]\s*\[data-dockkit-column='0'\]\[data-dockkit-content\]\s*\{[^}]*border-left:\s*0/,
+    )
   })
 
   it('hands the dock pane surface back to the plate', () => {
