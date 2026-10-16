@@ -76,8 +76,7 @@ html body[${BODY_ATTR}][data-ds-dark-theme] {
      '#141414' : '#ffffff' — sits on the wrong side of the crossover: measured
      against its own swatches, white lands at 2.19:1 on green, 2.21 on cyan,
      2.64 on orange, 2.77 on sky, 2.96 on violet and 4.33 on the default blue —
-     all below AA, on a fill that is also the user's bubble. The step below
-     measures 4.65:1 at its worst across those same seventeen swatches.
+     all below AA, on a fill that is also the user's bubble.
      The value here is only the fallback for an engine without relative colour
      syntax; the @supports rule below picks the ink from the accent itself. */
   --bt-accent-ink: var(--dsw-alias-label-primary-foreground);
@@ -111,23 +110,37 @@ html body[${BODY_ATTR}][data-ds-dark-theme] {
 }
 
 /* The accent ink, chosen from the accent ds-bot wrote.
-   ds-bot's own test is a luminance threshold at 0.45, which is the wrong side of
-   the crossover: everything from a light green to a mid blue keeps white text
-   (2.2–4.3:1). The step below sits just under the crossover — a near-black and a
-   near-white ink swap places around oklch L 0.58 for greys and higher for a
-   chromatic fill — so a light accent takes dark ink and a dark accent light ink.
-   Measured in the browser over ds-bot's own seventeen swatches, the worst case is
-   4.65:1 (its own rule reaches 2.19:1).
-   calc(0.99 - clamp(0, (l - 0.513) * 1000, 0.86)) is that step: the clamp is 0
-   for a dark accent (ink stays near-white at 0.99) and saturates at 0.86 for a
-   light one (ink drops to 0.13). Chroma 0 keeps the ink neutral — it sits on the
-   user's own colour, not on a palette one.
+   ds-bot's own test — a luminance threshold at 0.45 — keeps white text on colours
+   that cannot carry it: measured against its own swatches, green lands at 2.19:1,
+   cyan 2.21, orange 2.64, sky 2.77, violet 2.96 and the default blue 4.33, all
+   below AA, and that fill is also the user's bubble.
+   So the ink is ours, and it is a *step*, never an interpolation: pure white on a
+   dark accent, pure black on a light one. Two inks can only be equally readable
+   where their contrasts cross, and black against white cross at 4.58:1 — the best
+   any two-ink rule can do — so every accent has to land on one of the two ends.
+   Which end is decided by the accent's relative luminance, which xyz-d65 exposes
+   as its y channel: that is the very quantity the contrast ratio is built from,
+   so the decision cannot disagree with the measurement. (oklch's l is not: a scan
+   of 33 024 sRGB colours puts its best threshold at 4.10:1 worst case, and D50
+   lab's l — chromatic adaptation moves it off the luminance — at 4.45:1, against
+   4.58:1 here. Measured in the browser this rule's worst case over the same
+   colours is 4.59:1, i.e. the crossover itself.)
+   0.1791 is that crossover (where white's 1.05/(Y+0.05) meets black's
+   (Y+0.05)/0.05), and the two inks are written in xyz-d65: black is 0 0 0, white
+   is the sRGB white point. The multiplier makes the changeover 1e-9 wide, and a
+   full scan of the cube puts the nearest 8-bit colour below the threshold at
+   #97687b, 1.1e-8 away — eleven times further than the ramp is wide — so no
+   accent a colour picker can produce lands on a mid-grey ink at its own lightness
+   (an earlier, gentle, ramp did exactly that at ~1:1).
    Same specificity as the rule above, so it wins by coming later; an engine
    without relative colour syntax skips the block and keeps the fallback. */
-@supports (color: oklch(from red l c h)) {
+@supports (color: color(from red xyz-d65 x y z)) {
   html body[${BODY_ATTR}],
   html body[${BODY_ATTR}][data-ds-dark-theme] {
-    --bt-accent-ink: oklch(from var(--bt-accent) calc(0.99 - clamp(0, (l - 0.513) * 1000, 0.86)) 0 h);
+    --bt-accent-ink: color(from var(--bt-accent) xyz-d65
+      calc(0.9505 * clamp(0, (0.1791 - y) * 1000000000, 1))
+      calc(1 * clamp(0, (0.1791 - y) * 1000000000, 1))
+      calc(1.089 * clamp(0, (0.1791 - y) * 1000000000, 1)));
   }
 }
 

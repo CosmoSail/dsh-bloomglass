@@ -70,22 +70,31 @@ describe('BOT_CSS — the ds-bot palette bridge', () => {
     expect(BOT_CSS).toMatch(/--bt-user:\s*var\(--bt-accent\)/)
   })
 
-  it('chooses the accent ink from the accent’s own lightness', () => {
+  it('chooses the accent ink from the accent’s own luminance, as a step', () => {
     // ds-bot's own rule is a luminance threshold at 0.45, which keeps white text
     // on colours that cannot carry it (its green swatch measures 2.19:1, orange
     // 2.64, cyan 2.21, violet 2.96, the default blue 4.33 — all below AA), and
-    // that fill is also the user's bubble. The step sits just under the crossover
-    // where dark and light ink swap places: measured over ds-bot's seventeen
-    // swatches, its worst case is 4.65:1.
-    const step = /--bt-accent-ink:\s*oklch\(from var\(--bt-accent\)\s*calc\(0\.99 - clamp\(0, \(l - 0\.513\) \* 1000, 0\.86\)\)\s*0 h\)/
-    expect(BOT_CSS).toMatch(step)
+    // that fill is also the user's bubble. Two inks are equally readable only
+    // where their contrasts cross, and black against white cross at 4.58:1 — the
+    // best a two-ink rule can do — so the choice has to be a step on the accent's
+    // relative luminance, which xyz-d65 exposes as its y channel: the very
+    // quantity the contrast ratio is built from.
+    const ink = /--bt-accent-ink:\s*color\(from var\(--bt-accent\) xyz-d65([\s\S]*?)\);/.exec(BOT_CSS)?.[1] ?? ''
+    expect(ink).toContain('0.1791 - y')
+    expect(ink).toContain('0.9505')
+    expect(ink).toContain('1.089')
+    // The multiplier keeps the changeover 1e-9 wide; the nearest 8-bit colour
+    // below the threshold is 1.1e-8 away, so no accent a picker can produce lands
+    // on a mid-grey ink at its own lightness (the ~1:1 hole a gentle ramp opens).
+    expect(ink).toContain('1000000000')
+    expect(BOT_CSS).not.toMatch(/--bt-accent-ink:\s*oklch\(/)
     // Same specificity as the fallback rule, so it must come after it.
     const fallback = BOT_CSS.indexOf('--bt-accent-ink: var(--dsw-alias-label-primary-foreground)')
     expect(fallback).toBeGreaterThan(-1)
-    expect(BOT_CSS.indexOf('@supports (color: oklch(from red l c h))')).toBeGreaterThan(fallback)
+    expect(BOT_CSS.indexOf('@supports (color: color(from red xyz-d65 x y z))')).toBeGreaterThan(fallback)
     // An engine without relative colour syntax must keep a usable ink rather
     // than inherit into an invisible one.
-    expect(BOT_CSS).toMatch(/@supports \(color: oklch\(from red l c h\)\)\s*\{[\s\S]*?--bt-accent-ink:/)
+    expect(BOT_CSS).toMatch(/@supports \(color: color\(from red xyz-d65 x y z\)\)\s*\{[\s\S]*?--bt-accent-ink:/)
   })
 
   it('outranks the stylesheet ds-bot injects after this one', () => {

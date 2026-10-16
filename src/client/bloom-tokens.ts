@@ -221,12 +221,14 @@ export function sharedDswTokens(p: PaletteEntry, dark: boolean): string {
   --dsw-alias-tooltip-bg: color-mix(in oklch, ${dark ? bg : tx}, black ${dark ? 22 : 8}%);
   --dsw-alias-toast-bg: color-mix(in oklch, ${dark ? bg : tx}, black ${dark ? 22 : 8}%);
   --dsw-alias-bg-mask-photo: color-mix(in oklch, ${bg}, black ${dark ? 45 : 30}%);
-  /* 文档预览（右侧栏的 PDF / 文档视图）在 DSH 里是两个硬编码的蓝灰静态色，
-     全仓没有一处接管 —— 于是在莫兰迪窗口里，右侧栏一打开文件就只剩这一块
-     蓝灰底板（实测 DSH 值是 neutral-bluish-100）。它语义上就是「页面底色」，
-     跟着变体的 bg 走；label-document-preview 不接，提取到的包里没有任何
-     消费方，改了只是凭空造色。 */
-  --dsw-alias-bg-document-preview: ${bg};`
+  /* 文档预览（右侧栏的 PDF / 文档视图）在 DSH 里是三个硬编码的蓝灰静态色，
+     全仓没有一处接管 —— 于是在莫兰迪窗口里，右侧栏一打开文件就只剩这块蓝灰
+     底板（实测 DSH 值：底 neutral-bluish-100/950、状态字 neutral-bluish-700）。
+     bg 语义就是「页面底色」，跟着变体的 bg 走；label 是 PDF 预览体里的状态
+     文字（.ZhMWpq_body .ZhMWpq_status 消费），按次级墨色同一配方给，
+     否则一整片莫兰迪里会剩下一行蓝灰字。 */
+  --dsw-alias-bg-document-preview: ${bg};
+  --dsw-alias-label-document-preview: ${mix(tx, dark ? 30 : 28)};`
 }
 
 export function mistLight(p: PaletteEntry): string {

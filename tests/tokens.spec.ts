@@ -35,14 +35,19 @@ describe('bloomTokenOverrides', () => {
   })
 
   it('paints the document preview with the palette, not DSH’s neutral bluish', () => {
-    // DSH ships this one as a static neutral-bluish tone and nothing took it
-    // over, so a PDF opened in the right sidebar stayed the only blue-grey
-    // surface in a Morandi window. It is a page backdrop, so it follows the
-    // variant's own base tone in every palette and mode.
+    // DSH ships these as static neutral-bluish tones and nothing took them over,
+    // so a PDF opened in the right sidebar stayed the only blue-grey surface in a
+    // Morandi window: the page backdrop, and the status line the viewer puts on
+    // it ('.ZhMWpq_body .ZhMWpq_status' reads label-document-preview). The
+    // backdrop is the variant's own base tone; the status text takes the same
+    // secondary-ink recipe the rest of the shell uses.
     for (const variant of VARIANTS) {
       const tokens = bloomTokenOverrides(variant)
       expect(tokens['--dsw-alias-bg-document-preview'].light).toBe(PALETTE[variant].bgL)
       expect(tokens['--dsw-alias-bg-document-preview'].dark).toBe(PALETTE[variant].bgD)
+      // Same recipe as the shell's own secondary ink, so the status line matches
+      // the rest of the window instead of an invented tone.
+      expect(tokens['--dsw-alias-label-document-preview']).toEqual(tokens['--dsw-alias-label-secondary'])
     }
   })
 
