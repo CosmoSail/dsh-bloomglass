@@ -69,8 +69,12 @@ describe('COMPONENT_CSS — the new-session gradient', () => {
     expect(withoutFallback).not.toMatch(/rgb\(/)
     // The three stops ramp down (18 → 9 → 4), so the fill reads as light rather
     // than a block.
-    const alphas = [...base.matchAll(/calc\((\d+)% \* var\(--bloom-newchat-boost\)\)/g)].map(m => Number(m[1]))
+    const alphas = [...base.matchAll(/calc\((\d+)% \* var\(--bloom-newchat-boost, 1\)\)/g)].map(m => Number(m[1]))
     expect(alphas).toEqual([18, 9, 4])
+    // Every use carries the `, 1` fallback: without it an engine that does not
+    // support @property leaves the variable unset, and an unfallbacked var()
+    // makes the whole background-image invalid (no gradient at rest at all).
+    expect([...base.matchAll(/var\(--bloom-newchat-boost\)/g)]).toHaveLength(0)
     expect(base).toContain(') 52%,')
   })
 
