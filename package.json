@@ -30,6 +30,8 @@
     "docs/showcase/ui-mist-light.png",
     "docs/showcase/ui-ripple-plain.png",
     "docs/showcase/ui-ripple-glass.png",
+    "docs/showcase/bot-ui-light.png",
+    "docs/showcase/bot-ui-dark.png",
     "LICENSE"
   ],
   "scripts": {
