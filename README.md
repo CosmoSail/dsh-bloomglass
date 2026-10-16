@@ -31,6 +31,12 @@
 
 ### DS Bot（Bot 团队）界面
 
+Bot 列表、对话气泡、输入卡片与右侧详情面板都跟随当前配色与明暗（下图为亮 / 暗两态；截图里的 Bot 名、会话与面板内容全部为虚构示例，由 `scripts/generate-bot-showcase.mjs` 用 ds-bot 自己的样式表合成，不含任何真实会话）：
+
+| 亮色 | 暗色 |
+| --- | --- |
+| ![DS Bot 界面 · 亮色](docs/showcase/bot-ui-light.png) | ![DS Bot 界面 · 暗色](docs/showcase/bot-ui-dark.png) |
+
 Bot 团队界面由 `ds-bot` 插件渲染，它不读 DSH 的 `--dsw-*` token，而是用自己的 `--bt-*` 变量上色，并写在 `html body` / `html body[data-ds-dark-theme]` 上（挂载时注入，比本插件的样式标签更晚）。本插件把 `--bt-*` 接到同一批 DSH token（用带两个属性选择器的选择器压过它，否则它的后注入样式会赢），所以 Bot 侧栏与分组、气泡、卡片、输入卡片、面板、菜单与对话框都直接跟当前配色和明暗走。
 
 铺了壁纸时有三条规矩：
@@ -71,6 +77,7 @@ npm test         # vitest，115 个用例
 npm run typecheck
 npm run build    # tsdown → lib/index.js + lib/client.js
 npm run showcase # 重新生成 docs/showcase 下的演示页
+npm run showcase:bot # 重新生成 DS Bot 界面演示页（需已安装 ds-bot）
 ```
 
 `lib/` 随仓库提交（`dsh plugin add github:` 依赖它，也免去用户本地构建），因此**改完源码请重新构建再提交**。

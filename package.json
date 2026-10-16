@@ -38,6 +38,7 @@
     "prepack": "tsdown",
     "typecheck": "tsc --noEmit",
     "showcase": "node scripts/generate-wallpaper.mjs && node scripts/generate-showcase.mjs",
+    "showcase:bot": "node scripts/generate-bot-showcase.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },
