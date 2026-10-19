@@ -172,3 +172,58 @@ describe('COMPONENT_CSS — the Windows caption colour', () => {
     }
   })
 })
+
+/**
+ * What the eye sees at the top of a Windows window is not the native caption but
+ * a strip the page paints itself: AppFrame gives `.frame` a caption-height top
+ * padding and `.frame::before` the same fill, both from
+ * `var(--dsw-specific-sidebar-fill)`. In frosted mode that token is a translucent
+ * plate, so the strip let the wallpaper through (user report 2026-10-19, and the
+ * caption-colour fix alone changed nothing visible). The strip alone gets the
+ * solid tone; the frame's own background has to keep the plate, because the
+ * columns are transparent and the wallpaper shows through it.
+ */
+describe('COMPONENT_CSS — the Windows title strip', () => {
+  const selector = 'html[data-windows-titlebar] body[data-bloomglass-variant] [class*="_frame"]::before'
+  const block = /html\[data-windows-titlebar\]\s*body\[data-bloomglass-variant\]\s*\[class\*="_frame"\]::before\s*\{([^}]*)\}/.exec(COMPONENT_CSS)?.[1] ?? ''
+
+  it('paints the strip with the unfrosted tone', () => {
+    expect(block).not.toBe('')
+    expect(block).toContain('background: var(--bloom-sidebar-solid)')
+    expect(block).not.toContain('--dsw-specific-sidebar-fill')
+  })
+
+  it('never repaints the frame itself, or the wallpaper disappears', () => {
+    // A background on [class*="_frame"] (no ::before) would sit behind the three
+    // transparent columns and hide the wallpaper everywhere.
+    expect(COMPONENT_CSS).not.toMatch(/\[class\*="_frame"\]\s*\{[^}]*background/)
+  })
+
+  it('outranks the host rule, which is (0,2,1)', () => {
+    // Host: [data-windows-titlebar] .frame:before. Ours adds an element (html),
+    // an element (body) and a second attribute selector, so it wins by cascade
+    // order-independence rather than by !important.
+    expect(selector).toContain('html[data-windows-titlebar]')
+    expect(selector).toContain('body[data-bloomglass-variant]')
+    expect(block).not.toContain('!important')
+  })
+
+  it('matches the real AppFrame class and attributes', () => {
+    document.documentElement.setAttribute('data-windows-titlebar', '')
+    document.body.setAttribute('data-bloomglass-variant', 'mist')
+    const frame = document.createElement('div')
+    frame.className = 'BynINW_frame'
+    document.body.append(frame)
+    try {
+      // The pseudo-element cannot be matched in jsdom, so match its host part.
+      expect(frame.matches('html[data-windows-titlebar] body[data-bloomglass-variant] [class*="_frame"]')).toBe(true)
+      frame.className = 'BynINW_centerCol'
+      expect(frame.matches('html[data-windows-titlebar] body[data-bloomglass-variant] [class*="_frame"]')).toBe(false)
+    } finally {
+      frame.remove()
+      document.body.removeAttribute('data-bloomglass-variant')
+      document.documentElement.removeAttribute('data-windows-titlebar')
+    }
+  })
+})
+

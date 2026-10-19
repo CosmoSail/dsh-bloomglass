@@ -958,4 +958,24 @@ body[data-bloomglass-variant] button[class*="_primary"]:disabled {
 body[data-bloomglass-variant] > span[style*="--dsw-specific-sidebar-fill"] {
   --dsw-specific-sidebar-fill: var(--bloom-sidebar-solid);
 }
+
+/* ═══ Windows 标题栏条：页面自己画的那条（2026-10-19 第二轮，上一版打偏了）═══
+ * 上面那条只管「native 标题栏颜色」（探测 span → setTitleBarOverlay），但肉眼
+ * 看到的窗口最上端其实是**页面自己铺的一条**：ui-layout 的 AppFrame 里有
+ *   [data-windows-titlebar] .frame        { padding-top: var(--dsh-windows-titlebar-height);
+ *                                           background: var(--dsw-specific-sidebar-fill) }
+ *   [data-windows-titlebar] .frame::before{ height: var(--dsh-windows-titlebar-height);
+ *                                           background: var(--dsw-specific-sidebar-fill);
+ *                                           -webkit-app-region: drag }
+ * 磨砂时这个 token 是 alpha = 玻璃浓度的 plate（侧栏玻璃底也用它），这条 40px 就
+ * 变成半透明、把壁纸透出来 —— owner 报的「最上端透明」是这一层，不是 native 那层。
+ *
+ * 只把伪元素（条本身）换成未磨砂实心档；.frame 自己的 background **不能动**：
+ * 玻璃态下三列都是透明的，壁纸正是从 frame 的底色里透上来的，一改就等于关掉玻璃。
+ * 特异性 (0,3,3)（html + body + 两个属性 + 伪元素）压过宿主那条
+ * [data-windows-titlebar] .frame::before 的 (0,2,1)，不靠 !important，
+ * 也不受样式表插入顺序影响。 */
+html[data-windows-titlebar] body[data-bloomglass-variant] [class*="_frame"]::before {
+  background: var(--bloom-sidebar-solid);
+}
 `
