@@ -117,3 +117,58 @@ describe('COMPONENT_CSS — the new-session gradient', () => {
     expect(base).toContain('--bloom-newchat-boost var(')
   })
 })
+
+/**
+ * Windows draws the caption itself (titleBarStyle 'hidden' + titleBarOverlay), so
+ * the theme cannot style a titlebar element — it can only seed the colour the
+ * Desktop preload measures. That preload appends a bare `<span>` whose inline
+ * `background-color` is `var(--dsw-specific-sidebar-fill)` and hands the sampled
+ * rgba to `setTitleBarOverlay`. Frosted mode re-expresses that same token as a
+ * translucent plate (the sidebar's glass face reads it), which made the caption
+ * see-through — user report 2026-10-19: "最上端的窗口栏是透明的，改为纯色".
+ * The fix re-points the token on the probe only.
+ */
+describe('COMPONENT_CSS — the Windows caption colour', () => {
+  const selector = 'body[data-bloomglass-variant] > span[style*="--dsw-specific-sidebar-fill"]'
+  const block = /body\[data-bloomglass-variant\]\s*>\s*span\[style\*="--dsw-specific-sidebar-fill"\]\s*\{([^}]*)\}/.exec(COMPONENT_CSS)?.[1] ?? ''
+
+  it('pins the probe to the unfrosted sidebar fill', () => {
+    expect(block).not.toBe('')
+    expect(block).toContain('--dsw-specific-sidebar-fill: var(--bloom-sidebar-solid)')
+    // No `!important`: the probe declares no inline value for the custom property,
+    // so an element-level declaration already beats inheritance from body.
+    expect(block).not.toContain('!important')
+  })
+
+  it('leaves the token on body alone, so the sidebar keeps its glass face', () => {
+    // glass-css.ts paints the sidebar plate with var(--dsw-specific-sidebar-fill);
+    // redefining it on body would swap the glass for an opaque slab.
+    expect(COMPONENT_CSS).not.toMatch(/body\[data-bloomglass-variant\]\s*\{[^}]*--dsw-specific-sidebar-fill/)
+  })
+
+  it('matches the probe the Desktop preload appends, and nothing else', () => {
+    // Mirrors `probe.style.cssText` in lib/preload-windows.js.
+    const attribute = 'data-bloomglass-variant'
+    document.body.setAttribute(attribute, 'mist')
+    const probe = document.createElement('span')
+    probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;background-color:var(--dsw-specific-sidebar-fill);color:var(--dsw-alias-label-primary)'
+    const otherTag = document.createElement('div')
+    otherTag.style.cssText = 'background-color:var(--dsw-specific-sidebar-fill)'
+    const nested = document.createElement('div')
+    const nestedSpan = document.createElement('span')
+    nestedSpan.style.cssText = 'background-color:var(--dsw-specific-sidebar-fill)'
+    nested.append(nestedSpan)
+    document.body.append(probe, otherTag, nested)
+    try {
+      expect(probe.matches(selector)).toBe(true)
+      // Only the body-level <span> probe is the caption's colour source.
+      expect(otherTag.matches(selector)).toBe(false)
+      expect(nestedSpan.matches(selector)).toBe(false)
+    } finally {
+      nested.remove()
+      otherTag.remove()
+      probe.remove()
+      document.body.removeAttribute(attribute)
+    }
+  })
+})
