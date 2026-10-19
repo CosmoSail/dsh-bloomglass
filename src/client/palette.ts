@@ -45,19 +45,25 @@ export function isVariant(value: unknown): value is Variant {
  * 深色档「琥珀提亮、极光去黄」那几轮微调是针对明度做的，与色相无关，换色不该把它们
  * 推翻。accent 从智库给的 OKLCH 起步，再按 4.5:1 逐档校准（目标是 4.6 以上留余量）。
  *
+ * 亮色档两次加深（只动 L，色相/彩度不动；暗色档两次都没动）：
+ *   v1 2026-10-16  bg -4 / sf -5 / sf2 -5 / accent -2.0~3.2
+ *   v2 2026-10-19  bg -4 / sf -5 / sf2 -5 / accent -3.0（天青 -4.0 用来保住下限）
+ * v2 是 owner「浅色模式下各个颜色的色彩加深」之后的第二档，落位后亮色的 bg 在
+ * 87.9~90.0L、sf 84.0~86.7L、sf2 81.0~84.0L、accent 41~47L。
+ *
  * accent × bg 实测对比度（10 变体 × 明暗，全部 ≥ 4.5:1）——这一对同时是主按钮的
  * fill × dimmed（见 tokens.ts 的 button-primary-dimmed），也是本仓唯一不能为好看
  * 让路的比值。下表由脚本在浏览器里用 canvas 取真实 sRGB 值算出（同一组数字
  * palette.spec.ts 也在离线算，差 ≤0.03 是 CSS gamut 映射的余量）：
  *
  *   变体       亮色     暗色        变体       亮色     暗色
- *   mist     6.16:1   5.88:1      stone    6.03:1   7.66:1
- *   cinnabar 5.86:1   6.02:1      lapis    5.63:1   7.68:1
- *   petal    5.45:1   7.59:1      amber    5.66:1   7.00:1
- *   ripple   4.67:1   9.85:1      aurora   5.26:1   7.84:1
- *   sage     5.60:1   8.06:1      lavender 6.77:1   6.16:1
+ *   mist     6.16:1   5.88:1      stone    6.04:1   7.66:1
+ *   cinnabar 5.68:1   6.02:1      lapis    5.65:1   7.68:1
+ *   petal    5.47:1   7.59:1      amber    5.72:1   7.00:1
+ *   ripple   4.78:1   9.85:1      aurora   5.32:1   7.84:1
+ *   sage     5.67:1   8.06:1      lavender 6.81:1   6.16:1
  *
- * 最紧的是天青亮色 4.67:1（正文墨色最紧 8.22:1，落在暗色的表面二档上）——改任何
+ * 最紧的是天青亮色 4.78:1（正文墨色最紧 8.22:1，落在暗色的表面二档上）——改任何
  * 变体的 accentL/bgL 前先重算，别只看「颜色好不好看」。
  */
 /** One palette's colour set. `*L` / `*D` are the light / dark ends of a track. */
@@ -85,96 +91,96 @@ export interface PaletteEntry {
 
 export const PALETTE: Record<Variant, PaletteEntry> = {
   mist: {
-    accentL: 'oklch(44% 0.05 259)',  accentD: 'oklch(72% 0.08 259)',
+    accentL: 'oklch(41% 0.05 259)',  accentD: 'oklch(72% 0.08 259)',
     dye: '66, 80, 102',
     wash: '72, 80, 92',
-    bgL: 'oklch(92% 0.01 259)',      bgD: 'oklch(28% 0.02 259)',
+    bgL: 'oklch(88% 0.01 259)',      bgD: 'oklch(28% 0.02 259)',
     txL: 'oklch(25% 0.02 259)',      txD: 'oklch(96% 0.01 259)',
-    sfL: 'oklch(89% 0.01 259)',      sfD: 'oklch(34% 0.02 259)',
-    sf2L: 'oklch(86% 0.01 259)',     sf2D: 'oklch(40% 0.02 259)',
-    motionL: ['oklch(44% 0.05 259)', 'oklch(44% 0.046 229)', 'oklch(44% 0.045 294)'],
+    sfL: 'oklch(84% 0.01 259)',      sfD: 'oklch(34% 0.02 259)',
+    sf2L: 'oklch(81% 0.01 259)',     sf2D: 'oklch(40% 0.02 259)',
+    motionL: ['oklch(41% 0.05 259)', 'oklch(41% 0.046 229)', 'oklch(41% 0.045 294)'],
     motionD: ['oklch(72% 0.08 259)', 'oklch(72% 0.074 229)', 'oklch(72% 0.072 294)'],
   },
   cinnabar: {
-    accentL: 'oklch(48% 0.2 33)',  accentD: 'oklch(74% 0.15 33)',
+    accentL: 'oklch(45% 0.2 33)',  accentD: 'oklch(74% 0.15 33)',
     dye: '255, 70, 31',
     wash: '212, 116, 96',
-    bgL: 'oklch(93% 0.005 33)',      bgD: 'oklch(28% 0.02 33)',
+    bgL: 'oklch(89% 0.005 33)',      bgD: 'oklch(28% 0.02 33)',
     txL: 'oklch(25% 0.02 33)',       txD: 'oklch(96% 0.01 33)',
-    sfL: 'oklch(90% 0.005 33)',      sfD: 'oklch(34% 0.02 33)',
-    sf2L: 'oklch(87% 0.005 33)',     sf2D: 'oklch(40% 0.02 33)',
-    motionL: ['oklch(48% 0.2 33)', 'oklch(48% 0.184 3)', 'oklch(48% 0.18 68)'],
+    sfL: 'oklch(85% 0.005 33)',      sfD: 'oklch(34% 0.02 33)',
+    sf2L: 'oklch(82% 0.005 33)',     sf2D: 'oklch(40% 0.02 33)',
+    motionL: ['oklch(45% 0.2 33)', 'oklch(45% 0.184 3)', 'oklch(45% 0.18 68)'],
     motionD: ['oklch(74% 0.15 33)', 'oklch(74% 0.138 3)', 'oklch(74% 0.135 68)'],
   },
   petal: {
-    accentL: 'oklch(50% 0.14 7)',  accentD: 'oklch(80% 0.09 7)',
+    accentL: 'oklch(47% 0.14 7)',  accentD: 'oklch(80% 0.09 7)',
     dye: '246, 190, 200',
     wash: '229, 198, 203',
-    bgL: 'oklch(94% 0.01 7)',      bgD: 'oklch(28% 0.02 7)',
+    bgL: 'oklch(90% 0.01 7)',      bgD: 'oklch(28% 0.02 7)',
     txL: 'oklch(25% 0.02 7)',      txD: 'oklch(98% 0.01 7)',
-    sfL: 'oklch(91% 0.015 7)',     sfD: 'oklch(34% 0.02 7)',
-    sf2L: 'oklch(89% 0.015 7)',    sf2D: 'oklch(40% 0.02 7)',
-    motionL: ['oklch(50% 0.14 7)', 'oklch(50% 0.129 337)', 'oklch(50% 0.126 42)'],
+    sfL: 'oklch(86% 0.015 7)',     sfD: 'oklch(34% 0.02 7)',
+    sf2L: 'oklch(84% 0.015 7)',    sf2D: 'oklch(40% 0.02 7)',
+    motionL: ['oklch(47% 0.14 7)', 'oklch(47% 0.129 337)', 'oklch(47% 0.126 42)'],
     motionD: ['oklch(80% 0.09 7)', 'oklch(80% 0.083 337)', 'oklch(80% 0.081 42)'],
   },
   ripple: {
-    accentL: 'oklch(49.5% 0.09 209)',  accentD: 'oklch(80% 0.08 209)',
+    accentL: 'oklch(45.5% 0.09 209)',  accentD: 'oklch(80% 0.08 209)',
     dye: '155, 196, 203',
     wash: '170, 192, 196',
-    bgL: 'oklch(92% 0.01 209)',      bgD: 'oklch(20% 0.02 209)',
+    bgL: 'oklch(88% 0.01 209)',      bgD: 'oklch(20% 0.02 209)',
     txL: 'oklch(25% 0.02 209)',      txD: 'oklch(96% 0.01 209)',
-    sfL: 'oklch(89% 0.01 209)',      sfD: 'oklch(28% 0.02 209)',
-    sf2L: 'oklch(87% 0.01 209)',     sf2D: 'oklch(38% 0.02 209)',
-    motionL: ['oklch(49.5% 0.09 209)', 'oklch(49.5% 0.083 179)', 'oklch(49.5% 0.081 244)'],
+    sfL: 'oklch(84% 0.01 209)',      sfD: 'oklch(28% 0.02 209)',
+    sf2L: 'oklch(82% 0.01 209)',     sf2D: 'oklch(38% 0.02 209)',
+    motionL: ['oklch(45.5% 0.09 209)', 'oklch(45.5% 0.083 179)', 'oklch(45.5% 0.081 244)'],
     motionD: ['oklch(80% 0.08 209)', 'oklch(80% 0.074 179)', 'oklch(80% 0.072 244)'],
   },
   /* 竹青 hue 131：色相从旧档的 115 挪到竹叶的青绿区。 */
   sage: {
-    accentL: 'oklch(46% 0.1 131)',  accentD: 'oklch(74% 0.1 131)',
+    accentL: 'oklch(43% 0.1 131)',  accentD: 'oklch(74% 0.1 131)',
     dye: '120, 146, 98',
     wash: '128, 142, 116',
-    bgL: 'oklch(93% 0.011 131)',      bgD: 'oklch(20% 0.019 131)',
+    bgL: 'oklch(89% 0.011 131)',      bgD: 'oklch(20% 0.019 131)',
     txL: 'oklch(25% 0.02 131)',       txD: 'oklch(96% 0.011 131)',
-    sfL: 'oklch(89.9% 0.009 131)',    sfD: 'oklch(27.9% 0.02 131)',
-    sf2L: 'oklch(86.9% 0.009 131)',   sf2D: 'oklch(34% 0.03 131)',
-    motionL: ['oklch(46% 0.1 131)', 'oklch(46% 0.092 101)', 'oklch(46% 0.09 166)'],
+    sfL: 'oklch(84.9% 0.009 131)',    sfD: 'oklch(27.9% 0.02 131)',
+    sf2L: 'oklch(81.9% 0.009 131)',   sf2D: 'oklch(34% 0.03 131)',
+    motionL: ['oklch(43% 0.1 131)', 'oklch(43% 0.092 101)', 'oklch(43% 0.09 166)'],
     motionD: ['oklch(74% 0.1 131)', 'oklch(74% 0.092 101)', 'oklch(74% 0.09 166)'],
   },
   /* 赭石 hue 62：赤铁矿的暖棕，比旧档（29）更靠橙，与琥珀（51）之间靠彩度和
      场景区分 —— 赭石铺面（墙）、琥珀做强调（树脂）。 */
   stone: {
-    accentL: 'oklch(45% 0.09 62)',  accentD: 'oklch(74% 0.1 62)',
+    accentL: 'oklch(42% 0.09 62)',  accentD: 'oklch(74% 0.1 62)',
     dye: '132, 90, 51',
     wash: '119, 95, 75',
-    bgL: 'oklch(91.9% 0.01 62)',      bgD: 'oklch(20.1% 0.019 62)',
+    bgL: 'oklch(87.9% 0.01 62)',      bgD: 'oklch(20.1% 0.019 62)',
     txL: 'oklch(25% 0.02 62)',        txD: 'oklch(95.9% 0.01 62)',
-    sfL: 'oklch(89.1% 0.01 62)',      sfD: 'oklch(27.9% 0.02 62)',
-    sf2L: 'oklch(86% 0.01 62)',       sf2D: 'oklch(33.9% 0.03 62)',
-    motionL: ['oklch(45% 0.09 62)', 'oklch(45% 0.083 32)', 'oklch(45% 0.081 97)'],
+    sfL: 'oklch(84.1% 0.01 62)',      sfD: 'oklch(27.9% 0.02 62)',
+    sf2L: 'oklch(81% 0.01 62)',       sf2D: 'oklch(33.9% 0.03 62)',
+    motionL: ['oklch(42% 0.09 62)', 'oklch(42% 0.083 32)', 'oklch(42% 0.081 97)'],
     motionD: ['oklch(74% 0.1 62)', 'oklch(74% 0.092 32)', 'oklch(74% 0.09 97)'],
   },
   lapis: {
-    accentL: 'oklch(46% 0.11 232)',   accentD: 'oklch(75% 0.1 232)',
+    accentL: 'oklch(43% 0.11 232)',   accentD: 'oklch(75% 0.1 232)',
     dye: '76, 141, 174',
     wash: '105, 138, 155',
-    bgL: 'oklch(93.4% 0.006 232)',    bgD: 'oklch(23.1% 0.019 232)',
+    bgL: 'oklch(89.4% 0.006 232)',    bgD: 'oklch(23.1% 0.019 232)',
     txL: 'oklch(23% 0.02 232)',       txD: 'oklch(96.1% 0.008 232)',
-    sfL: 'oklch(90.6% 0.008 232)',    sfD: 'oklch(30.1% 0.022 232)',
-    sf2L: 'oklch(87.4% 0.013 232)',   sf2D: 'oklch(35.9% 0.025 232)',
-    motionL: ['oklch(46% 0.11 232)', 'oklch(46% 0.101 202)', 'oklch(46% 0.099 267)'],
+    sfL: 'oklch(85.6% 0.008 232)',    sfD: 'oklch(30.1% 0.022 232)',
+    sf2L: 'oklch(82.4% 0.013 232)',   sf2D: 'oklch(35.9% 0.025 232)',
+    motionL: ['oklch(43% 0.11 232)', 'oklch(43% 0.101 202)', 'oklch(43% 0.099 267)'],
     motionD: ['oklch(75% 0.1 232)', 'oklch(75% 0.092 202)', 'oklch(75% 0.09 267)'],
   },
   /* 琥珀 hue 51（松脂化石黄褐）。与落霞（hue 54）只差 3°，刻意保留：
      琥珀压暗、彩度中等，读作「棕琥珀」；落霞提亮、彩度更高，读作「金霞」。 */
   amber: {
-    accentL: 'oklch(48% 0.15 51)',  accentD: 'oklch(76% 0.13 51)',
+    accentL: 'oklch(45% 0.15 51)',  accentD: 'oklch(76% 0.13 51)',
     dye: '202, 105, 36',
     wash: '174, 121, 90',
-    bgL: 'oklch(93.5% 0.008 51)',     bgD: 'oklch(26% 0.018 51)',
+    bgL: 'oklch(89.5% 0.008 51)',     bgD: 'oklch(26% 0.018 51)',
     txL: 'oklch(24% 0.02 51)',        txD: 'oklch(95% 0.008 51)',
-    sfL: 'oklch(90.6% 0.01 51)',      sfD: 'oklch(32% 0.020 51)',
-    sf2L: 'oklch(88% 0.014 51)',      sf2D: 'oklch(38% 0.022 51)',
-    motionL: ['oklch(48% 0.15 51)', 'oklch(48% 0.138 21)', 'oklch(48% 0.135 86)'],
+    sfL: 'oklch(85.6% 0.01 51)',      sfD: 'oklch(32% 0.020 51)',
+    sf2L: 'oklch(83% 0.014 51)',      sf2D: 'oklch(38% 0.022 51)',
+    motionL: ['oklch(45% 0.15 51)', 'oklch(45% 0.138 21)', 'oklch(45% 0.135 86)'],
     motionD: ['oklch(76% 0.13 51)', 'oklch(76% 0.12 21)', 'oklch(76% 0.117 86)'],
   },
   /* 落霞 hue 54：传统色表里没有「落霞」这个固定值（纯诗意名），按 owner 定的
@@ -183,27 +189,27 @@ export const PALETTE: Record<Variant, PaletteEntry> = {
      底色去黄那条规矩继续有效（bgL 彩度 0.004，见 bgL 一行）：暖色只集中在
      accent 与 motion 上，背景保持中性，否则大面积铺开就是「发黄的旧纸」。 */
   aurora: {
-    accentL: 'oklch(50% 0.16 54)',   accentD: 'oklch(78% 0.14 54)',
+    accentL: 'oklch(47% 0.16 54)',   accentD: 'oklch(78% 0.14 54)',
     dye: '255, 140, 49',
     wash: '221, 159, 117',
-    bgL: 'oklch(94% 0.004 54)',       bgD: 'oklch(24.5% 0.008 54)',
+    bgL: 'oklch(90% 0.004 54)',       bgD: 'oklch(24.5% 0.008 54)',
     txL: 'oklch(24% 0.012 54)',       txD: 'oklch(95% 0.005 54)',
-    sfL: 'oklch(91.2% 0.005 54)',     sfD: 'oklch(30.5% 0.01 54)',
-    sf2L: 'oklch(88.4% 0.007 54)',    sf2D: 'oklch(36.5% 0.012 54)',
-    motionL: ['oklch(50% 0.16 54)', 'oklch(50% 0.147 24)', 'oklch(50% 0.144 89)'],
+    sfL: 'oklch(86.2% 0.005 54)',     sfD: 'oklch(30.5% 0.01 54)',
+    sf2L: 'oklch(83.4% 0.007 54)',    sf2D: 'oklch(36.5% 0.012 54)',
+    motionL: ['oklch(47% 0.16 54)', 'oklch(47% 0.147 24)', 'oklch(47% 0.144 89)'],
     motionD: ['oklch(78% 0.14 54)', 'oklch(78% 0.129 24)', 'oklch(78% 0.126 89)'],
   },
   /* 青莲 hue 311：青莲是李白自号，色取青紫色。彩度 0.21（与朱砂同级，是旧紫档的
      两倍），所以大面积一律走 wash 档；真色只出现在细线与标记上，一上面积就俗。 */
   lavender: {
-    accentL: 'oklch(45% 0.2 311)',   accentD: 'oklch(73% 0.15 311)',
+    accentL: 'oklch(42% 0.2 311)',   accentD: 'oklch(73% 0.15 311)',
     dye: '128, 29, 174',
     wash: '111, 69, 138',
-    bgL: 'oklch(93% 0.012 311)',      bgD: 'oklch(26% 0.02 311)',
+    bgL: 'oklch(89% 0.012 311)',      bgD: 'oklch(26% 0.02 311)',
     txL: 'oklch(25% 0.02 311)',       txD: 'oklch(96% 0.012 311)',
-    sfL: 'oklch(90% 0.014 311)',      sfD: 'oklch(32% 0.022 311)',
-    sf2L: 'oklch(87.5% 0.016 311)',   sf2D: 'oklch(38% 0.024 311)',
-    motionL: ['oklch(45% 0.2 311)', 'oklch(45% 0.184 281)', 'oklch(45% 0.18 346)'],
+    sfL: 'oklch(85% 0.014 311)',      sfD: 'oklch(32% 0.022 311)',
+    sf2L: 'oklch(82.5% 0.016 311)',   sf2D: 'oklch(38% 0.024 311)',
+    motionL: ['oklch(42% 0.2 311)', 'oklch(42% 0.184 281)', 'oklch(42% 0.18 346)'],
     motionD: ['oklch(73% 0.15 311)', 'oklch(73% 0.138 281)', 'oklch(73% 0.135 346)'],
   },
 }

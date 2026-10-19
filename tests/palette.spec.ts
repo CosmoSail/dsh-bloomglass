@@ -4,7 +4,7 @@ import { PALETTE, VARIANTS } from '../src/client/palette.ts'
 /**
  * oklch(L% C H) → sRGB, with the OKLab → linear-sRGB matrix and the sRGB transfer
  * function. The engine resolves these same values on a canvas; the script that
- * produced the table in palette.ts measured 5.13 / 4.72 / 4.64:1 for mist /
+ * produced the table in palette.ts measured 6.16 / 5.68 / 5.47:1 for mist /
  * cinnabar / petal in light mode, and this transform reproduces them within 0.03
  * (the residue is CSS gamut mapping), so the floor below is asserted with that
  * slack in mind rather than against a rounded literal.
@@ -51,7 +51,7 @@ describe('palette contrast floors', () => {
   it('keeps accent × background above AA in both modes', () => {
     // The pair is also the primary button's fill × its ink (tokens.ts), so it is
     // the one ratio the palette cannot trade away for looks. The tightest of the
-    // twenty is 4.60 (sage and amber, light).
+    // twenty is 4.78 (ripple, light) after the second light-mode deepening.
     for (const variant of VARIANTS) {
       const p = PALETTE[variant]
       expect(contrast(p.accentL, p.bgL), `${variant} light accent × bg`).toBeGreaterThanOrEqual(4.5)
@@ -76,16 +76,17 @@ describe('palette contrast floors', () => {
   it('keeps the light track deepened and the dark track untouched', () => {
     // 2026-10-16 (owner): the light tones were a notch too pale, so every
     // variant's light track dropped by 4–5L with its accent following 2.0–3.2L
-    // down to hold the ratio above. This guards the direction: no light base may
-    // climb back above 94L, the two surface steps must stay below it, and the
-    // dark track must not move with them.
+    // down to hold the ratio above. 2026-10-19 (owner, second pass): one more
+    // notch — bg -4, sf/sf2 -5, accent -3 (ripple -4 to keep its floor). This
+    // guards the direction: no light base may climb back above 91L, the two
+    // surface steps must stay below it, and the dark track must not move.
     for (const variant of VARIANTS) {
       const p = PALETTE[variant]
-      expect(lightness(p.bgL), `${variant} bgL`).toBeLessThanOrEqual(94)
+      expect(lightness(p.bgL), `${variant} bgL`).toBeLessThanOrEqual(91)
       expect(lightness(p.sfL), `${variant} sfL`).toBeLessThan(lightness(p.bgL))
       expect(lightness(p.sf2L), `${variant} sf2L`).toBeLessThan(lightness(p.sfL))
       // The accent had to follow the base down to hold its ratio.
-      expect(lightness(p.accentL), `${variant} accentL`).toBeLessThan(56)
+      expect(lightness(p.accentL), `${variant} accentL`).toBeLessThan(50)
       expect(lightness(p.bgD), `${variant} bgD`).toBeLessThan(30)
     }
   })
