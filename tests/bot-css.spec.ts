@@ -42,7 +42,7 @@ describe('BOT_CSS — the ds-bot palette bridge', () => {
     expect(BOT_CSS).toMatch(/--bt-glass-cover:\s*color-mix\(in oklab, var\(--dsw-alias-bg-overlay\), var\(--bloom-surface-solid, var\(--dsw-alias-bg-layer-1\)\)/)
     expect(BOT_GLASS_CSS).toMatch(/\.bt-exchange \.bt-dialog-foot\s*\{[^}]*background-color:\s*var\(--bt-glass-cover\)/)
     expect(BOT_GLASS_CSS).toMatch(/\.bt-exchange \.bt-dialog-foot::before\s*\{[^}]*linear-gradient\(to top, var\(--bt-glass-cover\), transparent\)/)
-    expect(BOT_GLASS_CSS).not.toMatch(/:is\(\.bt-panel, \.bt-pane\)::before\s*\{[^}]*var\(--bt-glass-cover\)/)
+    expect(BOT_GLASS_CSS).not.toMatch(/:is\(\.bt-panel, \.bt-pane\)::after\s*\{[^}]*var\(--bt-glass-cover\)/)
   })
 
   it('covers the roles ds-bot actually paints with', () => {
@@ -150,12 +150,74 @@ describe('BOT_GLASS_CSS — frost over the Bot UI', () => {
     expect(declarations).toContain('background-color: transparent')
     expect(declarations).not.toMatch(/backdrop-filter/)
 
-    const plate = new RegExp(`:is\\(\\.bt-panel, \\.bt-pane\\)::before\\s*\\{([^}]*)\\}`)
+    const plate = new RegExp(`:is\\(\\.bt-panel, \\.bt-pane\\)::after\\s*\\{([^}]*)\\}`)
     const body = plate.exec(BOT_GLASS_CSS)?.[1] ?? ''
     expect(body).toContain('position: absolute')
     expect(body).toContain('inset: 0')
     expect(body).toContain('backdrop-filter')
     expect(body).toContain('background-color: var(--dsw-alias-bg-overlay)')
+    // ds-bot's Windows caption band owns ::before on these same elements; the
+    // theme must not plate it there (see the cascade test below).
+    expect(BOT_GLASS_CSS).not.toMatch(/:is\(\.bt-panel, \.bt-pane\)::before/)
+  })
+
+  it('keeps the plate whole under ds-bot’s Windows caption band', () => {
+    // Regression pin for 1.0.4. ds-bot 0.2.x paints a caption band on
+    // `:is(.bt-pane,.bt-panel)::before` with `height: var(--bt-caption-band)`,
+    // and in the installed shell that resolves to 0px (the frame already clears
+    // the title bar). The theme never reset that height — it only declared
+    // inset — so while the plate shared the pseudo-element the band won the
+    // height and the panel became a hole onto the unblurred wallpaper. Plating
+    // ::after keeps the two declarations off each other's element, and keeps the
+    // band's `-webkit-app-region: drag` off the panel body.
+    const html = document.documentElement
+    html.setAttribute('data-windows-titlebar', '')
+    document.body.setAttribute(MR, '')
+    document.body.setAttribute(FR, '')
+    const panel = document.createElement('aside')
+    panel.className = 'bt-panel'
+    const sheet = document.createElement('aside')
+    sheet.className = 'bt-pane bt-exchange'
+    document.body.append(panel, sheet)
+    try {
+      // Theme first, ds-bot after: the real load order, since ds-bot injects its
+      // sheet from its own mount, later than the theme's tag.
+      const loadOrder = `${BOT_GLASS_CSS}\n${DS_BOT_BAND}`
+      const band = declaredOn(loadOrder, panel, '::before')
+      const plate = declaredOn(loadOrder, panel, '::after')
+
+      // The band still owns ::before — that is the whole point of the split.
+      expect(band.height).toContain('--bt-caption-band')
+      expect(band['-webkit-app-region']).toBe('drag')
+      expect(band.inset).toBeUndefined()
+      expect(band['backdrop-filter']).toBeUndefined()
+
+      // The plate owns ::after: full height by inset, and no height declaration
+      // anywhere that could compress it.
+      expect(plate.inset).toBe('0')
+      expect(plate.height).toBeUndefined()
+      expect(plate.position).toBe('absolute')
+      expect(plate['z-index']).toBe('-1')
+      expect(plate['pointer-events']).toBe('none')
+      expect(plate['backdrop-filter']).toContain('blur(var(--bloom-glass-blur))')
+      expect(plate['background-color']).toBe('var(--dsw-alias-bg-overlay)')
+
+      // No drag region rides along with the plate onto the panel body.
+      expect(plate['-webkit-app-region']).toBeUndefined()
+
+      // The exchange sheet is the same plate, densified, at full height too.
+      const cover = declaredOn(loadOrder, sheet, '::after')
+      expect(cover['background-color']).toContain('color-mix(in oklab')
+      expect(cover.inset).toBe('0')
+      expect(cover.height).toBeUndefined()
+      expect(cover['background-color']).not.toBe('var(--dsw-alias-bg-overlay)')
+    } finally {
+      panel.remove()
+      sheet.remove()
+      document.body.removeAttribute(MR)
+      document.body.removeAttribute(FR)
+      html.removeAttribute('data-windows-titlebar')
+    }
   })
 
   it('runs one glass family across every covering surface', () => {
@@ -184,13 +246,13 @@ describe('BOT_GLASS_CSS — frost over the Bot UI', () => {
   it('densifies the exchange sheet past the point where the host chat shows', () => {
     // The sheet is the one covering surface that has to erase what is behind it:
     // a share of the glass density still lets the host conversation be read.
-    const sheet = /\.bt-exchange::before\s*\{([^}]*)\}/.exec(BOT_GLASS_CSS)?.[1] ?? ''
+    const sheet = /\.bt-exchange::after\s*\{([^}]*)\}/.exec(BOT_GLASS_CSS)?.[1] ?? ''
     expect(sheet).toContain('color-mix(in oklab, var(--dsw-alias-bg-overlay), var(--bloom-surface-solid')
     expect(sheet).toMatch(/\b75%\)/)
     // The panel/dialog tier keeps the plain overlay role, and the near-solid
     // recipe stays reserved for the composer strip that scrolls over its own log.
-    expect(BOT_GLASS_CSS).toMatch(/:is\(\.bt-panel, \.bt-pane\)::before\s*\{[^}]*background-color:\s*var\(--dsw-alias-bg-overlay\)/)
-    expect(BOT_GLASS_CSS).not.toMatch(/:is\(\.bt-panel, \.bt-pane\)::before\s*\{[^}]*var\(--bt-glass-cover\)/)
+    expect(BOT_GLASS_CSS).toMatch(/:is\(\.bt-panel, \.bt-pane\)::after\s*\{[^}]*background-color:\s*var\(--dsw-alias-bg-overlay\)/)
+    expect(BOT_GLASS_CSS).not.toMatch(/:is\(\.bt-panel, \.bt-pane\)::after\s*\{[^}]*var\(--bt-glass-cover\)/)
   })
 
   it('hands the DSH composer card back to the theme plate', () => {
@@ -217,6 +279,83 @@ describe('BOT_GLASS_CSS — frost over the Bot UI', () => {
     expect(block).toContain('.bt-panel')
     expect(block).toContain('.bt-menu')
     expect(block).toContain('.bt-settings')
+    expect(block).toContain('::after')
     expect(block).toContain('backdrop-filter: none')
   })
 })
+
+/* ── A miniature cascade, just enough to answer one question ────────────────
+   Which pseudo-element does each declaration land on? jsdom cannot compute
+   styles for pseudo-elements, so this walks the real rule text, matches the
+   host part of every selector with the engine's own `matches()`, and merges the
+   declarations of the pseudo-element asked for, in source order. */
+
+/** ds-bot 0.2.2's Windows caption band, copied verbatim from its client.js. */
+const DS_BOT_BAND = `
+html[data-windows-titlebar]:not([data-fullscreen]) :is(.bt-pane,.bt-panel){--bt-caption-band:calc(var(--dsh-windows-titlebar-height,0px) - var(--dsh-frame-chrome-top,0px));padding-top:var(--bt-caption-band)}
+html[data-windows-titlebar]:not([data-fullscreen]) :is(.bt-pane,.bt-panel)::before{content:"";position:absolute;top:0;left:0;right:0;height:var(--bt-caption-band);-webkit-app-region:drag}
+`
+
+/** The sheet's top-level style rules; at-rules are skipped whole. */
+function topLevelRules(css: string): { selector: string; body: string }[] {
+  const rules: { selector: string; body: string }[] = []
+  let start = 0
+  for (let at = css.indexOf('{'); at >= 0; at = css.indexOf('{', start)) {
+    let depth = 0
+    let end = at
+    for (; end < css.length; end++) {
+      if (css[end] === '{') depth++
+      else if (css[end] === '}' && --depth === 0) break
+    }
+    const selector = css.slice(start, at).trim()
+    // A nested rule's "selector" is the tail of its parent's body; only the
+    // top-level rules are wanted, and a leading `@` marks an at-rule.
+    if (!selector.includes('@') && selector.length > 0) {
+      rules.push({ selector, body: css.slice(at + 1, end) })
+    }
+    start = end + 1
+  }
+  return rules
+}
+
+/** Split a selector list on the commas that separate rules (`:is(a, b)` keeps its own). */
+function selectorList(list: string): string[] {
+  const out: string[] = []
+  let depth = 0
+  let start = 0
+  for (let i = 0; i < list.length; i++) {
+    const ch = list[i]
+    if (ch === '(' || ch === '[') depth++
+    else if (ch === ')' || ch === ']') depth--
+    else if (ch === ',' && depth === 0) {
+      out.push(list.slice(start, i).trim())
+      start = i + 1
+    }
+  }
+  out.push(list.slice(start).trim())
+  return out.filter(Boolean)
+}
+
+/** Every declaration that reaches `el`'s `pseudo` element, later rules winning. */
+function declaredOn(css: string, el: Element, pseudo: '::before' | '::after'): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const rule of topLevelRules(css.replace(/\/\*[\s\S]*?\*\//g, ''))) {
+    const hits = selectorList(rule.selector).some(selector => {
+      if (!selector.endsWith(pseudo)) return false
+      const host = selector.slice(0, -pseudo.length).trim()
+      try {
+        return el.matches(host)
+      } catch {
+        // A selector jsdom cannot parse must not be silently taken as a match.
+        return false
+      }
+    })
+    if (!hits) continue
+    for (const declaration of rule.body.split(';')) {
+      const colon = declaration.indexOf(':')
+      if (colon < 0) continue
+      out[declaration.slice(0, colon).trim()] = declaration.slice(colon + 1).trim()
+    }
+  }
+  return out
+}

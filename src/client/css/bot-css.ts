@@ -25,10 +25,12 @@
  *      ds-bot's later tag wins the tie and the bridge is dead code.
  *
  *   2. `BOT_GLASS_CSS` turns what floats over the wallpaper into glass while
- *      one is painted. Plates go on `::before`, never on a panel itself: a
+ *      one is painted. Plates go on `::after`, never on a panel itself: a
  *      `backdrop-filter` on `.bt-panel` would make it a containing block and
  *      re-anchor the `position: fixed` menus rendered inside it (the same trap
- *      documented for the sidebar column in `bloom-glass.ts`).
+ *      documented for the sidebar column in `bloom-glass.ts`). `::before` is
+ *      not available either — ds-bot 0.2.x paints its Windows caption band
+ *      there, on the very same elements (see the plate rule below).
  *
  * Knob-token coverage follows the theme's own roles, not ds-bot's flat greys:
  * columns/panels read the plate token, menus the menu token, dialogs the
@@ -161,7 +163,7 @@ html body[${BODY_ATTR}] .bt-badge-main path {
 }
 `.trim()
 
-/** Panels whose subtree holds `position: fixed` nodes: the plate goes on ::before. */
+/** Panels whose subtree holds `position: fixed` nodes: the plate goes on ::after. */
 const PLATE = ':is(.bt-panel, .bt-pane)'
 /** Surfaces that carry the glass on the element itself. */
 const PANE =
@@ -232,12 +234,23 @@ body[${BODY_ATTR}][${FROST_ATTR}] ${BOT_COLUMN}::before {
   background-color: var(--dsw-alias-bg-overlay);
 }
 
-/* Covering panels: same glass, on ::before, so the panel itself stays
-   filter-free for the fixed descendants it hosts. */
+/* The panels' own fill goes: ds-bot paints .bt-panel and .bt-pane with
+   --bt-main, an opaque role, which would otherwise cover the plate. */
 body[${BODY_ATTR}][${FROST_ATTR}] ${PLATE} {
   background-color: transparent;
 }
-body[${BODY_ATTR}][${FROST_ATTR}] ${PLATE}::before {
+
+/* Covering panels: same glass, on ::after, so the panel itself stays
+   filter-free for the fixed descendants it hosts.
+   ::after, not ::before: ds-bot 0.2.x paints its Windows caption band on
+   :is(.bt-pane, .bt-panel)::before — height: var(--bt-caption-band) plus
+   -webkit-app-region: drag. In the installed shell --bt-caption-band resolves
+   to 0px (the frame already clears the title bar), and the band never resets
+   the height it declares elsewhere, so while the plate shared that
+   pseudo-element it came out 0px tall and the wallpaper showed through the
+   panel unblurred. The band owns ::before; the plate takes the other one, which
+   also keeps the drag region off the panel body. */
+body[${BODY_ATTR}][${FROST_ATTR}] ${PLATE}::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -249,7 +262,7 @@ body[${BODY_ATTR}][${FROST_ATTR}] ${PLATE}::before {
 /* The Bot↔Bot exchange sheet: the family glass, at the density that erases the
    host conversation behind it (see COVER). Everything else about the plate —
    position, the blur knob, the panel staying filter-free — is the rule above. */
-body[${BODY_ATTR}][${FROST_ATTR}] .bt-exchange::before {
+body[${BODY_ATTR}][${FROST_ATTR}] .bt-exchange::after {
   background-color: ${COVER};
 }
 
@@ -297,7 +310,7 @@ body[${BODY_ATTR}][${FROST_ATTR}] [data-composer-card] {
 
 @media (prefers-reduced-transparency: reduce) {
   body[${BODY_ATTR}][${FROST_ATTR}] ${BOT_COLUMN}::before,
-  body[${BODY_ATTR}][${FROST_ATTR}] ${PLATE}::before,
+  body[${BODY_ATTR}][${FROST_ATTR}] ${PLATE}::after,
   body[${BODY_ATTR}][${FROST_ATTR}] ${PANE},
   body[${BODY_ATTR}][${FROST_ATTR}] .bt-bubble {
     -webkit-backdrop-filter: none;
