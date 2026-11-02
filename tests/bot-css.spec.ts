@@ -478,13 +478,28 @@ describe('BOT_LEFTCOL_CSS — ds-bot 0.2.4’s portalled left column', () => {
     expect(portalBlock).not.toContain('-2px')
 
     // Dark mode has a competitor the light branch does not: the always-on accent
-    // plate is `html body[…][data-ds-dark-theme] .bt-leftcol::before` at (0,2,3),
-    // and a bare `body[…]` frost rule (0,2,2) loses to it. Measured on the running
+    // plate is `html body[…][data-ds-dark-theme] .bt-leftcol::before` at (0,3,3),
+    // and a bare `body[…]` frost rule (0,3,2) loses to it. Measured on the running
     // app, that painted the accent plate — oklch(0.42 …/.557) — instead of the
     // sidebar fill the classic column uses, oklch(0.26 …/.46).
-    expect(BOT_LEFTCOL_CSS).toMatch(new RegExp(`html body\\[[^\\]]+\\]\\[${FR}\\]\\s*\\.bt-leftcol::before`))
+    //
+    // The assertion has to read the frost *plate* rule's own block: a plain
+    // toMatch(/html body…[frost]…/) is also satisfied by the reduced-transparency
+    // block at the end of the sheet, so dropping `html` from the plate rule would
+    // still pass (质检 proved that with a mutation). There are exactly two blocks
+    // with that selector shape — the plate and the media override — and they must
+    // come in that order.
+    const frostBlocks = [...BOT_LEFTCOL_CSS.matchAll(
+      new RegExp(`html body\\[[^\\]]+\\]\\[${FR}\\]\\s*\\.bt-leftcol::before\\s*\\{([^}]*)\\}`, 'g'),
+    )].map(match => match[1] ?? '')
+    expect(frostBlocks).toHaveLength(2)
+    expect(frostBlocks[0]).toContain('background-color: var(--dsw-specific-sidebar-fill)')
+    expect(frostBlocks[0]).toContain('blur(var(--bloom-glass-blur))')
+    expect(frostBlocks[0]).toContain('saturate(var(--fw-saturate')
+    expect(frostBlocks[1]).toContain('backdrop-filter: none')
+    // ... and the frost plate must come after the dark accent plate in the sheet.
     const darkPlateAt = BOT_LEFTCOL_CSS.indexOf('[data-ds-dark-theme] .bt-leftcol::before')
-    const frostPlateAt = BOT_LEFTCOL_CSS.indexOf(`[${FR}] .bt-leftcol::before`)
+    const frostPlateAt = BOT_LEFTCOL_CSS.search(new RegExp(`html body\\[[^\\]]+\\]\\[${FR}\\]\\s*\\.bt-leftcol::before`))
     expect(darkPlateAt).toBeGreaterThan(-1)
     expect(frostPlateAt).toBeGreaterThan(darkPlateAt)
     // ... and the reduced-transparency override has to clear the same bar.

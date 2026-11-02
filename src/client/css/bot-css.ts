@@ -449,11 +449,12 @@ html body[${BODY_ATTR}][data-ds-dark-theme] .bt-leftcol::after {
    blur/saturate, and no overhang (see the rule above). The tint and wash above it
    are untouched, so the two veils stack exactly as they do beside a session list.
    'html body' is not decoration: in dark mode the always-on accent plate is
-   written as 'html body[…][data-ds-dark-theme] .bt-leftcol::before' (0,2,3), so a
-   bare 'body[…]' frost rule at (0,2,2) loses to it and the column paints the
+   written as 'html body[…][data-ds-dark-theme] .bt-leftcol::before' at (0,3,3),
+   so a bare 'body[…]' frost rule at (0,3,2) loses to it and the column paints the
    accent plate instead of the sidebar fill — measured on the running app as
    oklch(0.42 …/.557) against the sidebar's oklch(0.26 …/.46). The light branch has
-   no such competitor, which is why only dark looked wrong. */
+   no such competitor, which is why only dark looked wrong. At (0,3,3) and later in
+   the sheet, this rule wins the tie. */
 html body[${BODY_ATTR}][${FROST_ATTR}] .bt-leftcol::before {
   background-color: var(--dsw-specific-sidebar-fill);
   -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
