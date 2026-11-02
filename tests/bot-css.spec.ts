@@ -418,7 +418,10 @@ describe('BOT_LEFTCOL_CSS — ds-bot 0.2.4’s portalled left column', () => {
       expect(dockPlate['backdrop-filter']).toContain('blur(var(--bloom-glass-blur))')
       expect(dockPlate['backdrop-filter']).toContain('saturate(var(--fw-saturate')
       expect(dockPlate.inset).toContain('var(--bt-lc-clear')
-      expect(dockPlate.inset).toContain('-2px')
+      // The shell's -2px overhang is clipped by its own overflow: hidden, so the
+      // visible bleed is zero; this column has no overflow (it hosts ds-bot's
+      // portalled popovers), so it must not copy the parameter.
+      expect(dockPlate.inset).not.toContain('-2px')
       expect(dockPlate['z-index']).toBe('-1')
 
       // The drawer floats over the conversation: the exchange sheet's denser
@@ -465,6 +468,11 @@ describe('BOT_LEFTCOL_CSS — ds-bot 0.2.4’s portalled left column', () => {
     expect(portalBlock).toContain('background-color: var(--dsw-specific-sidebar-fill)')
     expect(portalBlock).toContain('blur(var(--bloom-glass-blur))')
     expect(portalBlock).toContain('saturate(var(--fw-saturate')
+    // Same *visible* geometry: the shell's -2px overhang is clipped by its own
+    // overflow: hidden, so copying the number here would paint a 2px band over the
+    // conversation (this column cannot take overflow: hidden — ds-bot portals its
+    // popovers into it).
+    expect(portalBlock).not.toContain('-2px')
 
     // ... and the tint + wash that sit above the plate in the classic column. They
     // ride ::after, because the portal column is a stacking context (ds-bot makes

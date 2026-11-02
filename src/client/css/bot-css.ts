@@ -395,13 +395,17 @@ html body[${BODY_ATTR}][data-ds-dark-theme] .bt-leftcol {
 /* The plate. Never a backdrop-filter on the column itself: 0.2.4 portals the
    whole list *plus* its dialogs into this node, and a filter here would make it
    the containing block for every position: fixed descendant (the trap in
-   bloom-glass.ts). inset top = the title band, so the strip above stays opaque;
-   the -2px right overhang is the shell column's, which covers the seam it shares
-   with the conversation column. */
+   bloom-glass.ts). inset top = the title band, so the strip above stays opaque.
+   The shell column's plate carries a -2px right overhang, but its own
+   'overflow: hidden' clips it — measured on the running page, the sidebar's
+   effective bleed is zero. This column must not be given overflow: hidden (it
+   hosts ds-bot's portalled popovers), so the overhang is written out instead of
+   copied: at -2px it painted a light 2px band over the conversation's first
+   columns, 27 levels off the seam the sidebar shows. */
 html body[${BODY_ATTR}] .bt-leftcol::before {
   content: '';
   position: absolute;
-  inset: var(--bt-lc-clear, var(--dsh-frame-top-clearance, 0px)) -2px 0 0;
+  inset: var(--bt-lc-clear, var(--dsh-frame-top-clearance, 0px)) 0 0 0;
   z-index: -1;
   pointer-events: none;
   background-color: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #fff) 88%);
