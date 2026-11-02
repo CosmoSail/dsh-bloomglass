@@ -318,3 +318,104 @@ body[${BODY_ATTR}][${FROST_ATTR}] [data-composer-card] {
   }
 }
 `.trim()
+
+/**
+ * ds-bot 0.2.4's portalled left column.
+ *
+ * 0.2.4 stops rendering the Bot list inside DSH's sidebar slot: the TeamSidebar
+ * is `createPortal(..., document.body)` into a `<div class="bt-leftcol">`, and
+ * the shell's own sidebar column is collapsed to width 0 while the centre column
+ * takes a `margin-left` of the same width. Every rule in BOT_GLASS_CSS that finds
+ * the column by its host slot (`*:has(> [data-slot='sidebar']):has(.bt-side)`)
+ * therefore matches nothing, and the portal column painted ds-bot's own
+ * `--bt-sidebar` — a token this theme maps to the *veiled* sidebar fill, so the
+ * list sat on a half-transparent plate with no backdrop filter at all: not
+ * frosted, just see-through.
+ *
+ * This sheet gives the portal column the treatment the shell column gets. The
+ * old selectors stay in place (BOT_GLASS_CSS), so a ds-bot that still renders
+ * into the slot keeps working.
+ *
+ * Two things are specific to the portal column:
+ *
+ *   - it runs from the window's top edge (ds-bot pads its content down by
+ *     `--bt-lc-clear` so the column and the title band share one fill), while the
+ *     titlebar strip is painted with the palette's *opaque* sidebar tone since
+ *     1.0.3. So the top band above `--bt-lc-clear` keeps that same opaque tone
+ *     and the glass starts below it — otherwise the glass would show up as a
+ *     second, lighter tone in the left 276px of the titlebar.
+ *   - its drawer state (`data-left='drawer'`) floats *over* the conversation, so
+ *     it takes the same denser cover the Bot↔Bot exchange sheet uses: a share of
+ *     the glass density would leave the chat behind it readable.
+ *
+ * The seam is the left sidebar's own: the accent tint over the layer-1 tone plus
+ * the outward accent glow (no hairline — the shell column's border is zeroed for
+ * the same reason), so the portal column and the old in-slot column read alike.
+ */
+export const BOT_LEFTCOL_CSS = `
+/* The column itself. The top band is the titlebar's opaque tone; everything
+   below it hands the fill to the plate (frost) or keeps the sidebar's accent
+   tint (no wallpaper). */
+html body[${BODY_ATTR}] .bt-leftcol {
+  border-right: 0;
+  background-color: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #fff) 94%);
+  background-image: linear-gradient(to bottom,
+    var(--bloom-sidebar-solid, var(--bt-sidebar)) 0,
+    var(--bloom-sidebar-solid, var(--bt-sidebar)) var(--bt-lc-clear, var(--dsh-frame-top-clearance, 0px)),
+    transparent var(--bt-lc-clear, var(--dsh-frame-top-clearance, 0px)));
+  background-repeat: no-repeat;
+  /* The shell column's outward glow, verbatim (bloom-glass.ts): offset and spread
+     the same 24/-24, so the light only spills right and never above or below. */
+  box-shadow:
+    24px 0 40px -24px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 45%),
+    0 14px 44px -16px rgba(0, 0, 0, 0.22);
+}
+html body[${BODY_ATTR}][data-ds-dark-theme] .bt-leftcol {
+  background-color: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #101010) 92%);
+  box-shadow:
+    24px 0 40px -24px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 35%),
+    0 16px 48px -18px rgba(0, 0, 0, 0.5);
+}
+
+/* The plate. Never a backdrop-filter on the column itself: 0.2.4 portals the
+   whole list *plus* its dialogs into this node, and a filter here would make it
+   the containing block for every position: fixed descendant (the trap in
+   bloom-glass.ts). inset top = the title band, so the strip above stays opaque. */
+html body[${BODY_ATTR}] .bt-leftcol::before {
+  content: '';
+  position: absolute;
+  inset: var(--bt-lc-clear, var(--dsh-frame-top-clearance, 0px)) 0 0 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #fff) 88%);
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.3);
+  backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.3);
+}
+html body[${BODY_ATTR}][data-ds-dark-theme] .bt-leftcol::before {
+  background-color: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #101010) 82%);
+}
+
+/* Frost: the column hands its fill to the plate, exactly like the in-slot one,
+   so the glass knob and the wallpaper move it with the rest of the window. */
+body[${BODY_ATTR}][${FROST_ATTR}] .bt-leftcol {
+  background-color: transparent;
+}
+body[${BODY_ATTR}][${FROST_ATTR}] .bt-leftcol::before {
+  background-color: var(--dsw-alias-bg-overlay);
+  -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
+  backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
+}
+
+/* Drawer: a floating column over the conversation, not a column of the frame —
+   the exchange sheet's denser cover, so what it covers cannot be read through. */
+body[${BODY_ATTR}][${FROST_ATTR}] .bt-leftcol[data-left='drawer']::before {
+  background-color: ${COVER};
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html body[${BODY_ATTR}] .bt-leftcol::before {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+`.trim()

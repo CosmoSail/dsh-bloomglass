@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { BODY_ATTR, FROST_ATTR } from '../src/client/constants.ts'
-import { BOT_CSS, BOT_GLASS_CSS } from '../src/client/css/bot-css.ts'
+import { BOT_CSS, BOT_GLASS_CSS, BOT_LEFTCOL_CSS } from '../src/client/css/bot-css.ts'
 
 /** Short aliases: the bridge and the frost sheet are both keyed on body attributes. */
 const MR = BODY_ATTR
@@ -359,3 +359,91 @@ function declaredOn(css: string, el: Element, pseudo: '::before' | '::after'): R
   }
   return out
 }
+
+/* ── ds-bot 0.2.4: the Bot list moved out of the shell's sidebar slot ───────
+   The list is now `createPortal`ed into a body-level `<div class="bt-leftcol">`
+   and the shell column collapses to width 0, so every in-slot selector in
+   BOT_GLASS_CSS stops matching. These pin the sheet that covers the portal. */
+
+function leftColumn(attrs: string): HTMLElement {
+  const column = document.createElement('div')
+  column.className = 'bt-leftcol'
+  for (const pair of attrs.split(' ').filter(Boolean)) {
+    const [name, value = ''] = pair.split('=')
+    column.setAttribute(name!, value)
+  }
+  document.body.append(column)
+  return column
+}
+
+describe('BOT_LEFTCOL_CSS — ds-bot 0.2.4’s portalled left column', () => {
+  it('gives the portal column the shell column’s seam and glass', () => {
+    // The seam the shell column has: the accent tint over layer-1 plus the
+    // outward accent glow (no hairline — the theme zeroes the column's border for
+    // the same reason), so the portal column does not read as a different panel.
+    expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol\s*\{[^}]*border-right:\s*0/)
+    expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol\s*\{[^}]*background-color:\s*color-mix\(in oklch, var\(--bloom-accent/)
+    expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol\s*\{[^}]*box-shadow:\s*24px 0 40px -24px color-mix\(in oklch, var\(--bloom-accent/)
+    // The column runs to the window's top edge and shares the title band, so the
+    // band above --bt-lc-clear keeps the opaque tone the titlebar strip is
+    // painted with; the glass starts below it.
+    expect(BOT_LEFTCOL_CSS).toMatch(/linear-gradient\(to bottom,\s*var\(--bloom-sidebar-solid, var\(--bt-sidebar\)\) 0,\s*var\(--bloom-sidebar-solid, var\(--bt-sidebar\)\) var\(--bt-lc-clear/)
+    // The plate: never a filter on the column itself (it now hosts the whole
+    // portal subtree, dialogs included), and never above the title band.
+    expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol::before\s*\{[^}]*position:\s*absolute/)
+    expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol::before\s*\{[^}]*inset:\s*var\(--bt-lc-clear/)
+    expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol::before\s*\{[^}]*z-index:\s*-1/)
+    expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol::before\s*\{[^}]*pointer-events:\s*none/)
+    expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol::before\s*\{[^}]*backdrop-filter:\s*blur\(var\(--bloom-glass-blur/)
+    // Nothing here may shout: the sheet has to lose to ds-bot's own drawer fill
+    // on specificity alone, which it does at (0,2,2) against (0,2,0).
+    expect(BOT_LEFTCOL_CSS).not.toContain('!important')
+  })
+
+  it('hands the portal column to the family glass under frost, and keeps the drawer dense', () => {
+    const html = document.documentElement
+    html.setAttribute('data-windows-titlebar', '')
+    document.body.setAttribute(MR, '')
+    document.body.setAttribute(FR, 'dark')
+    const column = leftColumn('data-left=dock')
+    const drawer = leftColumn('data-left=drawer')
+    try {
+      // Cascade the sheet the way the browser would for the two states.
+      const dockPlate = declaredOn(BOT_LEFTCOL_CSS, column, '::before')
+      expect(dockPlate['background-color']).toBe('var(--dsw-alias-bg-overlay)')
+      expect(dockPlate['backdrop-filter']).toContain('blur(var(--bloom-glass-blur))')
+      expect(dockPlate.inset).toContain('var(--bt-lc-clear')
+      expect(dockPlate['z-index']).toBe('-1')
+
+      // The drawer floats over the conversation: the exchange sheet's denser
+      // cover, which is the only recipe that leaves nothing readable behind it.
+      const drawerPlate = declaredOn(BOT_LEFTCOL_CSS, drawer, '::before')
+      expect(drawerPlate['background-color']).toContain('color-mix(in oklab')
+      expect(drawerPlate['background-color']).toMatch(/\b75%\)/)
+      expect(drawerPlate['background-color']).not.toBe('var(--dsw-alias-bg-overlay)')
+
+      // The frost rules are gated on both body attributes, like the rest.
+      const frostRules = [...BOT_LEFTCOL_CSS.matchAll(/body\[[^\]]+\]\[[^\]]+\]\.bt-leftcol|body\[[^\]]+\]\[[^\]]+\] \.bt-leftcol/g)]
+      expect(frostRules.length).toBeGreaterThanOrEqual(2)
+
+      // Reduced transparency drops the blur instead of leaving it on.
+      const reduced = /@media \(prefers-reduced-transparency: reduce\)\s*\{([\s\S]*)\}\s*$/.exec(BOT_LEFTCOL_CSS)?.[1] ?? ''
+      expect(reduced).toContain('.bt-leftcol::before')
+      expect(reduced).toContain('backdrop-filter: none')
+    } finally {
+      column.remove()
+      drawer.remove()
+      document.body.removeAttribute(MR)
+      document.body.removeAttribute(FR)
+      html.removeAttribute('data-windows-titlebar')
+    }
+  })
+
+  it('keeps the in-slot column treatment for a ds-bot that still renders there', () => {
+    // 0.2.4 moved the list out, but the old selectors stay: a rolled-back install
+    // (or a host that still renders into the slot) must keep its frosted column.
+    expect(BOT_GLASS_CSS).toContain(`:has(> [data-slot='sidebar']):has(.bt-side)`)
+    expect(BOT_GLASS_CSS).toMatch(/:has\(\.bt-rail\)\)\s*\{\s*background-color:\s*transparent/)
+    expect(BOT_GLASS_CSS).toMatch(/:has\(\.bt-rail\)\)::before\s*\{\s*background-color:\s*var\(--dsw-alias-bg-overlay\)/)
+  })
+})

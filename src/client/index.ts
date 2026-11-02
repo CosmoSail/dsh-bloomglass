@@ -22,7 +22,7 @@ import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-client-ui-theme/client'
 import { BODY_ATTR, LOCALE_NS, PACKAGE_ID, VARIANT_ATTR } from './constants.ts'
 import { SETTINGS_CSS, SURFACE_CSS } from './glass-css.ts'
-import { BOT_CSS, BOT_GLASS_CSS } from './css/bot-css.ts'
+import { BOT_CSS, BOT_GLASS_CSS, BOT_LEFTCOL_CSS } from './css/bot-css.ts'
 import { COMPONENT_CSS } from './css/bloom-component.ts'
 import { GLASS_CSS as BLOOM_GLASS_CSS } from './css/bloom-glass.ts'
 import { PALETTE_CSS } from './css/palette-css.ts'
@@ -161,6 +161,7 @@ export function apply(ctx: ClientCtx): void {
       SETTINGS_CSS,
       BOT_CSS,
       BOT_GLASS_CSS,
+      BOT_LEFTCOL_CSS,
       PALETTE_CSS,
     ].join('\n')
 
