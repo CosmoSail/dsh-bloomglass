@@ -477,6 +477,20 @@ describe('BOT_LEFTCOL_CSS — ds-bot 0.2.4’s portalled left column', () => {
     // popovers into it).
     expect(portalBlock).not.toContain('-2px')
 
+    // Dark mode has a competitor the light branch does not: the always-on accent
+    // plate is `html body[…][data-ds-dark-theme] .bt-leftcol::before` at (0,2,3),
+    // and a bare `body[…]` frost rule (0,2,2) loses to it. Measured on the running
+    // app, that painted the accent plate — oklch(0.42 …/.557) — instead of the
+    // sidebar fill the classic column uses, oklch(0.26 …/.46).
+    expect(BOT_LEFTCOL_CSS).toMatch(new RegExp(`html body\\[[^\\]]+\\]\\[${FR}\\]\\s*\\.bt-leftcol::before`))
+    const darkPlateAt = BOT_LEFTCOL_CSS.indexOf('[data-ds-dark-theme] .bt-leftcol::before')
+    const frostPlateAt = BOT_LEFTCOL_CSS.indexOf(`[${FR}] .bt-leftcol::before`)
+    expect(darkPlateAt).toBeGreaterThan(-1)
+    expect(frostPlateAt).toBeGreaterThan(darkPlateAt)
+    // ... and the reduced-transparency override has to clear the same bar.
+    const reduced = /@media \(prefers-reduced-transparency: reduce\)\s*\{([\s\S]*)\}\s*$/.exec(BOT_LEFTCOL_CSS)?.[1] ?? ''
+    expect(reduced).toMatch(new RegExp(`html body\\[[^\\]]+\\]\\[${FR}\\]\\s*\\.bt-leftcol::before`))
+
     // ... and the tint + wash that sit above the plate in the classic column. They
     // ride ::after, because the portal column is a stacking context (ds-bot makes
     // it position: fixed; z-index: 25) and a negative-z child would otherwise put

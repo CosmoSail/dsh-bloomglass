@@ -445,10 +445,16 @@ html body[${BODY_ATTR}][data-ds-dark-theme] .bt-leftcol::after {
 }
 
 /* Frost: the same plate the classic sidebar gets, token for token — the veiled
-   sidebar fill (not the details panel's overlay role), the shell's -2px overhang,
-   and the glass knob's blur/saturate. The tint and wash above it are untouched,
-   so the two veils stack exactly as they do beside a session list. */
-body[${BODY_ATTR}][${FROST_ATTR}] .bt-leftcol::before {
+   sidebar fill (not the details panel's overlay role), the blur knob's
+   blur/saturate, and no overhang (see the rule above). The tint and wash above it
+   are untouched, so the two veils stack exactly as they do beside a session list.
+   'html body' is not decoration: in dark mode the always-on accent plate is
+   written as 'html body[…][data-ds-dark-theme] .bt-leftcol::before' (0,2,3), so a
+   bare 'body[…]' frost rule at (0,2,2) loses to it and the column paints the
+   accent plate instead of the sidebar fill — measured on the running app as
+   oklch(0.42 …/.557) against the sidebar's oklch(0.26 …/.46). The light branch has
+   no such competitor, which is why only dark looked wrong. */
+html body[${BODY_ATTR}][${FROST_ATTR}] .bt-leftcol::before {
   background-color: var(--dsw-specific-sidebar-fill);
   -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
   backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
@@ -461,7 +467,10 @@ body[${BODY_ATTR}][${FROST_ATTR}] .bt-leftcol[data-left='drawer']::before {
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  html body[${BODY_ATTR}] .bt-leftcol::before {
+  /* Same (0,2,3) as the dark and frost plate rules, and last in the sheet, so it
+     wins over both — a bare body[…] selector would lose to them and leave the
+     blur on. */
+  html body[${BODY_ATTR}][${FROST_ATTR}] .bt-leftcol::before {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
