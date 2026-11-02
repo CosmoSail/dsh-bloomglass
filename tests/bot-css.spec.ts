@@ -384,7 +384,10 @@ describe('BOT_LEFTCOL_CSS — ds-bot 0.2.4’s portalled left column', () => {
     // the same reason), so the portal column does not read as a different panel.
     expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol\s*\{[^}]*border-right:\s*0/)
     expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol::after\s*\{[^}]*background-color:\s*color-mix\(in oklch, var\(--bloom-accent/)
-    expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol\s*\{[^}]*box-shadow:\s*24px 0 40px -24px color-mix\(in oklch, var\(--bloom-accent/)
+    // The glow rides the glass box (which starts under the title band), not the
+    // full-height column: on the column it spilled over the title strip.
+    expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol::before\s*\{[^}]*box-shadow:\s*24px 0 40px -24px color-mix\(in oklch, var\(--bloom-accent/)
+    expect(BOT_LEFTCOL_CSS).not.toMatch(/\.bt-leftcol\s*\{[^}]*box-shadow:[^}]*24px 0 40px -24px/)
     // The column runs to the window's top edge and shares the title band, so the
     // band above --bt-lc-clear keeps the opaque tone the titlebar strip is
     // painted with; the glass starts below it.

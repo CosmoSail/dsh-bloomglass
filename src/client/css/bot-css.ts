@@ -380,16 +380,14 @@ html body[${BODY_ATTR}] .bt-leftcol {
     var(--bloom-sidebar-solid, var(--bt-sidebar)) var(--bt-lc-clear, var(--dsh-frame-top-clearance, 0px)),
     transparent var(--bt-lc-clear, var(--dsh-frame-top-clearance, 0px)));
   background-repeat: no-repeat;
-  /* The shell column's outward glow, verbatim (bloom-glass.ts): offset and spread
-     the same 24/-24, so the light only spills right and never above or below. */
-  box-shadow:
-    24px 0 40px -24px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 45%),
-    0 14px 44px -16px rgba(0, 0, 0, 0.22);
+  /* The drop shadow only. The accent glow lives on the glass box below: this
+     column is full-height, so a glow on the element would spill over the title
+     strip (measured 18 levels on the strip beside the column) — the shell column
+     never does that because its element starts under the strip. */
+  box-shadow: 0 14px 44px -16px rgba(0, 0, 0, 0.22);
 }
 html body[${BODY_ATTR}][data-ds-dark-theme] .bt-leftcol {
-  box-shadow:
-    24px 0 40px -24px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 35%),
-    0 16px 48px -18px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 16px 48px -18px rgba(0, 0, 0, 0.5);
 }
 
 /* The plate. Never a backdrop-filter on the column itself: 0.2.4 portals the
@@ -411,9 +409,14 @@ html body[${BODY_ATTR}] .bt-leftcol::before {
   background-color: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #fff) 88%);
   -webkit-backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.3);
   backdrop-filter: blur(var(--bloom-glass-blur, 24px)) saturate(1.3);
+  /* The shell column's outward glow (bloom-glass.ts), same 24/-24 offset and
+     spread — carried by the glass box, which starts under the title band, so it
+     spills right exactly where the sidebar's does and never tints the strip. */
+  box-shadow: 24px 0 40px -24px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 45%);
 }
 html body[${BODY_ATTR}][data-ds-dark-theme] .bt-leftcol::before {
   background-color: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #101010) 82%);
+  box-shadow: 24px 0 40px -24px color-mix(in oklch, var(--bloom-accent, #6b8f71), transparent 35%);
 }
 
 /* The column's own two veils — the accent tint and its top wash — ride a second
