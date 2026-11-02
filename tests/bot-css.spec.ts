@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { BODY_ATTR, FROST_ATTR } from '../src/client/constants.ts'
+import { GLASS_CSS } from '../src/client/glass-css.ts'
 import { BOT_CSS, BOT_GLASS_CSS, BOT_LEFTCOL_CSS } from '../src/client/css/bot-css.ts'
 
 /** Short aliases: the bridge and the frost sheet are both keyed on body attributes. */
@@ -382,7 +383,7 @@ describe('BOT_LEFTCOL_CSS — ds-bot 0.2.4’s portalled left column', () => {
     // outward accent glow (no hairline — the theme zeroes the column's border for
     // the same reason), so the portal column does not read as a different panel.
     expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol\s*\{[^}]*border-right:\s*0/)
-    expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol\s*\{[^}]*background-color:\s*color-mix\(in oklch, var\(--bloom-accent/)
+    expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol::after\s*\{[^}]*background-color:\s*color-mix\(in oklch, var\(--bloom-accent/)
     expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol\s*\{[^}]*box-shadow:\s*24px 0 40px -24px color-mix\(in oklch, var\(--bloom-accent/)
     // The column runs to the window's top edge and shares the title band, so the
     // band above --bt-lc-clear keeps the opaque tone the titlebar strip is
@@ -410,9 +411,14 @@ describe('BOT_LEFTCOL_CSS — ds-bot 0.2.4’s portalled left column', () => {
     try {
       // Cascade the sheet the way the browser would for the two states.
       const dockPlate = declaredOn(BOT_LEFTCOL_CSS, column, '::before')
-      expect(dockPlate['background-color']).toBe('var(--dsw-alias-bg-overlay)')
+      // The classic sidebar's plate token, not the details panel's overlay role:
+      // the owner asked for the two columns to match in transparency/brightness.
+      expect(dockPlate['background-color']).toBe('var(--dsw-specific-sidebar-fill)')
+      expect(dockPlate['background-color']).not.toBe('var(--dsw-alias-bg-overlay)')
       expect(dockPlate['backdrop-filter']).toContain('blur(var(--bloom-glass-blur))')
+      expect(dockPlate['backdrop-filter']).toContain('saturate(var(--fw-saturate')
       expect(dockPlate.inset).toContain('var(--bt-lc-clear')
+      expect(dockPlate.inset).toContain('-2px')
       expect(dockPlate['z-index']).toBe('-1')
 
       // The drawer floats over the conversation: the exchange sheet's denser
@@ -437,6 +443,41 @@ describe('BOT_LEFTCOL_CSS — ds-bot 0.2.4’s portalled left column', () => {
       document.body.removeAttribute(FR)
       html.removeAttribute('data-windows-titlebar')
     }
+  })
+
+  it('copies the classic sidebar’s glass chain instead of approximating it', () => {
+    // The owner compared the portal column against the classic agent sidebar in
+    // the running app: transparency, brightness and frost have to agree. The
+    // classic chain is GLASS_CSS's sidebar plate (`--dsw-specific-sidebar-fill`,
+    // the shell's -2px overhang, the blur knob) *plus* the column's own accent
+    // tint and top wash from bloom-glass.ts / bloom-component.ts. Copying the
+    // numbers by eye got the plate token wrong (`--dsw-alias-bg-overlay`, the
+    // details panel's role, .77 instead of .55) and dropped the tint, which is
+    // exactly what looks heavier and flatter. So this pins *sameness*, not values.
+    // The shared plate rule (one recipe for every column) carries the blur pair;
+    // the sidebar-specific rule adds its own fill token and the -2px overhang.
+    expect(GLASS_CSS).toMatch(/:has\(> \[data-slot='sidebar'\]\)::before,\s*\n[^{]*\{[^}]*blur\(var\(--bloom-glass-blur\)\) saturate\(var\(--fw-saturate\)\)/)
+    const classicPlate = /:has\(> \[data-slot='sidebar'\]\)::before\s*\{([^}]*)\}/.exec(GLASS_CSS)?.[1] ?? ''
+    expect(classicPlate).toContain('var(--dsw-specific-sidebar-fill)')
+    expect(classicPlate).toContain('inset: 0 -2px 0 0')
+
+    const portalBlock = new RegExp(`body\\[[^\\]]+\\]\\[${FR}\\]\\s*\\.bt-leftcol::before\\s*\\{([^}]*)\\}`).exec(BOT_LEFTCOL_CSS)?.[1] ?? ''
+    expect(portalBlock).toContain('background-color: var(--dsw-specific-sidebar-fill)')
+    expect(portalBlock).toContain('blur(var(--bloom-glass-blur))')
+    expect(portalBlock).toContain('saturate(var(--fw-saturate')
+
+    // ... and the tint + wash that sit above the plate in the classic column. They
+    // ride ::after, because the portal column is a stacking context (ds-bot makes
+    // it position: fixed; z-index: 25) and a negative-z child would otherwise put
+    // the plate *above* the tint — the two translucent layers do not commute.
+    expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol::after\s*\{[^}]*background-color:\s*color-mix\(in oklch, var\(--bloom-accent, #6b8f71\), var\(--dsw-alias-bg-layer-1, #fff\) 94%\)/)
+    expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol::after\s*\{[^}]*background-image:\s*linear-gradient\(to bottom,\s*color-mix\(in oklch, var\(--bloom-accent, #6b8f71\), transparent 94%\),\s*transparent 120px\)/)
+    expect(BOT_LEFTCOL_CSS).toMatch(/\.bt-leftcol::after\s*\{[^}]*z-index:\s*-1/)
+    // The tint must sit above the plate: same z-index, later in tree order.
+    const plateAt = BOT_LEFTCOL_CSS.indexOf('.bt-leftcol::before')
+    const tintAt = BOT_LEFTCOL_CSS.indexOf('.bt-leftcol::after')
+    expect(plateAt).toBeGreaterThan(-1)
+    expect(tintAt).toBeGreaterThan(plateAt)
   })
 
   it('keeps the in-slot column treatment for a ds-bot that still renders there', () => {
