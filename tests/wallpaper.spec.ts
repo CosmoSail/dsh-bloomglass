@@ -154,7 +154,7 @@ describe('FrostedPresenter', () => {
     expect(frostedScope).toContain('--dsw-alias-bg-document-preview: transparent')
   })
 
-  it('re-points the rail’s base role at the rail surface, in both frost states', () => {
+  it('re-points the rail’s base role at the rail surface, and only without frost', () => {
     // DSH's file navigator (ui-sidebar-files) is
     //   '._navigator { background: var(--dsw-alias-bg-base) }'
     // and without a wallpaper that role is the page's base tone at alpha 1: the
