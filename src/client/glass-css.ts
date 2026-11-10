@@ -183,6 +183,13 @@ body[${BODY_ATTR}] [data-rightbar-col] {
   /* The sidebar's fill formula, verbatim (bloom-glass.ts), as the ramp's far end:
      same tone as the panel on the left, so the two seams read as one treatment. */
   --bloom-rail-surface: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #fff) 94%);
+  /* The rail's own surfaces do not all paint from the plate: DSH's file
+     navigator (ui-sidebar-files) paints its background from the base role, and
+     without a wallpaper that role is the page's *opaque* base tone — it painted
+     the file list as a near-black slab over the rail's ramp. Inside the rail the
+     base is the rail's own surface, so every such surface follows the column
+     instead of punching a hole in it. */
+  --dsw-alias-bg-base: var(--bloom-rail-surface);
   /* The sidebar's outward glow, mirrored across the seam: same colour, same 45%
      ink, same 40px blur and 24/-24 offset — only the direction flips, so the light
      spills left into the conversation column instead of right. */
@@ -210,6 +217,22 @@ body[${BODY_ATTR}] [data-rightbar-fullscreen] [data-rightbar-col] {
  */
 body[${BODY_ATTR}]:not([${FROST_ATTR}]) [data-rightbar-col] {
   --dsw-alias-bg-document-preview: var(--bloom-rail-surface);
+}
+/*
+ * Under frost the same token is the page's *opaque* base tone (tokens.ts hands it
+ * one — alpha 1), and the preview body fills the pane with it: opening a file
+ * turned the whole right rail solid near-black (measured 11,25,27, one colour
+ * across the pane) while every other surface in the column was glass. Handing it
+ * the placeholder 'transparent' lets the column's frosted plate through, which is
+ * the surface the rest of the rail already reads. The non-frost branch above stays
+ * as it is — there the rail is a ramp, not a plate, and the preview has to carry
+ * the ramp's end tone.
+ */
+body[${BODY_ATTR}][${FROST_ATTR}] [data-rightbar-col] {
+  --dsw-alias-bg-document-preview: transparent;
+  /* Same reasoning as the base role above: under frost the plate *is* the
+     surface, so the rail's own fills must not stack a second veil on top. */
+  --dsw-alias-bg-base: transparent;
 }
 body[${BODY_ATTR}] [data-rightbar-col]::before {
   content: '';

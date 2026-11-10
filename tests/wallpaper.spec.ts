@@ -136,18 +136,38 @@ describe('FrostedPresenter', () => {
     expect(rule).toContain('box-shadow: none')
   })
 
-  it('keeps the rail’s tone under an open document, and only without frost', () => {
+  it('keeps the rail’s tone under an open document, in both frost states', () => {
     // The document preview body paints '--dsw-alias-bg-document-preview' (the
     // page's bg, handed over in tokens.ts) across the whole pane, so with a file
     // open it would cover the rail's tone — the two regions would look alike
-    // again exactly when the rail is in use. Scoped to the rail, and off under
-    // frost where the rail is a flat glass plate that must match the
-    // conversation side tone for tone.
+    // again exactly when the rail is in use. Scoped to the rail.
+    //
+    // Without frost the rail is a ramp, so the preview carries the ramp's end tone.
     const scoped = new RegExp(`body\\[[^\\]]*\\]:not\\(\\[${FROST_ATTR}\\]\\)\\s*\\[data-rightbar-col\\]\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
     expect(scoped).toContain('--dsw-alias-bg-document-preview: var(--bloom-rail-surface)')
-    // The frost branch must not carry it.
+    // Under frost it used to keep the page tone — which is *opaque*, and it filled
+    // the pane with a solid near-black while every other surface in the column was
+    // glass (measured 11,25,27, one colour across the pane). Transparent hands the
+    // pane back to the column's frosted plate, the surface the rest of the rail
+    // reads.
     const frostedScope = new RegExp(`body\\[[^\\]]*\\]\\[${FROST_ATTR}\\]\\s*\\[data-rightbar-col\\]\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
-    expect(frostedScope).not.toContain('--dsw-alias-bg-document-preview')
+    expect(frostedScope).toContain('--dsw-alias-bg-document-preview: transparent')
+  })
+
+  it('re-points the rail’s base role at the rail surface, in both frost states', () => {
+    // DSH's file navigator (ui-sidebar-files) is
+    //   '._navigator { background: var(--dsw-alias-bg-base) }'
+    // and without a wallpaper that role is the page's base tone at alpha 1: the
+    // whole file list painted as a near-black slab over the rail's ramp. Inside
+    // the column the role has to mean the column's own surface instead, so every
+    // surface in the rail that reads it follows the rail rather than punching a
+    // hole in it.
+    const always = new RegExp(`body\\[[^\\]]*\\]\\s*\\[data-rightbar-col\\]\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
+    expect(always).toContain('--dsw-alias-bg-base: var(--bloom-rail-surface)')
+    // Under frost the plate *is* the surface: re-pointing the role at another veil
+    // would stack a second one over the glass.
+    const frosted = new RegExp(`body\\[[^\\]]*\\]\\[${FROST_ATTR}\\]\\s*\\[data-rightbar-col\\]\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
+    expect(frosted).toContain('--dsw-alias-bg-base: transparent')
   })
 
   it('takes the dock rail’s own hairline off — on the tab host, at a specificity that wins', () => {
