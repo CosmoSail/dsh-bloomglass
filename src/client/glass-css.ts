@@ -183,13 +183,6 @@ body[${BODY_ATTR}] [data-rightbar-col] {
   /* The sidebar's fill formula, verbatim (bloom-glass.ts), as the ramp's far end:
      same tone as the panel on the left, so the two seams read as one treatment. */
   --bloom-rail-surface: color-mix(in oklch, var(--bloom-accent, #6b8f71), var(--dsw-alias-bg-layer-1, #fff) 94%);
-  /* The rail's own surfaces do not all paint from the plate: DSH's file
-     navigator (ui-sidebar-files) paints its background from the base role, and
-     without a wallpaper that role is the page's *opaque* base tone — it painted
-     the file list as a near-black slab over the rail's ramp. Inside the rail the
-     base is the rail's own surface, so every such surface follows the column
-     instead of punching a hole in it. */
-  --dsw-alias-bg-base: var(--bloom-rail-surface);
   /* The sidebar's outward glow, mirrored across the seam: same colour, same 45%
      ink, same 40px blur and 24/-24 offset — only the direction flips, so the light
      spills left into the conversation column instead of right. */
@@ -217,6 +210,14 @@ body[${BODY_ATTR}] [data-rightbar-fullscreen] [data-rightbar-col] {
  */
 body[${BODY_ATTR}]:not([${FROST_ATTR}]) [data-rightbar-col] {
   --dsw-alias-bg-document-preview: var(--bloom-rail-surface);
+  /* Same reason, and the same state: DSH's file navigator (ui-sidebar-files)
+     paints its background from the base role, and without a wallpaper that role
+     is the page's *opaque* base tone — it painted the whole file list as a
+     near-black slab over the rail's ramp. Inside the rail the base has to mean
+     the rail's own surface, so every surface that reads it follows the column.
+     Under frost the role is already the veil tier (alpha .08, DSH's own card
+     wash, never the black slab), so that branch leaves it alone — see below. */
+  --dsw-alias-bg-base: var(--bloom-rail-surface);
 }
 /*
  * Under frost the same token is the page's *opaque* base tone (tokens.ts hands it
@@ -230,9 +231,10 @@ body[${BODY_ATTR}]:not([${FROST_ATTR}]) [data-rightbar-col] {
  */
 body[${BODY_ATTR}][${FROST_ATTR}] [data-rightbar-col] {
   --dsw-alias-bg-document-preview: transparent;
-  /* Same reasoning as the base role above: under frost the plate *is* the
-     surface, so the rail's own fills must not stack a second veil on top. */
-  --dsw-alias-bg-base: transparent;
+  /* The base role is deliberately left alone: under frost tokens.ts has already
+     re-expressed it as the veil tier (alpha .08), which is DSH's own list-card
+     wash and was never broken — zeroing it here would flatten the file list's
+     cards into the plate for no gain. */
 }
 body[${BODY_ATTR}] [data-rightbar-col]::before {
   content: '';

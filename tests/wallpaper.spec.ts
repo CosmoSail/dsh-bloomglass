@@ -162,12 +162,16 @@ describe('FrostedPresenter', () => {
     // the column the role has to mean the column's own surface instead, so every
     // surface in the rail that reads it follows the rail rather than punching a
     // hole in it.
+    const noFrost = new RegExp(`body\\[[^\\]]*\\]:not\\(\\[${FROST_ATTR}\\]\\)\\s*\\[data-rightbar-col\\]\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
+    expect(noFrost).toContain('--dsw-alias-bg-base: var(--bloom-rail-surface)')
+    // Under frost the role is already the veil tier (alpha .08) that DSH's own
+    // list cards are drawn with — it was never the black slab — so neither the
+    // always-on rule nor the frost branch may re-point it, or the cards flatten
+    // into the plate.
     const always = new RegExp(`body\\[[^\\]]*\\]\\s*\\[data-rightbar-col\\]\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
-    expect(always).toContain('--dsw-alias-bg-base: var(--bloom-rail-surface)')
-    // Under frost the plate *is* the surface: re-pointing the role at another veil
-    // would stack a second one over the glass.
+    expect(always).not.toContain('--dsw-alias-bg-base')
     const frosted = new RegExp(`body\\[[^\\]]*\\]\\[${FROST_ATTR}\\]\\s*\\[data-rightbar-col\\]\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
-    expect(frosted).toContain('--dsw-alias-bg-base: transparent')
+    expect(frosted).not.toContain('--dsw-alias-bg-base')
   })
 
   it('takes the dock rail’s own hairline off — on the tab host, at a specificity that wins', () => {
