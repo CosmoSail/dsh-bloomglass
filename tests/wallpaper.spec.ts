@@ -202,9 +202,41 @@ describe('FrostedPresenter', () => {
     expect(rule).toContain('background-color: var(--dsw-alias-bg-base)')
     expect(rule).toContain('background-image: var(--bloom-ambience')
     expect(rule).toContain('background-attachment: fixed')
-    // With a wallpaper there is no ambience to match; DSH's own 8% veil is the
-    // right mask there and must be left alone.
-    expect(SURFACE_CSS).not.toMatch(new RegExp(`\\[${FROST_ATTR}\\]\\s*\\[data-plugin-bar\\]`))
+    // Over a wallpaper there is no ambience to match. A backdrop filter inside
+    // the page body samples nothing — the body is the page's scroll container —
+    // so the frost glass has to be painted outside it: the panel carries the
+    // page plate, the bar's ::before becomes position: fixed, and 'contain:
+    // paint' on the panel anchors that pseudo to the panel's own box. Its height
+    // keeps coming from DSH's '--plugin-header-paint-height' (130px at rest,
+    // 66px compacted), which the rule below deliberately does not re-declare.
+    const panel = new RegExp(`body\\[[^\\]]*\\]\\[${FROST_ATTR}\\]\\s*\\[data-plugin-panel\\]\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
+    expect(panel).toContain('position: relative')
+    expect(panel).toContain('contain: paint')
+    const plate = new RegExp(`body\\[[^\\]]*\\]\\[${FROST_ATTR}\\]\\s*\\[data-plugin-panel\\]::before\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
+    expect(plate).toContain('background: var(--dsw-alias-bg-overlay)')
+    expect(plate).toContain('blur(var(--bloom-glass-blur))')
+    expect(plate).toContain('saturate(var(--fw-saturate')
+    expect(plate).toContain('z-index: -1')
+    // Two rules carry this selector shape (the glass one and the media
+    // override, which only turns the blur off and sits before it in the sheet),
+    // so pick the block that paints the strip.
+    const bandBlocks = [...SURFACE_CSS.matchAll(
+      new RegExp(`body\\[[^\\]]*\\]\\[${FROST_ATTR}\\]\\s*\\[data-plugin-panel\\]\\s*\\[data-plugin-bar\\]\\[data-natural\\]::before\\s*\\{([^}]*)\\}`, 'g'),
+    )].map(match => match[1] ?? '')
+    const band = bandBlocks.find(block => block.includes('position: fixed')) ?? ''
+    // The strip carries no fill of its own: the plate below already paints the
+    // tone, and a second overlay on top of it cut an 18.7-level darker band
+    // across the header. Transparent + blur reads as the same glass.
+    expect(band).toContain('position: fixed')
+    expect(band).toContain('background-color: transparent')
+    expect(band).toContain('blur(var(--bloom-glass-blur))')
+    expect(band).toContain('saturate(var(--fw-saturate')
+    // Reduced transparency has to reach both glasses: the rules above are at
+    // (0,5,2)/(0,5,3), so the media override needs html plus both body attributes.
+    const reduced = /@media \(prefers-reduced-transparency: reduce\)\s*\{([\s\S]*)\}\s*$/.exec(SURFACE_CSS)?.[1] ?? ''
+    expect(reduced).toMatch(new RegExp(`html body\\[[^\\]]+\\]\\[${FROST_ATTR}\\]\\s*\\[data-plugin-panel\\]::before`))
+    expect(reduced).toMatch(new RegExp(`html body\\[[^\\]]+\\]\\[${FROST_ATTR}\\]\\s*\\[data-plugin-panel\\]\\s*\\[data-plugin-bar\\]`))
+    expect(reduced).toContain('backdrop-filter: none')
   })
 
   it('hands the dock pane surface back to the plate', () => {
