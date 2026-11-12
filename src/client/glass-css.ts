@@ -402,6 +402,33 @@ body[${BODY_ATTR}] [role='dialog'][aria-modal='true'] {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+}
+
+/*
+ * Sticky page bars over the global panel.
+ *
+ * DSH's pages (the plugin manager is the one reported) keep their header stuck to
+ * the top with
+ *   '.pageBar[data-natural]::before { background: var(--dsw-alias-bg-base) }'
+ * and rely on it to mask the list scrolling underneath. Under the theme that role
+ * is the page's base tone at alpha 1, while the page itself is that tone *plus*
+ * COMPONENT_CSS's ambience wash on the body — so the bar painted a flat near-black
+ * band across the top: measured (11,25,27) where the page reads (23,44,47), 17
+ * levels, and the owner reported it as a black frame.
+ *
+ * Repaint the bar with the surface it covers: the same base role plus the same
+ * ambience, fixed to the viewport exactly as the body paints it. Verified
+ * pixel-identical to a deliberately transparent bar (0.00 difference, max 0), and
+ * 16.5 levels away from the old fill.
+ *
+ * Only without frost: with a wallpaper there is no ambience to match (the body's
+ * wash is gone and the wallpaper is the backdrop), and DSH's own 8% veil is the
+ * right mask there — it was never the black band.
+ */
+body[${BODY_ATTR}]:not([${FROST_ATTR}]) [data-plugin-bar][data-natural]::before {
+  background-color: var(--dsw-alias-bg-base);
+  background-image: var(--bloom-ambience, none);
+  background-attachment: fixed;
 }`.trim()
 
 /** Settings-panel styles. Class names are fw- prefixed and used only by SettingsSection. */

@@ -192,6 +192,21 @@ describe('FrostedPresenter', () => {
     )
   })
 
+  it('repaints the sticky page bar with the surface it covers', () => {
+    // DSH's plugin page keeps its header stuck with
+    //   '.pageBar[data-natural]::before { background: var(--dsw-alias-bg-base) }'
+    // — a page tone at alpha 1 under the theme, while the page around it is that
+    // tone *plus* the body's ambience wash. The bar therefore painted a flat
+    // near-black band across the top of the plugin page (owner: 上方的黑框).
+    const rule = new RegExp(`body\\[[^\\]]*\\]:not\\(\\[${FROST_ATTR}\\]\\)\\s*\\[data-plugin-bar\\]\\[data-natural\\]::before\\s*\\{([^}]*)\\}`).exec(SURFACE_CSS)?.[1] ?? ''
+    expect(rule).toContain('background-color: var(--dsw-alias-bg-base)')
+    expect(rule).toContain('background-image: var(--bloom-ambience')
+    expect(rule).toContain('background-attachment: fixed')
+    // With a wallpaper there is no ambience to match; DSH's own 8% veil is the
+    // right mask there and must be left alone.
+    expect(SURFACE_CSS).not.toMatch(new RegExp(`\\[${FROST_ATTR}\\]\\s*\\[data-plugin-bar\\]`))
+  })
+
   it('hands the dock pane surface back to the plate', () => {
     // Dockkit's tab host paints its own fill — '._tabHost:not(._float) {
     // background: var(--dsw-alias-bg-base) }' — and it is in-flow content above
