@@ -400,8 +400,7 @@ body[${BODY_ATTR}] [role='dialog'][aria-modal='true'] {
   body[${BODY_ATTR}] [data-rightbar-col]::before,
   body[${BODY_ATTR}] [role='dialog'][aria-modal='true'],
   /* html + both body attributes: the plugin-page glass below is written at
-     (0,5,2)/(0,5,3), so a bare body[…] selector here would lose to it. */
-  html body[${BODY_ATTR}][${FROST_ATTR}] [data-plugin-panel]::before,
+     (0,5,3), so a bare body[…] selector here would lose to it. */
   html body[${BODY_ATTR}][${FROST_ATTR}] [data-plugin-panel] [data-plugin-bar][data-natural]::before {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
@@ -436,49 +435,35 @@ body[${BODY_ATTR}]:not([${FROST_ATTR}]) [data-plugin-bar][data-natural]::before 
 }
 
 /*
- * The same bar over a wallpaper — and the page behind it.
+ * The same bar over a wallpaper.
  *
  * A backdrop filter painted inside the page body samples nothing: the body is the
  * page's own scroll container ('overflow: hidden auto'), so the strip only ever
  * got its tint, never a blur (verified on ds-bot 0.3.5: list text scrolling under
  * the strip stayed sharp, while the same filter on a viewport-fixed probe blurred
- * normally). The glass has to be painted outside that scroll container.
+ * normally). The glass has to be painted outside that scroll container, so the
+ * bar's ::before is promoted to position: fixed and 'contain: paint' makes the
+ * panel its containing block — the page is already clipped to its own box, so
+ * this changes nothing else, and the strip lands on the panel's top edge at the
+ * panel's width, at any rail state and under the desktop title bar. Its height
+ * keeps coming from DSH's own '--plugin-header-paint-height' (130px at rest,
+ * 66px compacted), so the strip follows the header without any measurement.
  *
- * So the panel carries the page's plate, and the bar's ::before is promoted to
- * position: fixed. 'contain: paint' makes the panel the containing block of that
- * pseudo — the page is already clipped to its own box, so this changes nothing
- * else — and the strip then lands on the panel's top edge at the panel's width, at
- * any rail state and under the desktop title bar. Its height keeps coming from
- * DSH's own '--plugin-header-paint-height' (130px at rest, 66px compacted), so the
- * strip follows the header without any measurement of our own.
- *
- * The plate takes the family glass — the overlay role plus the blur knob. The
- * strip must not: painted on top of that plate, its own overlay doubled the tint
- * and cut an 18.7-level darker band across the header. It keeps only the blur, so
- * it is a pane of the plate's glass (0.07 levels off it) that smears whatever
- * scrolls underneath. (Owner's call, 2026-11-12: route B, one plate under the
- * whole page.)
+ * Only the strip is glass: the page itself keeps its normal surface (owner,
+ * 2026-11-12: the page should stay as it was, only the header should be frosted),
+ * so the strip has no plate tone to inherit. It keeps the blur alone — no fill
+ * of its own: measured against the page it sits on, the veil tier still cut a
+ * 7.95-level band while pure blur sits 0.37 levels off, and both smear the list
+ * underneath the same way. Over a photographed wallpaper the blur itself is the
+ * frost you see; over a flat one it simply has nothing to show until content
+ * scrolls under it.
  */
 body[${BODY_ATTR}][${FROST_ATTR}] [data-plugin-panel] {
   position: relative;
   contain: paint;
 }
-body[${BODY_ATTR}][${FROST_ATTR}] [data-plugin-panel]::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: var(--dsw-alias-bg-overlay);
-  -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
-  backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
-}
 body[${BODY_ATTR}][${FROST_ATTR}] [data-plugin-panel] [data-plugin-bar][data-natural]::before {
   position: fixed;
-  /* No fill of its own: the plate below already carries the tone, and a second
-     overlay on top of it painted the strip 18.7 levels darker than the page it
-     touches. Transparent + blur leaves it 0.07 levels off the plate, so the
-     header reads as a pane of the same glass rather than a band across it. */
   background-color: transparent;
   -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
   backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
