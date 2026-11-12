@@ -33,11 +33,11 @@ function createTheme() {
   }
   const publish = (): void => { for (const listener of [...listeners]) listener() }
 
-  const register = (source: string, tokens: Record<string, Modes>): (() => void) => {
+  const register = (source: string, tokens: Record<string, Modes>, silent = false): (() => void) => {
     log.push(source)
     const layer = { seq: ++seq, tokens }
     layers.set(source, layer)
-    publish()
+    if (!silent) publish()
     return () => {
       if (layers.get(source) !== layer) return
       layers.delete(source)
@@ -47,6 +47,8 @@ function createTheme() {
 
   return {
     register,
+    /** A layer that lands without publishing — the remount that swallows its own change. */
+    registerSilently: (source: string, tokens: Record<string, Modes>) => register(source, tokens, true),
     composed: compose,
     registrations: () => [...log],
     ownRegistrations: () => log.filter(source => source === PACKAGE_ID).length,
@@ -67,9 +69,12 @@ function createTheme() {
 }
 
 /** Boot the plugin against the fake runtime; `theme` is the test's handle. */
+const cleanups: Array<() => void> = []
+
 function boot() {
   const theme = createTheme()
   const effects: Array<() => void> = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ctx = {
     theme: theme.service,
     locale: {
@@ -87,7 +92,14 @@ function boot() {
     on: theme.on,
   }
   apply(ctx as never)
-  return { theme, effects }
+  let done = false
+  const cleanup = (): void => {
+    if (done) return
+    done = true
+    for (const dispose of effects) dispose()
+  }
+  cleanups.push(cleanup)
+  return { theme, effects, cleanup }
 }
 
 /** What the plugin's own layer says for one token, in one scheme. */
@@ -102,8 +114,10 @@ const ours = (name: string, scheme: Scheme = 'light'): string => {
 
 describe('shared tokens with ds-bot', () => {
   afterEach(() => {
+    while (cleanups.length > 0) cleanups.pop()?.()
     document.body.removeAttribute(BODY_ATTR)
     document.body.removeAttribute(VARIANT_ATTR)
+    document.body.removeAttribute('style')
     document.head.querySelectorAll('style[data-plugin]').forEach(node => { node.remove() })
   })
 
@@ -142,6 +156,55 @@ describe('shared tokens with ds-bot', () => {
 
     expect(theme.ownRegistrations()).toBe(before)
     expect(theme.composed()['--dsw-alias-markdown-code-block']).toBe('#ff0000')
+  })
+
+  it('takes them back when the rival layer lands after the change that woke us', async () => {
+    // The mode switch remounts the Bot UI: ds-bot re-registers its layer after
+    // the theme/change we handled, and the remount swallows its own change, so
+    // no second event arrives. The settled re-check has to catch it.
+    const { theme } = boot()
+    const before = theme.ownRegistrations()
+    theme.setScheme('dark')                    // a change with nothing stolen yet
+    theme.registerSilently('ds-bot', RIVAL)    // lands after it, no event
+    await Promise.resolve()                    // past the microtask check
+    expect(theme.ownRegistrations()).toBe(before + 1)
+    for (const name of SHARED_LAYER_TOKENS) expect(theme.composed()[name]).toBe(ours(name, 'dark'))
+  })
+
+  it('takes them back when the rival is only visible in the body’s token write', async () => {
+    // The presenter paints the composed palette onto body's inline style. A
+    // rival layer can land and be painted there without any theme/change we
+    // could act on; the inline repaint is what settles the rendered value, and
+    // the observer is the trigger that catches it.
+    const { theme } = boot()
+    const before = theme.ownRegistrations()
+    theme.registerSilently('ds-bot', RIVAL)
+    document.body.style.setProperty('--dsw-alias-bg-base', '#111111')
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(theme.ownRegistrations()).toBe(before + 1)
+    for (const name of SHARED_LAYER_TOKENS) expect(theme.composed()[name]).toBe(ours(name))
+    // The rendered value is the inline one; it has to be ours again.
+    for (const name of SHARED_LAYER_TOKENS) {
+      expect(document.body.style.getPropertyValue(name)).toBe(ours(name))
+    }
+    document.body.removeAttribute('style')
+  })
+
+  it('drops its inline copies when the theme is disposed', () => {
+    const { theme, cleanup } = boot()
+    expect(document.body.style.getPropertyValue('--dsw-alias-bg-base')).toBe(ours('--dsw-alias-bg-base'))
+    cleanup()
+    expect(document.body.style.getPropertyValue('--dsw-alias-bg-base')).toBe('')
+    expect(theme.ownRegistrations()).toBeGreaterThan(0)
+  })
+
+  it('settles after one late re-stack instead of fighting', async () => {
+    const { theme } = boot()
+    const before = theme.ownRegistrations()
+    theme.setScheme('dark')
+    theme.registerSilently('ds-bot', RIVAL)
+    await new Promise(resolve => setTimeout(resolve, 20))   // frame fallback
+    expect(theme.ownRegistrations()).toBe(before + 1)
   })
 
   it('converges: one re-stack per intrusion, not a loop', () => {

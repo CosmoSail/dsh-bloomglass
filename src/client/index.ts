@@ -33,7 +33,7 @@ import { en, zh, type BloomglassKey } from './locales.ts'
 import type { Variant } from './palette.ts'
 import { SettingsSection, type SettingsSectionInjected } from './SettingsSection.tsx'
 import { createBloomglassStore, type BloomglassState } from './store.ts'
-import { bloomOwnVarsCss, bloomglassTokens, stolenSharedTokens, type ThemeTokenOverrides, type TokenInputs } from './tokens.ts'
+import { SHARED_LAYER_TOKENS, bloomOwnVarsCss, bloomglassTokens, stolenSharedTokens, type ThemeTokenOverrides, type TokenInputs } from './tokens.ts'
 import { FrostedPresenter, type ColorScheme } from './wallpaper.ts'
 
 export const name = PACKAGE_ID
@@ -214,6 +214,44 @@ export function apply(ctx: ClientCtx): void {
     }
   }
 
+  /** What our layer wants for the six shared tokens, active scheme included. */
+  const sharedValues = (): Array<[string, string]> => {
+    const layer = bloomglassTokens(tokenInputs())
+    const scheme = schemeOf()
+    const out: Array<[string, string]> = []
+    for (const name of SHARED_LAYER_TOKENS) {
+      const value = layer[name]?.[scheme]
+      if (typeof value === 'string') out.push([name, value])
+    }
+    return out
+  }
+
+  /**
+   * Paint the six shared tokens where the theme's own presenter paints them.
+   *
+   * The presenter writes the composed palette onto `body`'s inline style. On the
+   * ds-bot mode switch (owner report, 2026-11-12) the Bot UI remounts and its
+   * layer re-registers while our own layer write is still in flight, so the
+   * presenter's write for that moment carries the rival values and no later
+   * change comes to correct it — the layer order is ours, yet the body keeps the
+   * rival colours. Writing our values into the same place settles the rendered
+   * result regardless of which layer was last, and it is idempotent: the
+   * observer below fires once more, sees the values already ours, and stops.
+   */
+  const paintSharedTokens = (): void => {
+    if (disposed) return
+    const style = document.body.style
+    for (const [name, value] of sharedValues()) {
+      if (style.getPropertyValue(name) !== value) style.setProperty(name, value)
+    }
+  }
+
+  /** Drop our inline copies so a disposed theme cannot leave colours behind. */
+  const releaseSharedTokens = (): void => {
+    const style = document.body.style
+    for (const name of SHARED_LAYER_TOKENS) style.removeProperty(name)
+  }
+
   /**
    * Take back the tokens we share with another plugin's layer.
    *
@@ -221,14 +259,90 @@ export function apply(ctx: ClientCtx): void {
    * and `ds-bot` registers its own layer at mount and again whenever its
    * Appearance settings change, i.e. after ours, which would hand the Bot shell
    * its own greys. The composed snapshot says which of the shared tokens is
-   * currently someone else's, so this re-stacks exactly when we lost one:
-   * no timers, no DOM reads, and no fight over the tokens nobody contests.
+   * currently someone else's, so this re-stacks exactly when we lost one, then
+   * repaints: no DOM reads beyond our own write, and no fight over the tokens
+   * nobody contests.
    */
+  let restacks = 0
+  let budgetAt = 0
+  let budget = 0
   const defendSharedTokens = (): void => {
+    paintSharedTokens()
     if (disposed) return
+    // Our own dispose/register publishes are not intrusions: while they are in
+    // flight the composed snapshot is briefly someone else's, and reacting to it
+    // would re-stack forever. A rival that lands during our write is caught by
+    // the settled checks below, once the write has finished.
+    if (stacking) return
     const composed = ctx.theme.getTheme?.()?.active?.tokens
-    if (stolenSharedTokens(composed, tokenInputs(), schemeOf()).length === 0) return
+    if (stolenSharedTokens(composed, tokenInputs(), schemeOf()).length === 0) {
+      restacks = 0
+      return
+    }
+    if (restacks >= 3) return
+    // A rival that re-registers in answer to our write would ping-pong forever;
+    // cap the burst so a broken rival cannot spin the UI.
+    const now = Date.now()
+    if (now - budgetAt > 1500) {
+      budgetAt = now
+      budget = 0
+    }
+    if (budget >= 4) return
+    budget += 1
+    restacks += 1
     stackTokens()
+  }
+
+  /**
+   * Re-check after the change has settled.
+   *
+   * The Bot UI remount can register its layer after the `theme/change` that woke
+   * us; look once past the microtask queue and once past the next frame, then
+   * stop. Both passes are idempotent, so a change that needed no correction
+   * costs nothing.
+   */
+  let cancelFrame: (() => void) | undefined
+  const settleDefend = (): void => {
+    if (disposed) return
+    queueMicrotask(() => { if (!disposed) defendSharedTokens() })
+    if (cancelFrame !== undefined) return
+    if (typeof requestAnimationFrame === 'function') {
+      const handle = requestAnimationFrame(() => { cancelFrame = undefined; if (!disposed) defendSharedTokens() })
+      cancelFrame = () => { cancelAnimationFrame(handle); cancelFrame = undefined }
+    } else {
+      const handle = setTimeout(() => { cancelFrame = undefined; if (!disposed) defendSharedTokens() }, 0)
+      cancelFrame = () => { clearTimeout(handle); cancelFrame = undefined }
+    }
+  }
+
+  /**
+   * Watch the place the composed tokens actually land.
+   *
+   * The presenter writes the whole composed palette onto `body`'s inline style
+   * (and a few housekeeping vars onto `html`). That write is the proof that a
+   * rival layer has just painted: repaint ours there and the observer fires once
+   * more, finds the values already ours, and stops. This is the trigger that
+   * cannot miss a late adversary — no timer of our own, and no dependence on
+   * event order.
+   * @returns disposer that stops watching (plugin teardown).
+   */
+  const watchTokenWrites = (): (() => void) => {
+    if (typeof MutationObserver !== 'function') return () => { /* nothing to stop */ }
+    let queued = false
+    const check = (): void => {
+      if (disposed) return
+      if (queued) return
+      queued = true
+      queueMicrotask(() => {
+        queued = false
+        if (!disposed) defendSharedTokens()
+      })
+    }
+    const observer = new MutationObserver(check)
+    const options: MutationObserverInit = { attributes: true, attributeFilter: ['style'] }
+    observer.observe(document.body, options)
+    observer.observe(document.documentElement, options)
+    return () => { observer.disconnect() }
   }
 
   /* ── projection ──────────────────────────────────────────────────────── */
@@ -388,12 +502,17 @@ export function apply(ctx: ClientCtx): void {
     // Stack the palette synchronously: waiting for IndexedDB to answer would
     // flash the official theme before the first paint.
     project(true)
+    const unwatch = watchTokenWrites()
     const off = ctx.on('theme/change', () => {
       projectChrome()
       // Another plugin may have re-registered its layer above ours in the same
-      // change that woke us (ds-bot does); take the shared tokens back.
+      // change that woke us (ds-bot does), or just after it; take the shared
+      // tokens back now and once the change has settled.
       defendSharedTokens()
+      settleDefend()
     })
+    // The first stack ran before this handler subscribed; paint its values now.
+    defendSharedTokens()
     void images.get().then((record) => {
       if (disposed || mutation !== boot) return
       if (record !== undefined) adoptRecord(record, false)
@@ -404,6 +523,9 @@ export function apply(ctx: ClientCtx): void {
       disposed = true
       mutation += 1
       off()
+      cancelFrame?.()
+      unwatch()
+      releaseSharedTokens()
       if (typeof disposeTokens === 'function') disposeTokens()
       disposeTokens = undefined
       retractChrome()
