@@ -168,6 +168,25 @@ const PLATE = ':is(.bt-panel, .bt-pane)'
 /** Surfaces that carry the glass on the element itself. */
 const PANE =
   ':is(.bt-menu, .bt-drop, .bt-avedit, .bt-connect-tip, .bt-update-pop, .bt-us-pick, .bt-react-strip, .bt-pill, .bt-settings, .bt-mem, .bt-palette, .bt-nc-card, .bt-settings-nav)'
+/**
+ * The PANE surfaces ds-bot itself stops blurring.
+ *
+ * ds-bot 0.3.10 has one rule for the OS that cannot composite a backdrop and for
+ * the two effect levels that ask it not to:
+ *
+ *   body:is([data-bt-effects=reduced], [data-bt-effects=off], [data-bt-os=windows])
+ *     :is(.bt-pill, .bt-island, .bt-drop, .bt-avedit, .bt-scrim, .bt-react-strip,
+ *         .bt-menu, .bt-palette, .bt-import-menu, .bt-cbar, .bt-pmenu-pop,
+ *         .bt-update-pop, .bt-bcard-x, .bt-us-tip, .bt-reading)
+ *     { backdrop-filter: none !important }
+ *
+ * Seven of the thirteen PANE members are in that list, so exactly these seven
+ * lose the filter while the family glass still gives them a veil. The other six
+ * (.bt-connect-tip, .bt-us-pick, .bt-settings, .bt-mem, .bt-nc-card,
+ * .bt-settings-nav) keep their blur and therefore keep their glass untouched.
+ */
+const PANE_NO_BLUR =
+  ':is(.bt-menu, .bt-drop, .bt-avedit, .bt-update-pop, .bt-react-strip, .bt-pill, .bt-palette)'
 /** The column that hosts the Bot list (rail or full sidebar). */
 const BOT_COLUMN =
   ":is(*:has(> [data-slot='sidebar']):has(.bt-side), *:has(> [data-slot='sidebar']):has(.bt-rail))"
@@ -272,6 +291,25 @@ body[${BODY_ATTR}][${FROST_ATTR}] ${PANE} {
   ${GLASS}
 }
 
+/* Where the blur is gone, the veil goes with it.
+   ds-bot's own fallback for these states is '--bt-glass-bg: var(--bt-card)',
+   set on the same rule that switches the filter off, i.e. its surfaces are meant
+   to turn opaque. Our glass rule outranks that write, so the fallback never
+   lands: what lands is the veil — '--dsw-alias-bg-overlay', alpha = slider +
+   0.22, 0.40 at the owner's 0.18 — with no filter under it. On Windows that is
+   the shipped state, not an edge case: ds-bot stops blurring for the whole OS,
+   and 'effects=reduced|off' take the same three branches. The account menu over
+   the conversation then reads as a 40% plate, and the text behind it comes
+   through at ~60% strength, sharp.
+   So in exactly those states these seven surfaces take the family's near-solid
+   cover: 96% of the palette's opaque surface mixed with the overlay role, i.e.
+   alpha 0.96 + 0.04 × overlay-alpha ≥ 0.968 at any slider position. The six
+   PANE surfaces ds-bot still blurs are deliberately absent — their glass is
+   working and must not be flattened. */
+body[${BODY_ATTR}][${FROST_ATTR}]:is([data-bt-os='windows'], [data-bt-effects='reduced'], [data-bt-effects='off']) ${PANE_NO_BLUR} {
+  background-color: var(--bt-glass-cover);
+}
+
 /* The exchange sheet's composer footer scrolls over its own transcript, so it
    needs a plate that hides text rather than a share of the density. It is the
    one surface that stays near-solid, and it is a thin strip. */
@@ -315,6 +353,12 @@ body[${BODY_ATTR}][${FROST_ATTR}] [data-composer-card] {
   body[${BODY_ATTR}][${FROST_ATTR}] .bt-bubble {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+  }
+  /* The rule above takes the filter off *every* PANE surface — not only the
+     seven ds-bot stops blurring — so under this preference every one of them
+     needs the solid cover; the veil alone would let the page through at 60%. */
+  body[${BODY_ATTR}][${FROST_ATTR}] ${PANE} {
+    background-color: var(--bt-glass-cover);
   }
 }
 `.trim()

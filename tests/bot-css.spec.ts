@@ -283,6 +283,115 @@ describe('BOT_GLASS_CSS — frost over the Bot UI', () => {
     expect(block).toContain('::after')
     expect(block).toContain('backdrop-filter: none')
   })
+
+  it('drops the veil for the cover wherever the blur is unavailable', () => {
+    // Owner report (the settings-menu bug, fixed in 1.0.8): the account menu read
+    // as a 40% plate with no blur on Windows, so the conversation behind it came
+    // through sharp at ~60%. The theme's glass rule outranks ds-bot's own
+    // `--bt-glass-bg: var(--bt-card)` fallback, so the surface kept the veil but
+    // lost the filter.
+    const html = document.documentElement
+    document.body.setAttribute(MR, '')
+    document.body.setAttribute(FR, 'dark')
+    const menu = document.createElement('div')
+    menu.className = 'bt-menu'
+    const pill = document.createElement('button')
+    pill.className = 'bt-pill'
+    const settings = document.createElement('div')
+    settings.className = 'bt-settings'
+    document.body.append(menu, pill, settings)
+    try {
+      // The three branches ds-bot treats as "no backdrop composite" — the two
+      // effect levels and the OS that cannot afford it. Each has to reach the
+      // cover, on the menu and on the other surfaces that lose the filter.
+      const states = [
+        ['data-bt-os', 'windows'],
+        ['data-bt-effects', 'reduced'],
+        ['data-bt-effects', 'off'],
+      ] as const
+      for (const [name, value] of states) {
+        document.body.setAttribute(name, value)
+        expect(declaredOnElement(BOT_GLASS_CSS, menu)['background-color'], `${name}=${value}`)
+          .toBe('var(--bt-glass-cover)')
+        expect(declaredOnElement(BOT_GLASS_CSS, pill)['background-color'], `${name}=${value}`)
+          .toBe('var(--bt-glass-cover)')
+        // The blur stays ds-bot's to switch off !important — adding one here
+        // would fight the user's own effects setting, and win.
+        const rule = /body\[[^\]]+\]\[[^\]]+\]:is\(\[data-bt-os[^{]*\{([^}]*)\}/.exec(BOT_GLASS_CSS)?.[1] ?? ''
+        expect(rule).not.toContain('backdrop-filter')
+        expect(rule).not.toContain('!important')
+        document.body.removeAttribute(name)
+      }
+
+      // A surface ds-bot still blurs keeps its glass: flattening it would change
+      // a working surface just because the OS is Windows.
+      document.body.setAttribute('data-bt-os', 'windows')
+      expect(declaredOnElement(BOT_GLASS_CSS, settings)['background-color'])
+        .toBe('var(--dsw-alias-bg-overlay)')
+      expect(declaredOnElement(BOT_GLASS_CSS, settings)['backdrop-filter'])
+        .toContain('blur(var(--bloom-glass-blur))')
+      document.body.removeAttribute('data-bt-os')
+
+      // And with the blur available, nothing changes: the shipped glass recipe.
+      expect(declaredOnElement(BOT_GLASS_CSS, menu)['background-color'])
+        .toBe('var(--dsw-alias-bg-overlay)')
+      expect(declaredOnElement(BOT_GLASS_CSS, menu)['backdrop-filter'])
+        .toContain('blur(var(--bloom-glass-blur))')
+    } finally {
+      menu.remove()
+      pill.remove()
+      settings.remove()
+      document.body.removeAttribute('data-bt-os')
+      document.body.removeAttribute('data-bt-effects')
+      document.body.removeAttribute(MR)
+      document.body.removeAttribute(FR)
+      html.removeAttribute('data-windows-titlebar')
+    }
+  })
+
+  it('covers exactly the PANE surfaces ds-bot stops blurring', () => {
+    // The intersection of the theme's PANE family and the class list in ds-bot
+    // 0.3.10's `backdrop-filter: none !important` rule (client.js:19200, copied
+    // verbatim below). Wider would flatten surfaces whose blur still works;
+    // narrower would leave a veil with no filter — the reported bug.
+    const DS_BOT_NO_BLUR = `body:is([data-bt-effects=reduced],[data-bt-effects=off],[data-bt-os=windows]) :is(
+      .bt-pill,.bt-island,.bt-drop,.bt-avedit,.bt-scrim,.bt-react-strip,.bt-menu,.bt-palette,
+      .bt-import-menu,.bt-cbar,.bt-pmenu-pop,.bt-update-pop,.bt-bcard-x,.bt-us-tip,.bt-reading
+    ){-webkit-backdrop-filter:none!important;backdrop-filter:none!important}`
+    const kills = new Set([...DS_BOT_NO_BLUR.matchAll(/\.(bt-[a-z-]+)/g)].map(match => match[1]))
+    const pane = new Set([
+      'bt-menu', 'bt-drop', 'bt-avedit', 'bt-connect-tip', 'bt-update-pop', 'bt-us-pick',
+      'bt-react-strip', 'bt-pill', 'bt-settings', 'bt-mem', 'bt-palette', 'bt-nc-card',
+      'bt-settings-nav',
+    ])
+    const expected = [...pane].filter(name => kills.has(name)).sort()
+    const covered = /body\[[^\]]+\]\[[^\]]+\]:is\(\[data-bt-os[^{]*\{([^}]*)\}/.exec(BOT_GLASS_CSS)?.[0] ?? ''
+    const actual = [...new Set([...covered.matchAll(/\.(bt-[a-z-]+)/g)].map(match => match[1]))].sort()
+    expect(actual).toEqual(expected)
+    // Six PANE members keep their blur and must stay out of the cover rule.
+    for (const kept of ['bt-settings', 'bt-settings-nav', 'bt-mem', 'bt-nc-card', 'bt-connect-tip', 'bt-us-pick']) {
+      expect(actual).not.toContain(kept)
+    }
+    // Under prefers-reduced-transparency the theme itself takes the filter off
+    // *every* PANE surface, so there every one of them needs the cover.
+    const reduced = /@media \(prefers-reduced-transparency: reduce\)\s*\{([\s\S]*)\}\s*$/.exec(BOT_GLASS_CSS)?.[1] ?? ''
+    const cover = /body\[[^\]]+\]\[[^\]]+\]\s*:is\(\.bt-menu[^{]*\{[^}]*background-color:\s*var\(--bt-glass-cover\)/.exec(reduced)?.[0] ?? ''
+    const coveredThere = [...new Set([...cover.matchAll(/\.(bt-[a-z-]+)/g)].map(match => match[1]))].sort()
+    expect(coveredThere).toEqual([...pane].sort())
+  })
+
+  it('makes the no-blur cover opaque enough to carry text alone', () => {
+    // The cover is the family's near-solid recipe: 96% of the palette's opaque
+    // surface, so its alpha is 0.96 + 0.04 × overlay ≈ 0.969 at the shipped
+    // density and never below 0.968 — well past the 0.85 the owner asked for.
+    const cover = /--bt-glass-cover:\s*color-mix\(in oklab, var\(--dsw-alias-bg-overlay\), var\(--bloom-surface-solid, var\(--dsw-alias-bg-layer-1\)\)\s*(\d+(?:\.\d+)?)%\)/
+      .exec(BOT_CSS)
+    const share = Number(cover?.[1]) / 100
+    expect(share).toBeGreaterThanOrEqual(0.95)
+    // Overlay is min(0.94, slider + 0.22), so even at the faintest slider the
+    // composite stays above 0.968.
+    expect(share + (1 - share) * 0.22).toBeGreaterThanOrEqual(0.95)
+  })
 })
 
 /* ── A miniature cascade, just enough to answer one question ────────────────
@@ -348,6 +457,27 @@ function declaredOn(css: string, el: Element, pseudo: '::before' | '::after'): R
         return el.matches(host)
       } catch {
         // A selector jsdom cannot parse must not be silently taken as a match.
+        return false
+      }
+    })
+    if (!hits) continue
+    for (const declaration of rule.body.split(';')) {
+      const colon = declaration.indexOf(':')
+      if (colon < 0) continue
+      out[declaration.slice(0, colon).trim()] = declaration.slice(colon + 1).trim()
+    }
+  }
+  return out
+}
+
+/** Every declaration that reaches `el` itself (no pseudo-element), later rules winning. */
+function declaredOnElement(css: string, el: Element): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const rule of topLevelRules(css.replace(/\/\*[\s\S]*?\*\//g, ''))) {
+    const hits = selectorList(rule.selector).some(selector => {
+      try {
+        return el.matches(selector)
+      } catch {
         return false
       }
     })
