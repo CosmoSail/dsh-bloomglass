@@ -29,6 +29,7 @@ import { PALETTE_CSS } from './css/palette-css.ts'
 import { ImageValidationError, prepareWallpaper, wallpaperBlob, type WallpaperRecord } from './image.ts'
 import { openImageStore, type ImageStore } from './image-store.ts'
 import { loadKnobs, normalizeKnobs, saveKnobs, type BloomglassKnobs } from './knobs.ts'
+import { MARKET_ROOT_SELECTOR, clearMarketBand, publishMarketBand } from './market-band.ts'
 import { en, zh, type BloomglassKey } from './locales.ts'
 import type { Variant } from './palette.ts'
 import { SettingsSection, type SettingsSectionInjected } from './SettingsSection.tsx'
@@ -472,6 +473,62 @@ export function apply(ctx: ClientCtx): void {
     observer.observe(document.head, { childList: true })
     return () => { observer.disconnect() }
   }, `${PACKAGE_ID}: ds-bot sheet ownership`)
+
+  /* Keep the plugin market's sticky-band metrics where the bar can read them
+     (see market-band.ts). Three things move them: the market mounting, its own
+     inline metrics changing (the rows wrap when the panel narrows), and a window
+     resize. The body-wide observer is filtered down to records that touch the
+     market root — this page streams chat tokens elsewhere. */
+  ctx.effect(() => {
+    let rootObserver: MutationObserver | undefined
+    let watchedRoot: HTMLElement | undefined
+    let queued = false
+
+    const sync = (): void => {
+      if (disposed) return
+      publishMarketBand()
+    }
+    const schedule = (): void => {
+      if (queued) return
+      queued = true
+      queueMicrotask(() => { queued = false; sync() })
+    }
+    const watchRoot = (): void => {
+      const root = document.querySelector<HTMLElement>(MARKET_ROOT_SELECTOR)
+      if (root === watchedRoot) return
+      rootObserver?.disconnect()
+      rootObserver = undefined
+      watchedRoot = root ?? undefined
+      if (root !== null) {
+        rootObserver = new MutationObserver(schedule)
+        rootObserver.observe(root, { attributes: true, attributeFilter: ['style'] })
+      }
+    }
+    const resync = (): void => {
+      watchRoot()
+      schedule()
+    }
+
+    resync()
+    const touchesMarket = (node: Node): boolean =>
+      node instanceof Element &&
+      (node.matches(MARKET_ROOT_SELECTOR) || node.querySelector(MARKET_ROOT_SELECTOR) !== null)
+    const observer = new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of [...record.addedNodes, ...record.removedNodes]) {
+          if (touchesMarket(node)) { resync(); return }
+        }
+      }
+    })
+    observer.observe(document.body, { childList: true, subtree: true })
+    window.addEventListener('resize', resync)
+    return () => {
+      observer.disconnect()
+      rootObserver?.disconnect()
+      window.removeEventListener('resize', resync)
+      clearMarketBand()
+    }
+  }, `${PACKAGE_ID}: market band`)
 
   const injected = (): SettingsSectionInjected => ({
     store,

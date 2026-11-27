@@ -111,6 +111,16 @@ body[${FROST_ATTR}] *:has(> [data-slot='details'])::before {
 }`.trim()
 
 /**
+ * How far the market band reaches below the plugin bar, relative to the stack
+ * it covers: bar paint + tab head + category row + a 20px tail.
+ *
+ * The owner asked for a third more range twice on 2026-11-27, so the stack is
+ * multiplied by (4/3)^2 = 16/9. It lives here as one named expression: the band
+ * rule interpolates it into its `calc`, and changing the range is this line.
+ */
+const MARKET_BAND_SCALE = '4 / 3 * 4 / 3'
+
+/**
  * Surfaces that are frosted whenever the theme is installed, not only while a
  * wallpaper is painted — so unlike GLASS_CSS this sheet rides the always-on
  * style tag. Both rules are keyed on stable DSH attributes rather than hashed
@@ -467,6 +477,136 @@ body[${BODY_ATTR}][${FROST_ATTR}] [data-plugin-panel] [data-plugin-bar][data-nat
   background-color: transparent;
   -webkit-backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
   backdrop-filter: blur(var(--bloom-glass-blur)) saturate(var(--fw-saturate, 100%));
+}
+
+/*
+ * The plugin market's sticky band.
+ *
+ * dshmarket (1.84.1) stacks its own header rows under the plugin bar and keeps
+ * them stuck: a 64px tab head, then a 56px category row. Both paint
+ * 'var(--dshm-sticky-bg, var(--dsw-alias-bg-base))' — under frost that role is
+ * the palette's base at 8% — and neither has a backdrop filter, so the cards
+ * scrolling underneath read straight through them: measured 93.5% of the detail
+ * survived and the tab labels sat at 1.09:1 against what showed through. The one
+ * strip that *was* frosted is the plugin bar's ::before above, and it stops at
+ * the bar's paint height (66px when compacted).
+ *
+ * So extend that same fixed strip across the market's sticky stack — both rows
+ * plus a 20px tail — and mask it so the blur is strongest at the top and gone at
+ * the tail: the list gets blurrier the further it scrolls in, and the tabs sit
+ * on a fully blurred backdrop instead of a clear one. The rows themselves are
+ * untouched: their 8% veil stays, no tint is added, and their text stays sharp
+ * because the band is painted behind them (the bar's ::before keeps its place in
+ * the stack; only its box grows).
+ *
+ * The mask holds full through the bar's own stripe before it starts fading: the
+ * bar's blur is the 1.0.7 top band, tuned and verified, and the owner asked for
+ * the content *below* the top bar to blur — ramping from the viewport's first
+ * pixel instead would have weakened the bar to 68% at its bottom edge.
+ *
+ * Heights come from the market itself, measured and copied onto <html> by
+ * market-band.ts, because the bar is a sibling branch of the market root and
+ * cannot inherit its custom properties: the head's published
+ * '--dshm-plugins-head-height', and the category row's own box, which publishes
+ * nothing and is not constant either — both grow when the panel narrows (64/56
+ * at a 968px panel, 118/72 at 412px), so a hard-coded pair would end the band
+ * short. Both values carry a 2px margin: the band may end long (its tail is a
+ * fade), never short.
+ *
+ * Gated on the market's own stuck marker: at rest the page keeps its surface and
+ * no blur band sits under the header.
+ *
+ * The owner asked for a third more range twice on 2026-11-27, and for a
+ * steeper ramp: the measured stack is multiplied by (4/3)^2 = 16/9 through the
+ * named scale above, so the tail grows with the rows instead of a hard-coded
+ * pixel value, and the tab head gets a second, heavier tier — see the rule
+ * below.
+ */
+body[${BODY_ATTR}][${FROST_ATTR}] [data-plugin-panel]:has([data-dsh-market-plugins-tab]):has([data-dshm-stuck]) [data-plugin-bar][data-natural]::before {
+  height: calc((var(--plugin-header-paint-height, 66px) + var(--bloom-market-head, 64px) + var(--bloom-market-cats, 58px) + 20px) * ${MARKET_BAND_SCALE});
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 var(--plugin-header-paint-height, 66px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 var(--plugin-header-paint-height, 66px), transparent 100%);
+  pointer-events: none;
+}
+
+/*
+ * The band's second tier: a heavier blur over the tab head.
+ *
+ * One 8px layer cannot be both a long, gentle fade and a strong blur right
+ * under the bar. The owner asked for both (2026-11-27): the range has been
+ * extended by a third twice, and the gradient needs more steps — topmost smear,
+ * then step by step to clear. So the band above keeps the blur knob across the
+ * whole range and its long fade, and this fixed strip adds twice the knob over
+ * the tab head only, masked from full at the bar's edge to nothing at the
+ * category row's top edge. The two masks multiply: the head starts at 3x the
+ * knob, lands at the plain band level at its bottom, and the band then fades
+ * out over the tail.
+ *
+ * Painted on the panel, not the bar: dshmarket hangs a one-pixel hairline on the
+ * bar's ::after, and the panel's own pseudo-elements are unused. The panel's
+ * 'contain: paint' already makes it the fixed-position containing block for the
+ * bar's ::before, so this strip lands on the same edge at the same width. It
+ * paints under the bar (z2) and under the market's sticky rows (z6/z5) — their
+ * text stays sharp — while the band's own 8px filter above samples this strip's
+ * output, so the two filters compound instead of competing.
+ *
+ * No tint of its own, and only while the market is stuck: at rest the page keeps
+ * its surface.
+ */
+body[${BODY_ATTR}][${FROST_ATTR}] [data-plugin-panel]:has([data-dsh-market-plugins-tab]):has([data-dshm-stuck])::after {
+  content: '';
+  position: fixed;
+  top: var(--plugin-header-paint-height, 66px);
+  left: 0;
+  right: 0;
+  height: calc(var(--bloom-market-head, 64px) + 2px);
+  -webkit-backdrop-filter: blur(calc(var(--bloom-glass-blur) * 2)) saturate(var(--fw-saturate, 100%));
+  backdrop-filter: blur(calc(var(--bloom-glass-blur) * 2)) saturate(var(--fw-saturate, 100%));
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.78) 30%, rgba(0, 0, 0, 0.46) 62%, rgba(0, 0, 0, 0.18) 85%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.78) 30%, rgba(0, 0, 0, 0.46) 62%, rgba(0, 0, 0, 0.18) 85%, transparent 100%);
+  pointer-events: none;
+}
+
+/*
+ * Blur unavailable: solid, not transparent.
+ *
+ * The band is ours, so its blur only goes away when the engine says the user
+ * prefers reduced transparency (the media block at the end of this sheet). The
+ * market rows, though, are the market's own surfaces: under that preference the
+ * veil alone would leave 92% of the cards readable through them, so they take
+ * the family's near-solid cover through the two variables the market documents
+ * for exactly this ('--dshm-sticky-bg' at rest, '--dshm-stuck-bg' once stuck).
+ * The band is cancelled at the same time — nothing is left to blur — and the
+ * bar's own stripe goes solid over its own height.
+ */
+@media (prefers-reduced-transparency: reduce) {
+  /* Same specificity as the band above (both :has() gates), earlier in rank but
+     later in the sheet — so the band is cancelled rather than merely re-tinted:
+     with the filter gone it would be a transparent strip. */
+  body[${BODY_ATTR}][${FROST_ATTR}] [data-plugin-panel]:has([data-dsh-market-plugins-tab]):has([data-dshm-stuck]) [data-plugin-bar][data-natural]::before {
+    height: var(--plugin-header-paint-height, 66px);
+    background-color: var(--bt-glass-cover);
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  /* The second tier is pure filter: with reduced transparency it has nothing to
+     leave behind, so it is cancelled outright rather than made solid. */
+  body[${BODY_ATTR}][${FROST_ATTR}] [data-plugin-panel]:has([data-dsh-market-plugins-tab]):has([data-dshm-stuck])::after {
+    content: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  /* At rest there is no band to cancel; the bar's own stripe still needs a real
+     ground when its blur is gone. */
+  body[${BODY_ATTR}][${FROST_ATTR}] [data-plugin-panel]:has([data-dsh-market-plugins-tab]) [data-plugin-bar][data-natural]::before {
+    background-color: var(--bt-glass-cover);
+  }
+  body[${BODY_ATTR}][${FROST_ATTR}] [data-dsh-market-plugins-tab] {
+    --dshm-sticky-bg: var(--bt-glass-cover);
+    --dshm-stuck-bg: var(--bt-glass-cover);
+  }
 }`.trim()
 
 /** Settings-panel styles. Class names are fw- prefixed and used only by SettingsSection. */
